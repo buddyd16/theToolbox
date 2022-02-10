@@ -1,0 +1,65 @@
+
+{% extends "layout.html"%}
+
+{% block scripts %}
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js">
+</script>
+{% endblock scripts %}
+
+{% block content %}
+<div class="container">
+<div class="row">
+    <div class="col-sm">
+    <h3>Linear Interpolation:</h3>
+        <form method=post action="">
+            <table class="table table-striped w-auto small">
+                <tr>
+                <td class="text-right">{{ form.x1L.label }}</td>
+                <td>{{ form.x1L}}</td>
+                <td class="text-right">{{ form.xL.label }}</td>
+                <td>{{ form.xL}}</td>
+                <td class="text-right">{{ form.x2L.label }}</td>
+                <td>{{ form.x2L}}</td>
+                </tr>
+                <tr>
+                <td class="text-right">{{ form.y1L.label }}</td>
+                <td>{{ form.y1L}}</td>
+                <td class="text-right">y</td>
+                
+                {% if result != None %}
+                    {% if result[1]==0 %}
+                    <td class="table-warning  text-center">{{result[0]}}</td>
+                    {% else %}
+                    <td class="table-success  text-center">{{result[0]|round(4)}}</td>
+                    {% endif %}
+                {% else %}
+                <td class="table-secondary text-center">value to find</td>
+                {% endif %}
+                <td class="text-right">{{ form.y2L.label }}</td>
+                <td>{{ form.y2L}}</td>
+                </tr>
+            </table>
+
+            <p><input type=submit value=Compute></p>
+            
+        </form>
+    </div>
+    <div class="col-sm">
+        <!-- Mathjax Formulas -->
+        <table class="table table-striped w-auto small">
+            <tr>
+                <td>\(x(t) = x_{1} + t (x_{2}-x_{1}) \text{ , } 0 \leq t \leq 1 \)</td>
+            </tr>
+            <tr>
+                <td>\[ t = \frac{x(t) - x_{1}}{(x_{2}-x_{1})} \]</td>
+            </tr>
+            <tr>
+                <td>\(y(t) = y_{1} + t (y_{2}-y_{1}) \text{ , } 0 \leq t \leq 1 \)</td>
+            </tr>
+        </table>
+    </div>
+</div>
+</div>
+{% endblock content %}

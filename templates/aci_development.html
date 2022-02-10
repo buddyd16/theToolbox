@@ -1,0 +1,232 @@
+{% extends "layout.html"%}
+
+{% block scripts %}
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" 
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js">
+</script>
+<script src="{{ url_for('static', filename='js/ACI_Development.js') }}"></script>
+{% endblock scripts %}
+
+{% block content %}
+<a id="top"></a>
+<div class="container">
+    <nav class="nav">
+        <a class="nav-link" href="#ACI_STRAIGHT_SECTION" id="Ld_LINK">ACI 318-14 Tension Development Length</a>
+        <a class="nav-link" href="#ACI_HOOKED_SECTION" id="Ldh_LINK">ACI 318-14 Hooked Development Length</a>
+    </nav>
+    <table class="table table-sm table-hover">
+        <tr>
+            <td>Bar</td>
+            <td>
+                <select id="aci_bar" class="aci_bar input-sm" name="aci_bar" style="width:95px">
+                    <option value="0.375"> #3 </option>
+                    <option value="0.500"> #4 </option>
+                    <option value="0.625"> #5 </option>
+                    <option value="0.750"> #6 </option>
+                    <option value="0.875"> #7 </option>
+                    <option value="1.000"> #8 </option>
+                    <option value="1.128"> #9 </option>
+                    <option value="1.270"> #10 </option>
+                    <option value="1.410"> #11 </option>
+                    <option value="1.693"> #14 </option>
+                    <option value="2.257"> #18 </option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>d<sub>b</sub></td>
+            <td id="tbl_db">0.375</td>
+            <td>in</td>
+            <td>bar diameter.</td>
+        </tr>
+        <tr>
+            <td>&lambda;</td>
+            <td>
+                <select id="aci_lambda" class="aci_lambda input-sm" name="aci_lambda" style="width:200px">
+                    <option value="1.0"> Normalweight concrete</option>
+                    <option value="0.75"> Lightweight concrete</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>f'<sub>c</sub></td>
+            <td><input id="fpc_psi" name="fpc_psi" class="fpc_psi input-sm" style="width:95px" type="number" step="any" min="2500" value="3000.0"></td>
+            <td>psi</td>
+            <td>Specified 28-day compressive strength of concrete in which the bar is to be developed.</td>
+        </tr>
+        <tr>
+            <td>f<sub>y</sub></td>
+            <td><input id="fy_psi" name="fy_psi" class="fy_psi input-sm" style="width:95px" type="number" step="any" min="40000" value="60000.0"></td>
+            <td>psi</td>
+            <td>Yield strength of bar to be developed.</td>
+        </tr>
+    </table>
+
+    <h3 id="ACI_STRAIGHT_SECTION"><a href="#top">&#8593;</a> ACI 318-14 Straight Tension Development Length, L<sub>d</sub>:</h3>
+    <div class="row">
+        <div class="col-sm">
+            <table class="table table-sm table-hover">
+                <tr>
+                    <td>&Psi;<sub>t</sub></td>
+                    <td>
+                        <select id="aci_psi_t" class="aci_psi_t input-sm" name="aci_psi_t" style="width:200px">
+                            <option value="1.3"> More than 12 in. of fresh concrete placed below horizontal reinforcement.</option>
+                            <option value="1.0"> Other </option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>&Psi;<sub>e</sub></td>
+                    <td>
+                        <select id="aci_psi_e" class="aci_psi_e input-sm" name="aci_psi_e" style="width:200px">
+                            <option value="1.5"> Epoxy-coated or zinc and epoxy dual-coated reinforcement with clear cover less than 3d<sub>b</sub> or clear spacing less than 6d<sub>b</sub></option>
+                            <option value="1.2"> Epoxy-coated or zinc and epoxy dual-coated reinforcement for all other conditions </option>
+                            <option value="1.0"> Uncoated or zinc-coated (galvanized) reinforcement </option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>&Psi;<sub>s</sub></td>
+                    <td>
+                        <select id="aci_psi_s" class="aci_psi_s input-sm" name="aci_psi_s" style="width:200px" disabled>
+                            <option value="0.8"> No. 6 and smaller bars and deformed wires </option>
+                            <option value="1.0"> No. 7 and larger bars</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>c<sub>c</sub></td>
+                    <td><input id="cc_in" name="cc_in" class="cb_watch cc_in input-sm" style="width:95px" type="number" step="any" min="0" value="1.5"></td>
+                    <td>in</td>
+                    <td>distance from center of bar to nearest concrete surface.</td>
+                </tr>
+                <tr>
+                    <td>s<sub>b</sub></td>
+                    <td><input id="sb_in" name="sb_in" class="cb_watch sb_in input-sm" style="width:95px" type="number" step="any" min="0" value="10"></td>
+                    <td>in</td>
+                    <td>center-to-center spacing of bars being developed.</td>
+                </tr>
+                <tr>
+                    <td>c<sub>b</sub></td>
+                    <td id="tbl_cb">1.5</td>
+                    <td>in</td>
+                </tr>
+                <tr>
+                    <td>A<sub>tr</sub></td>
+                    <td><input id="atr_in2" name="atr_in2" class="ktr_watch atr_in2 input-sm" style="width:95px" type="number" step="any" min="0" value="0"></td>
+                    <td>in<sup>2</sup></td>
+                    <td>Total cross-sectional area of all transverse reinforcement within spacing s that crosses the potential plane of splitting through the reinforcement being developed. If unsure of value use 0.</td>
+                </tr>
+                <tr>
+                    <td>s</td>
+                    <td><input id="s_in" name="s_in" class="ktr_watch s_in input-sm" style="width:95px" type="number" step="any" min="0" value="10"></td>
+                    <td>in</td>
+                    <td>maximum center-to-center spacing of transverse reinforcement within L<sub>d</sub>.</td>
+                </tr>
+                <tr>
+                    <td>n</td>
+                    <td><input id="n_bars" name="n_bars" class="ktr_watch n_bars input-sm" style="width:95px" type="number" step="any" min="0" value="0"></td>
+                    <td></td>
+                    <td>number of bars being developed.</td>
+                </tr>
+                <tr>
+                    <td>K<sub>tr</sub></td>
+                    <td id="tbl_ktr">0</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="col-sm">
+            <table class="table table-sm table-hover">
+                <!--
+                <tr>
+                    <td>L<sub>d</sub> = </td>
+                    <td id="Ld"></td>
+                    <td>in</td>
+                </tr>
+                -->
+                <tr>
+                    <td colspan=3> \[L_{d} = \text{max } \begin{bmatrix}\text{(a) }\left( \frac{3}{40} \frac{f_{y}}{\lambda\sqrt{f'_{c}}} \frac{\psi_{t}\psi_{e}\psi_{s}}{(\frac{c_{b}+K_{tr}}{d_{b}})} \right) d_{b} \text{ (25.4.2.3a)} \\ \text{(b) }12 \text{ in} \end{bmatrix} \text{[25.4.2.1]}\] </td>
+                </tr>
+                <tr>
+                    <td colspan=3 id="TBL_KTR_EQUATION">\[K_{tr} = 0.0 \]</td>
+                </tr>
+                <tr>
+                    <td colspan=3 id="TBL_CONFINE_EQUATION"></td>
+                </tr>
+                <tr>
+                    <td colspan=3 id="TBL_LD_A_EQUATION"></td>
+                </tr>
+                <tr>
+                    <td colspan=3 id="TBL_LD_EQUATION"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <h3 id="ACI_HOOKED_SECTION"><a href="#top">&#8593;</a> ACI 318-14 Hooked Development Length, L<sub>dh</sub>:</h3>
+    <div class="row">
+        <div class="col-sm">
+            <table class="table table-sm table-hover">
+                <tr>
+                    <td>&Psi;<sub>e</sub></td>
+                    <td>
+                        <select id="aci_psi_e_ldh" class="aci_psi_e_ldh input-sm" name="aci_psi_e_ldh" style="width:200px">
+                            <option value="1.2"> Epoxy-coated or zinc and epoxy dual-coated reinforcement</option>
+                            <option value="1.0"> Uncoated or zinc-coated (galvanized) reinforcement </option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>&Psi;<sub>c</sub></td>
+                    <td>
+                        <select id="aci_psi_c_ldh" class="aci_psi_c_ldh input-sm" name="aci_psi_c_ldh" style="width:200px">
+                            <option value="0.7"> For No. 11 bar and smaller hooks with side cover (normal to plane of hook)&GreaterEqual;2-1/2 in. and for 90-degree hook with cover on bar extension beyond hook &GreaterEqual;2 in.</option>
+                            <option value="1.0"> Other </option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>&Psi;<sub>r</sub></td>
+                    <td>
+                        <select id="aci_psi_r_ldh" class="aci_psi_r_ldh input-sm" name="aci_psi_r_ldh" style="width:200px">
+                            <option value="0.8"> For 90-degree hooks of No. 11 and smaller bars (1)enclosed along L<sub>dh</sub> within ties or stirrups<sup>[1]</sup> perpendicular to L<sub>dh</sub> at s &leq; 3d<sub>b</sub>, or (2)enclosed along the bar extension beyond hook including the bend withing ties or stirrups<sup>[1]</sup> perpendicular to L<sub>ext</sub> at s &leq; 3d<sub>b</sub> </option>
+                            <option value="0.8"> For 180-degree hooks of No. 11 and smaller bars enclosed along L<sub>dh</sub> within ties or stirrups<sup>[1]</sup> perpendicular to L<sub>dh</sub> at s &leq; 3d<sub>b</sub> </option>
+                            <option value="1.0"> Other </option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="col-sm">
+            <table class="table table-sm table-hover">
+                <!-- 
+                <tr>
+                    <td>L<sub>dh</sub> = </td>
+                    <td id="Ldh"></td>
+                    <td>in</td>
+                </tr>
+                -->
+                <tr>
+                    <td colspan=3>\[L_{dh} = \text{max }\begin{bmatrix}\text{(a) } \left(\frac{f_{y}\psi_{e}\psi_{c}\psi_{r}}{50\lambda\sqrt{f'_{c}}} \right)d_{b} \\ \text{(b) }8d_{b} \\ \text{(c) }6 \text{ in} \end{bmatrix} \text{ [25.4.3.1]} \]</td>
+                </tr>
+                <tr>
+                    <td colspan=3 id="TBL_LDHA_EQUATION"></td>
+                </tr>
+                <tr>
+                    <td colspan=3 id="TBL_LDH_EQUATION"></td>
+                </tr>
+                <tr>
+                    <td id="aci_90_bend"></td>
+                    <td colspan=2><img style="max-width: 250px; margin-top: 2px;"src="{{ url_for('static', filename='images/aci_90.svg')}}"></td>
+                </tr>
+                <tr>
+                    <td id="aci_180_bend"></td>
+                    <td colspan=2><img style="max-width: 250px; margin-top: 2px;"src="{{ url_for('static', filename='images/aci_180.svg')}}"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock content %}

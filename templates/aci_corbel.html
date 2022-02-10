@@ -1,0 +1,354 @@
+{% extends "layout.html"%}
+
+{% block scripts %}
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" 
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js">
+</script>
+<script src="{{ url_for('static', filename='js/ACI_Common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ACI_Corbel.js') }}"></script>
+{% endblock scripts %}
+
+{% block content %}
+<a id="top"></a>
+<div class="container">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="row">
+                    <h4>Corbel - Inputs:</h4>
+                </div>
+                <div class="row">
+                    <table class="table table-sm table-hover">
+                        <tr>
+                            <td class="text-right text-nowrap">V<sub>uc</sub></td>
+                            <td><input id="vuc_kips" name="vuc_kips" class="vuc_kips input-sm 165_param user_param" style="width:95px" type="number" step="any" value="10.0"></td>
+                            <td>kips</td>
+                            <td>Vertical Load on Corbel</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-nowrap">N<sub>uc</sub></td>
+                            <td><input id="nuc_kips" name="nuc_kips" class="nuc_kips input-sm 165_param user_param" style="width:95px" type="number" step="any" value="5.0"></td>
+                            <td>kips</td>
+                            <td>Direct Horizontal Load on Corbel</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-nowrap">H<sub>c</sub></td>
+                            <td><input id="Hc_in" name="Hc_in" class="Hc_in input-sm d_param user_param" style="width:95px" type="number" step="any" value="24.0"></td>
+                            <td>in</td>
+                            <td>Total Corbel Height</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-nowrap">B<sub>c</sub></td>
+                            <td><input id="Bc_in" name="Bc_in" class="Bc_in input-sm user_param" style="width:95px" type="number" step="any" value="12.0"></td>
+                            <td>in</td>
+                            <td>Total Corbel Width</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-nowrap">a<sub>v</sub></td>
+                            <td><input id="av_in" name="av_in" class="av_in input-sm user_param" style="width:95px" type="number" step="any" value="6.0"></td>
+                            <td>in</td>
+                            <td>Distance from face of column to load application point.</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-nowrap">L<sub>c</sub></td>
+                            <td><input id="Lc_in" name="Lc_in" class="Lc_in input-sm user_param" style="width:95px" type="number" step="any" value="12.0"></td>
+                            <td>in</td>
+                            <td>Distance from face of column to edge of corbel.</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-nowrap">S<sub>c</sub></td>
+                            <td><input id="Sc_in" name="Sc_in" class="Sc_in input-sm user_param" style="width:95px" type="number" step="any" value="12.0"></td>
+                            <td>in</td>
+                            <td>Column/wall width.</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-nowrap">cover</td>
+                            <td><input id="cover_in" name="cover_in" class="cover_in input-sm d_param user_param" style="width:95px" type="number" step="any" value="1.5"></td>
+                            <td>in</td>
+                            <td>clear cover to exterior face of reinforcement.</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-nowrap">Main Corbel Bar:</td>
+                            <td>
+                                <select id="aci_bar_main" class="aci_bar_main input-sm d_param user_param" name="aci_bar_main" style="width:95px">
+                                    <option value="3"> #3 </option>
+                                    <option value="4"> #4 </option>
+                                    <option value="5"> #5 </option>
+                                    <option value="6"> #6 </option>
+                                    <option value="7"> #7 </option>
+                                    <option value="8"> #8 </option>
+                                    <option value="9"> #9 </option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-nowrap">d<sub>b</sub></td>
+                            <td id="tbl_db_main" class="user_param">0.375</td>
+                            <td>in</td>
+                            <td>bar diameter</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-nowrap">A<sub>s</sub></td>
+                            <td id="tbl_as_main">0.11</td>
+                            <td>in<sup>2</sup></td>
+                            <td>bar area</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-nowrap">Corbel Tie Bars:</td>
+                            <td>
+                                <select id="aci_bar_tie" class="aci_bar_tie input-sm user_param" name="aci_bar_tie" style="width:95px">
+                                    <option value="3"> #3 </option>
+                                    <option value="4"> #4 </option>
+                                    <option value="5"> #5 </option>
+                                    <option value="6"> #6 </option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-nowrap">d<sub>b</sub></td>
+                            <td id="tbl_db_tie" class="user_param">0.375</td>
+                            <td>in</td>
+                            <td>bar diameter</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-nowrap">A<sub>s</sub></td>
+                            <td id="tbl_as_tie">0.11</td>
+                            <td>in<sup>2</sup></td>
+                            <td>bar area</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-nowrap">&lambda;</td>
+                            <td>
+                                <select id="aci_lambda" class="aci_lambda input-sm user_param" name="aci_lambda" style="width:200px">
+                                    <option value="1.0"> Normalweight concrete</option>
+                                    <option value="0.75"> Lightweight concrete</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-nowrap">f'<sub>c</sub></td>
+                            <td><input id="fc_psi" name="fc_psi" class="fc_psi input-sm user_param" style="width:95px" type="number" step="any" min="2500" value="4000.0"></td>
+                            <td>psi</td>
+                            <td>Specified 28-day compressive strength of concrete.</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-nowrap">&beta;<sub>1</sub></td>
+                            <td id="tbl_beta1" class="user_param">0.85</td>
+                            <td></td>
+                            <td>[Table 22.2.2.4.3]</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-nowrap">f<sub>y</sub></td>
+                            <td><input id="fy_psi" name="fy_psi" class="fy_psi input-sm user_param" style="width:95px" type="number" step="any" min="40000" value="60000.0"></td>
+                            <td>psi</td>
+                            <td>Yield strength of bar to be developed.</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right text-nowrap">&mu;:</td>
+                            <td>
+                                <select id="aci_mu" class="aci_mu input-sm user_param" name="aci_mu" style="width:300px">
+                                    <option value="1.4"> Monolithic Concrete </option>
+                                    <option value="1.0"> Surface Roughened Concrete (1/4") </option>
+                                    <option value="0.6"> Clean Unroughened Concrete </option>
+
+                                </select>
+                            </td>
+                            <td></td>
+                            <td>Coefficient of friction for shear friction</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-auto">
+                <div class="row pb-2">
+                    <div class="col-md-auto">
+                        <h4>Corbel - Results:</h4>
+                    </div>
+                    <div class="col-sm">
+                        <input id="btn_calc" class="btn btn-dark float-right" type="button" value="Run Calc" />
+                    </div>
+                </div>
+                <div class="row">
+                    <table class="table table-sm table-hover">
+                        <tr id="res_status_16511">
+                            <td colspan="2" class="text-right">Section 16.5 applicable :</td>
+                            <td id="res_status_16511_value"></td>
+                        </tr>
+                        <tr id="res_status_16524">
+                            <td colspan="2" class="text-right">Section dimensions satisfy 16.5.2.4:</td>
+                            <td id="res_status_16524_value"></td>
+                        </tr>
+                        <tr id="res_status_aflimit">
+                            <td colspan="2" class="text-right">A<sub>f</sub> &#8804; A<sub>f,limit</sub>:</td>
+                            <td id="res_status_aflimit_value"></td>
+                        </tr>
+                        <tr id="res_asc_row">
+                            <td class="text-right">A<sub>sc,req</sub> :</td>
+                            <td id="res_asc_value"></td>
+                            <td>in<sup>2</sup></td>
+                        </tr>
+                        <tr id="res_asc_bars_row">
+                            <td id="res_num_main_bars" class="text-right"></td>
+                            <td id="res_asc_provided"></td>
+                            <td>in<sup>2</sup></td>
+                        </tr>
+                        <tr id="res_ah_row">
+                            <td class="text-right">A<sub>h,req</sub> :</td>
+                            <td id="res_ah_value"></td>
+                            <td>in<sup>2</sup></td>
+                        </tr>
+                        <tr id="res_ah_bars_row">
+                            <td id="res_num_tie_bars" class="text-right"></td>
+                            <td id="res_ah_provided"></td>
+                            <td>in<sup>2</sup></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="row">
+                    <canvas id="corbel_canvas" width="400" height="600"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+    <h5><u><strong>ACI 318-14 - Section 16.5 - Brackets and Corbels</strong></u></h5>
+    </div>
+    <div class="container">
+        <div class="row">
+            <table class="table table-sm table-hover">
+                <tr>
+                    <th colspan="4" class="text-left text-nowrap"><u><strong>Preliminary Computations</strong></u></th>
+                </tr>
+                <tr>
+                    <td>\[ d = H_{c} - (Cover + \frac{d_{b}}{2}) \]</td>
+                    <td id="tbl_d_in" class="align-middle">0</td>
+                    <td class="align-middle">in</td>
+                    <td class="align-middle">Depth from bottom of corbel at face of support to center of primary reinforcement.</td>
+                </tr>
+                <tr>
+                    <td class="text-right text-nowrap">&Phi;<sub>corbel</sub></td>
+                    <td id="phi_corbel">0.75</td>
+                    <td></td>
+                    <td>[Table 21.2.1 - Strength reduction factors &Phi;]</td>
+                </tr>
+                <tr>
+                    <td class="text-right text-nowrap">N<sub>uc,design</sub></td>
+                    <td id="tbl_nuc_design_kips">0</td>
+                    <td>kips</td>
+                    <td>[16.5.3.5 - N<sub>uc,design</sub> shall be at least 0.2V<sub>uc</sub>]</td>
+                </tr>
+                <tr>
+                    <td class="text-right text-nowrap">\[M_{u} = V_{uc}a_{v}+N_{uc,design}(H_{c}-d)\frac{1 \text{ ft}}{12 \text{ in}}\]</sub></td>
+                    <td id="tbl_mu_design_ftkips" class="align-middle">0</td>
+                    <td class="align-middle">ft-kips</td>
+                    <td class="align-middle">[16.5.3.1]</td>
+                </tr>
+            </table>
+        </div>
+        <div class="row">
+            <table class="table table-sm table-hover">
+                <tr>
+                    <th colspan="2" class="text-left text-nowrap"><u><strong>16.5.1.1 -- Verification that 16.5 is applicable</strong></u></th>
+                    <th id="status_165_test"></th>
+                </tr>
+                <tr id="av_d_test_row" class="">
+                    <td>\[ \frac{a_{v}}{d} \]</td>
+                    <td id="av_d_test"></td>
+                    <td id="av_d_test_result" class="align-middle"></td>
+                </tr>
+                <tr id="nv_test_row" class="">
+                    <td>\[ N_{uc} \le V_{uc} \]</td>
+                    <td id="nv_test"></td>
+                    <td id="nv_test_result" class="align-middle"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="row" id="dimension_check">
+            <table class="table table-sm table-hover">
+                <tr>
+                    <th colspan="2" class="text-left text-nowrap" id="dimension_check_section">16.5.2.4 -- Verification that dimensions satisfy max shear friction</th>
+                    <th id="dimension_check_test"></th>
+                </tr>
+                <tr id="dimension_check_a_row">
+                    <td id="dimension_check_a_formula">\[0.2F'_{c}b_{w}d \]</td>
+                    <td id="dimension_check_a_evaluation"></td>
+                    <td id="dimension_check_a_status" class="align-middle"></td>
+                </tr>
+                <tr id="dimension_check_b_row">
+                    <td id="dimension_check_b_formula">\[(480+0.08F'_{c})b_{w}d \]</td>
+                    <td id="dimension_check_b_evaluation"></td>
+                    <td id="dimension_check_b_status" class="align-middle"></td>
+                </tr>
+                <tr id="dimension_check_c_row">
+                    <td id="dimension_check_c_formula">\[1600b_{w}d \]</td>
+                    <td id="dimension_check_c_evaluation"></td>
+                    <td id="dimension_check_c_status" class="align-middle"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="row" id="div_design_strength">
+            <table class="table table-sm table-hover">
+                <tr>
+                    <th colspan="2" class="text-left text-nowrap" id="design_strength_head"><u><strong>16.5.4 -- Design Strength</strong></u></th>
+                </tr>
+                <tr>
+                    <td colspan="3"><strong>16.5.4.3 -- A<sub>n</sub> for Tensile Strength</strong></td>
+                </tr>
+                <tr>
+                    <td>\[A_{n} = \frac{N_{uc,design}}{\phi F_{y}} \]</td>
+                    <td id="tbl_an_tension" class="align-middle"></td>
+                    <td class="align-middle">in<sup>2</sup></td>
+                </tr>
+                <tr>
+                    <td colspan="3"><strong>16.5.4.4 -- A<sub>vf</sub> for Shear Friction</strong></td>
+                </tr>
+                <tr>
+                    <td>\[A_{vf} = \frac{V_{uc}}{\phi \mu \lambda F_{y}} \]</td>
+                    <td id="tbl_avf_shearfriction" class="align-middle"></td>
+                    <td class="align-middle">in<sup>2</sup></td>
+                </tr>
+                <tr>
+                    <td colspan="3"><strong>16.5.4.5 -- A<sub>f</sub> for Flexure</strong></td>
+                </tr>
+                <tr>
+                    <td colspan="3">\[ M_{uc} = \phi A_{f} f_y (d - \frac{a}{2}) \text{ ,where } a = \frac{A_{f} f_{y}}{0.85 f'_{c} B_{c}} \]</td>
+                </tr>
+                <tr>
+                    <td>\[\frac{-1 \phi 10 f_{y}^2}{17 f'_{c} B_{c}} A_{f}^2 + \phi f_{y} d A_{f} - M_{uc,design} = 0 \]</td>
+                    <td id="tbl_af_req" class="align-middle"></td>
+                    <td class="align-middle">in<sup>2</sup></td>
+                </tr>
+                <tr>
+                    <td colspan="3">\[ \epsilon_t = \left( \frac{\frac{a}{\beta_{1}}-d}{\frac{a}{\beta_{1}}} \right) 0.003 \text{ ,limit } \epsilon_t = 0.004 \]</td>
+                </tr>
+                <tr>
+                    <td>\[A_{f, limit} = \frac{51 B_{c} \beta_{1} d f'_{c}}{140 f_{y}} \]</td>
+                    <td id="tbl_af_max" class="align-middle"></td>
+                    <td class="align-middle">in<sup>2</sup></td>
+                </tr>
+            </table>
+            <table class="table table-sm table-hover">
+                <tr>
+                    <th colspan="2" class="text-left text-nowrap" id="design_reinf_head"><u><strong>16.5.5 -- Reinforcement limits</strong></u></th>
+                </tr>
+                <tr>
+                    <td colspan="3"><strong>16.5.5.1 -- A<sub>sc</sub>, Area of primary tension reinforcement</strong></td>
+                </tr>
+                <tr>
+                    <td id="tbl_asc_mathjax">\[ \text{max } \begin{bmatrix}A_{f}+A_{n} \\ (\frac{2}{3})A_{vf}+A_{n} \\ 0.04(\frac{f'_{c}}{f_{y}})(B_{c}d) \end{bmatrix} \]</td>
+                    <td id="tbl_asc_value" class="align-middle">0</td>
+                    <td class="align-middle">in<sup>2</sup></td>
+                </tr>
+                <tr>
+                    <td colspan="3"><strong>16.5.5.2 -- A<sub>h</sub>, Area of closed stirrups or ties parallel to A<sub>sc</sub></strong></td>
+                </tr>
+                <td id="tbl_ah_mathjax">\[A_{h}=0.5(A_{sc}-A_{n}) \]</td>
+                <td id="tbl_ah_value" class="align-middle">0</td>
+                <td class="align-middle">in<sup>2</sup></td>
+            </table>
+
+        </div>
+    </div>
+</div>
+{% endblock content %}

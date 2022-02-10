@@ -1,0 +1,534 @@
+
+{% extends "layout.html"%}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/WeldGroup.js') }}"></script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js">
+</script>
+{% endblock scripts %}
+
+{% block style %}
+
+.table-condensed{
+  font-size: 12px;
+}
+
+{% endblock style %}
+
+{% block content %}
+
+<div class="container">
+<div class="row">
+<div class="col-sm">
+    <h1>Elastic Weld Group Analysis</h1>
+    <h4>Inputs:</h4>
+    <form class="form-floating" method=post action="">
+    
+    <ul class="nav nav-tabs" id="inputTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="loads_tab" href="#loads" aria-controls="loads" role="tab" data-toggle="tab">Loads</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="weldprop_tab" href="#weld_property" aria-controls="weld_property" role="tab" data-toggle="tab">Weld Property</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="segments_tab" href="#segments" aria-controls="segments" role="tab" data-toggle="tab">Weld Segments</a>
+        </li>
+    </ul>
+{% if segments == None %}
+
+<!-- Inputs template -->
+<div class="tab-content" id="inputTab">
+
+    <div class="tab-pane fade show active" id="loads"  role="tablist" aria-labelledby="inputTabs">
+        <table id="loadInput" class="table table-sm table-dark w-auto">
+            <tr>
+            <td class="text-right">Loading Type:</td>
+            <td class="align-middle">
+            <select id="loadType" class="loadType input-sm" name="loadType" style="width:95px">
+                <option value="service">Service</option>
+                <option value="ultimate">Ultimate</option>
+            </select>
+            </td>
+            </tr>
+        </table>
+        <table class="table table-sm table-dark w-auto">
+            <tr>
+            <td class="text-right">F<sub>z</sub></td>
+            <td><input id="fz" name="fz" class="fz input-sm" style="width:95px" type="number" step="any" value="0.0"></td>
+            <td colspan="3">Kips (+ Tension)</td>
+            </tr>
+            <tr>
+            <td class="text-right">F<sub>x</sub></td>
+            <td><input id="fx" name="fx" class="fx input-sm" style="width:95px" type="number" step="any" value="0.0"></td>
+            <td colspan="3">Kips (+ right)</td>
+            </tr>
+            <tr>
+            <td class="text-right">F<sub>y</sub></td>
+            <td><input id="fy" name="fy" class="fy input-sm" style="width:95px" type="number" step="any" value="0.0"></td>
+            <td colspan="3">Kips (+ up)</td>
+            </tr>
+            <tr>
+            <td class="text-right">M<sub>x</sub></td>
+            <td><input id="mx" name="mx" class="mx input-sm" style="width:95px" type="number" step="any" value="0.0"></td>
+            <td colspan="3">ft-Kips (+ Tension on Top)</td>
+            </tr>
+            <tr>
+            <td class="text-right">M<sub>y</sub></td>
+            <td><input id="my" name="my" class="my input-sm" style="width:95px" type="number" step="any" value="0.0"></td>
+            <td colspan="3">ft-Kips (+ Tension on left)</td>
+            </tr>
+            <tr>
+            <td class="text-right">T<sub>z</sub></td>
+            <td><input id="tz" name="tz" class="tz input-sm" style="width:95px" type="number" step="any" value="0.0"></td>
+            <td colspan="3">ft-Kips (+ gives -x shear at top)</td>
+            </tr>
+        </table>
+        <table class="table table-sm table-dark w-auto">
+            <tr id="userLoadPoint">
+            <td class="text-right align-middle" rowspan="2">Loading Point:</td>
+            <td class="align-middle" rowspan="2">
+            <select id="loadPosition" class="loadPosition input-sm" name="loadPosition" style="width:95px">
+                <option value="user">User</option>
+                <option value="centroid">Centroid</option>
+            </select>
+            </td>
+            <td class="text-right">x (in)</td>
+            <td class="text-center">y (in)</td>
+            <td class="text-center">z (in)</td>
+            </tr>
+            <tr>
+            <td class="text-right"><input id="user_x" name="user_x" class="user_x input-sm" style="width:95px" type="number" step="any" value="0.0"></td>
+            <td class="text-center"><input id="user_y" name="user_y" class="user_y input-sm" style="width:95px" type="number" step="any" value="0.0"></td>
+            <td class="text-center"><input id="user_z" name="user_z" class="user_z input-sm" style="width:95px" type="number" step="any" value="0.0"></td>
+            </tr>
+        </table>
+    </div>
+    <div class="tab-pane fade" id="weld_property" role="tablist" aria-labelledby="inputTabs">
+        <table class="table table-sm table-dark w-auto">
+            <tr>
+            <td class="text-right">F<sub>exx</sub></td>
+            <td><input id="fexx" name="fexx" class="fexx input-sm" style="width:95px" type="number" step="any" value="70.0"></td>
+            <td>ksi</td>
+            </tr>
+        </table>
+    </div>
+    <div class="tab-pane fade" id="segments"  role="tablist" aria-labelledby="inputTabs">
+        <table id="weldTable" class="table table-sm table-dark w-auto">
+            <thead>
+            <tr>
+            <th> Segment</br>ID </th>
+            <th class="text-center"> xi (in) </th>
+            <th class="text-center"> yi (in) </th>
+            <th class="text-center"> xj (in) </th>
+            <th class="text-center"> yj (in) </th>
+            <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Initial Form -->
+            <tr class="user segment">
+            <td class="suid">1</td>
+            <td><input id="xi" name="xi" class="xi input-sm" style="width:95px" type="number" step="any" value="0.0"></td>
+            <td><input id="yi" name="yi" class="yi input-sm" style="width:95px" type="number" step="any" value="0.0"></td>
+            <td><input id="xj" name="xj" class="xj input-sm" style="width:95px" type="number" step="any" value="1.0"></td>
+            <td><input id="yj" name="yj" class="yj input-sm" style="width:95px" type="number" step="any" value="1.0"></td>
+            <td>    
+                    <button type="button" class="addWeldFirst btn btn-secondary btn-success btn-sm no-print">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                      <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                    </svg>
+                    </button>
+            </td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+
+{% else %}
+
+<div class="tab-content" id="inputTab">
+
+    <div class="tab-pane fade show active" id="loads"  role="tablist" aria-labelledby="inputTabs">
+    <!-- Inputs loaded from submission -->
+    <table id="loadInput" class="table table-sm table-dark w-auto">
+        <tr>
+            <td class="text-right">Loading Type:</td>
+            <td class="align-middle">
+
+            <select id="loadType" class=class="loadType input-sm" name="loadType" style="width:95px">
+
+            {% if loadInputs[0]=="service" %}
+                <option value="service">Service</option>
+                <option value="ultimate">Ultimate</option>
+            {% else %}
+                <option value="ultimate">Ultimate</option>
+                <option value="service">Service</option>
+            {% endif %}
+
+            </select>
+            </td>
+        </tr>
+    </table>
+    <table class="table table-sm table-dark w-auto">
+        <tr>
+        <td class="text-right">F<sub>z</sub></td>
+        <td><input id="fz" name="fz" class="fz input-sm" style="width:95px" type="number" step="any" value="{{loadInputs[1][0]}}"></td>
+        <td colspan="3">Kips (+ Tension)</td>
+        </tr>
+        <tr>
+        <td class="text-right">F<sub>x</sub></td>
+        <td><input id="fx" name="fx" class="fx input-sm" style="width:95px" type="number" step="any" value="{{loadInputs[1][1]}}"></td>
+        <td colspan="3">Kips (+ right)</td>
+        </tr>
+        <tr>
+        <td class="text-right">F<sub>y</sub></td>
+        <td><input id="fy" name="fy" class="fy input-sm" style="width:95px" type="number" step="any" value="{{loadInputs[1][2]}}"></td>
+        <td colspan="3">Kips (+ up)</td>
+        </tr>
+        <tr>
+        <td class="text-right">M<sub>x</sub></td>
+        <td><input id="mx" name="mx" class="mx input-sm" style="width:95px" type="number" step="any" value="{{loadInputs[1][3]}}"></td>
+        <td colspan="3">ft-Kips (+ Tension on Top)</td>
+        </tr>
+        <tr>
+        <td class="text-right">M<sub>y</sub></td>
+        <td><input id="my" name="my" class="my input-sm" style="width:95px" type="number" step="any" value="{{loadInputs[1][4]}}"></td>
+        <td colspan="3">ft-Kips (+ Tension on left)</td>
+        </tr>
+        <tr>
+        <td class="text-right">T<sub>z</sub></td>
+        <td><input id="tz" name="tz" class="tz input-sm" style="width:95px" type="number" step="any" value="{{loadInputs[1][5]}}"></td>
+        <td colspan="3">ft-Kips (+ gives -x shear at top)</td>
+        </tr>
+    </table>
+    <table class="table table-sm table-dark w-auto">
+        <tr id="userLoadPoint">
+        <td class="text-right align-middle" rowspan="2">Loading Point:</td>
+        <td class="align-middle" rowspan="2">
+        <select id="loadPosition" class=class="loadPosition input-sm" name="loadPosition" style="width:95px">
+
+        {% if loadInputs[2][0]=="user" %}
+            <option value="user">User</option>
+            <option value="centroid">Centroid</option>
+        {% else %}
+            <option value="centroid">Centroid</option>
+            <option value="user">User</option>
+        {% endif %}
+
+        </select>
+        </td>
+        <td class="text-right">x (in)</td>
+        <td class="text-center">y (in)</td>
+        <td class="text-center">z (in)</td>
+        </tr>
+        <tr>
+        <td class="text-right"><input id="user_x" name="user_x" class="user_x input-sm" style="width:95px" type="number" step="any" value="{{loadInputs[2][1][0]}}"></td>
+        <td class="text-center"><input id="user_y" name="user_y" class="user_y input-sm" style="width:95px" type="number" step="any" value="{{loadInputs[2][1][1]}}"></td>
+        <td class="text-center"><input id="user_z" name="user_z" class="user_z input-sm" style="width:95px" type="number" step="any" value="{{loadInputs[2][1][2]}}"></td>
+        </tr>
+    </table>
+    </div>
+    <div class="tab-pane fade" id="weld_property" role="tablist" aria-labelledby="inputTabs">
+    <table class="table table-sm table-dark w-auto">
+    <tr>
+    <td class="text-right">F<sub>exx</sub></td>
+    <td><input id="fexx" name="fexx" class="fexx input-sm" style="width:95px" type="number" step="any" value="{{loadInputs[3]}}"></td>
+    <td>ksi</td>
+    </tr>
+    </table>
+    </div>
+    <div class="tab-pane fade" id="segments"  role="tablist" aria-labelledby="inputTabs">
+    <table id="weldTable" class="table table-sm table-dark w-auto">
+    <thead>
+    <tr>
+    <th> Segment</br>ID </th>
+    <th class="text-center"> xi (in) </th>
+    <th class="text-center"> yi (in) </th>
+    <th class="text-center"> xj (in) </th>
+    <th class="text-center"> yj (in) </th>
+    <th></th>
+    </tr>
+    </thead>
+    <tbody>
+
+    <!-- Initial Form -->
+    {% for weld in segments %}
+
+        {% if weld.suid == 1 %}
+        <tr class="user segment">
+        <td class="suid">{{weld.suid}}</td>
+        <td><input id="xi" name="xi" class="xi input-sm" style="width:95px" type="number" step="any" value="{{weld.start[0]}}"></td>
+        <td><input id="yi" name="yi" class="yi input-sm" style="width:95px" type="number" step="any" value="{{weld.start[1]}}"></td>
+        <td><input id="xj" name="xj" class="xj input-sm" style="width:95px" type="number" step="any" value="{{weld.end[0]}}"></td>
+        <td><input id="yj" name="yj" class="yj input-sm" style="width:95px" type="number" step="any" value="{{weld.end[1]}}"></td>
+        <td>    
+                <button type="button" class="addWeldFirst btn btn-secondary btn-success btn-sm no-print">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                  <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                </svg>
+                </button>
+        </td>
+        </tr>
+        {% else %}
+        <tr class="user segment">
+        <td class="suid">{{weld.suid}}</td>
+        <td><input id="xi" name="xi" class="xi input-sm" style="width:95px" type="number" step="any" value="{{weld.start[0]}}"></td>
+        <td><input id="yi" name="yi" class="yi input-sm" style="width:95px" type="number" step="any" value="{{weld.start[1]}}"></td>
+        <td><input id="xj" name="xj" class="xj input-sm" style="width:95px" type="number" step="any" value="{{weld.end[0]}}"></td>
+        <td><input id="yj" name="yj" class="yj input-sm" style="width:95px" type="number" step="any" value="{{weld.end[1]}}"></td>
+        <td>    
+                <button type="button" class="addWeld btn btn-secondary btn-success btn-sm no-print">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                  <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                </svg>
+                </button>
+                <a href="#" class="removeButton badge badge-danger no-print" style="margin-left: 5px"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                </svg></a>
+        </td>
+        </tr>
+        {% endif %}
+        
+    {% endfor %}
+    </tbody>
+    </table>
+    </div>
+
+</div>
+
+{% endif %}
+
+    <p><input type=submit value="Compute"></p>
+
+    </form>
+
+</div>
+
+<div class="col-5">
+
+    <!-- Plot -->
+    <canvas id="weldCanvas" width="500" height="600"></canvas>
+    
+    {% if weldgroup.errors != [] %}
+        <h4>Warnings:</h4>
+        <table class="table table-hover">
+    {% for error in weldgroup.errors %}
+        <tr><td class="table-danger">{{error}}</td></tr>
+    {% endfor %}
+        </table>
+    {% endif %}
+    
+    {% if weldgroup.warnings != [] %}
+        <h4>Warnings:</h4>
+        <table class="table table-hover">
+    {% for warning in weldgroup.warnings %}
+        <tr><td class="table-warning">{{warning}}</td></tr>
+    {% endfor %}
+        </table>
+    {% endif %}
+
+    <!-- Primary Results -->
+    {% if segments != None %}
+    
+    
+    <!-- Formulas using Mathjax-->
+    <div>
+        <table class="table table-sm">
+            <tr><td>\( \sigma_{max} = {{"%.3f"|format(sigma)}} \text{ lb/in} \cdot \frac{1 \text{ k}}{1000 \text{ lb}} = {{"%.3f"|format(sigma/1000)}} \text{ k/in} \)</td></tr>
+            {% if loadInputs[0]=="service" %}
+            <tr><td> \(R_{n,req} = \sigma_{max} \cdot \Omega = {{"%.3f"|format(throat[1])}} \text{ k/in}\)</td></tr>
+            {% else %}
+            <tr><td> \(R_{n,req} = \frac{\sigma_{max}}{\phi} = {{"%.3f"|format(throat[1])}} \text{ k/in}\)</td></tr>
+            {% endif %}
+            <tr><td> \(Req. Throat = \frac{R_{n,req}}{0.6 \cdot F_{exx}} = {{"%.3f"|format(throat[2])}} \text{ in} \)</td></tr>
+            <tr><td> \(\frac{Fillet}{16} = \frac{32 \cdot {{"%.3f"|format(throat[2])}}}{\sqrt{2}} = \begin{bmatrix}{{"%.3f"|format(throat[3])}} & \text{exact}\\{{"%.1f"|format(throat[5])}}& \text{rounded}\end{bmatrix} \)</td></tr>
+            <tr><td> \(R_n = \begin{bmatrix}{{"%.3f"|format(throat[3])}}\\{{"%.1f"|format(throat[5])}}\end{bmatrix} \cdot \frac{\sqrt{2}}{2} \cdot \frac{1}{16.0} \cdot 0.6 \cdot F_{exx} \)</td></tr>
+            <tr><td> \(R_n = \begin{bmatrix}{{"%.3f"|format(throat[4])}} \text{ k/in}\\{{"%.3f"|format(throat[6])}} \text{ k/in}\end{bmatrix} \)</td></tr>
+            <tr><td><strong> &there4; use {{throat[5]|round|int}}/16" fillet weld.</td></tr>
+        </table>
+    </div>
+        
+    <!-- Results -->
+    <!--
+    <table class="table table-hover">
+        <tr>
+        <td>&sigma;<sub>max</sub>:</td>
+        <td> {{"%.3f"|format(sigma)}} psi</td>
+        <td> {{"%.3f"|format(sigma/1000)}} ksi </td>
+        </tr>
+        <tr>
+        {% if loadInputs[0]=="service" %}
+            <td> &Omega;:</td><td> {{throat[0]}} </td><td></td>
+        {% else %}
+            <td> &Phi;: </td><td>{{throat[0]}} </td><td></td>
+        {% endif %}
+        </tr>
+        <tr>
+        <td> R<sub>n,req</sub>:</td>
+        <td> {{"%.3f"|format(throat[1])}} ksi</td>
+        <td></td>
+        </tr>
+        <tr>
+        <td>Req. Throat: </td>
+        <td>{{"%.3f"|format(throat[2])}} in</td>
+        <td></td>
+        </tr>
+        <tr>
+        <td> Fillet Weld: </td>
+        <td>{{"%.3f"|format(throat[3])}}/16</td>
+        <td>{{"%.1f"|format(throat[5])}}/16 </td>
+        </tr>
+        <tr>
+        <td> R<sub>n</sub>: </td>
+        <td>{{"%.3f"|format(throat[4])}} ksi</td>
+        <td> {{"%.3f"|format(throat[6])}} ksi </td>
+        </tr>
+    </table>
+    -->
+
+    {% endif %}
+    
+    <img style="max-width: 250px; margin-top: 4px;"src="{{ url_for('static', filename='images/weld_segment.svg')}}"></img>
+
+</div>
+
+</div>
+
+<div class="row">
+<!-- Detailed Results -->
+{% if segments != None %}
+    <table class="table table-striped table-hover table-sm table-condensed">
+        <thead>
+        <tr class="table-primary"><th colspan="6">Loads at the Weld Group Centroid:</th></tr>
+        <tr class="table-info">
+            <th scope="col" class="text-nowrap">Fz (lbs)</th>
+            <th scope="col" class="text-nowrap">Fx (lbs)</th>
+            <th scope="col" class="text-nowrap">Fy (lbs)</th>
+            <th scope="col" class="text-nowrap">Mx (in-lbs)</th>
+            <th scope="col" class="text-nowrap">My (in-lbs)</th>
+            <th scope="col" class="text-nowrap">Tz (in-lbs)</th>
+        </tr>
+        </thead>
+        <tr>
+        {% for load in appliedLoad %}
+        <td>{{load}}</td>
+        {% endfor %}
+        </tr>
+    </table>
+
+    <table class="table table-striped table-hover table-sm table-condensed">
+        <thead>
+        <tr class="table-primary"><th colspan="8">Weld Group Properties</th></tr>
+        <tr class="table-info">
+            <th scope="col" class="text-nowrap">Area (in<sup>2</sup>)</th>
+            <th scope="col" class="text-nowrap">Cx (in)</th>
+            <th scope="col" class="text-nowrap">Cy (in)</th>
+            <th scope="col" class="text-nowrap">Ixx (in<sup>4</sup>)</th>
+            <th scope="col" class="text-nowrap">Iyy (in<sup>4</sup>)</th>
+            <th scope="col" class="text-nowrap">Ixy (in<sup>4</sup>)</th>
+            <th scope="col" class="text-nowrap">Ip (in<sup>4</sup>)</th>
+            <th scope="col" class="text-nowrap">Ixx*Iyy - Ixy<sup>2</sup> (in<sup>8</sup>)</th>
+        </tr>
+        </thead>
+        <tr>
+        <td>{{"%.3f"|format(weldgroup.Area)}}</td>
+        <td>{{"%.3f"|format(weldgroup.Cx)}}</td>
+        <td>{{"%.3f"|format(weldgroup.Cy)}}</td>
+        <td>{{"%.3f"|format(weldgroup.Ixx)}}</td>
+        <td>{{"%.3f"|format(weldgroup.Iyy)}}</td>
+        <td>{{"%.3f"|format(weldgroup.Ixy)}}</td>
+        <td>{{"%.3f"|format(weldgroup.Ip)}}</td>
+        <td>{{"%.3f"|format(weldgroup.IxxIyy_Ixy2)}}</td>
+        </tr>
+    </table>
+</div>
+
+{% for weld in segments %}
+<div class="row">
+    <table class="table table-striped table-hover table-sm table-condensed">
+        <thead>
+        <tr class="table-primary"><th colspan="12">Weld Segment {{weld.suid}} Details:</th></tr>
+        <tr class="table-info">
+            <th scope="col" class="text-nowrap">m</th>
+            <th scope="col" class="text-nowrap">n</th>
+            <th scope="col" class="text-nowrap">center</th>
+            <th scope="col" class="text-nowrap">area</th>
+            <th scope="col" class="text-nowrap">Ixo</th>
+            <th scope="col" class="text-nowrap">Iyo</th>
+            <th scope="col" class="text-nowrap">dxi</th>
+            <th scope="col" class="text-nowrap">dyi</th>
+            <th scope="col" class="text-nowrap">dxj</th>
+            <th scope="col" class="text-nowrap">dyj</th>
+            <th scope="col" class="text-nowrap">dxm</th>
+            <th scope="col" class="text-nowrap">dym</th>
+        </tr>
+        </thead>
+        <tr>
+        <td>{{"%.3f"|format(weld.m)}}</td>
+        <td>{{"%.3f"|format(weld.n)}}</td>
+        <td>{{weld.center}}</td>
+        <td>{{"%.3f"|format(weld.area)}}</td>
+        <td>{{"%.3f"|format(weld.Ixo)}}</td>
+        <td>{{"%.3f"|format(weld.Iyo)}}</td>
+        <td>{{"%.3f"|format(weld.dxi)}}</td>
+        <td>{{"%.3f"|format(weld.dyi)}}</td>
+        <td>{{"%.3f"|format(weld.dxj)}}</td>
+        <td>{{"%.3f"|format(weld.dyj)}}</td>
+        <td>{{"%.3f"|format(weld.dxm)}}</td>
+        <td>{{"%.3f"|format(weld.dym)}}</td>
+        </tr>
+    </table>
+    <table class="table table-striped table-hover table-sm table-condensed">
+        <thead>
+        <tr>
+            <th scope="col" class="text-nowrap">&sigma;<sub>xi</sub></th>
+            <th scope="col" class="text-nowrap">&sigma;<sub>yi</sub></th>
+            <th scope="col" class="text-nowrap">&sigma;<sub>zi</sub></th>
+            <th scope="col" class="text-nowrap">&sigma;<sub>xj</sub></th>
+            <th scope="col" class="text-nowrap">&sigma;<sub>yj</sub></th>
+            <th scope="col" class="text-nowrap">&sigma;<sub>zj</sub></th>
+            <th scope="col" class="text-nowrap">&sigma;<sub>xm</sub></th>
+            <th scope="col" class="text-nowrap">&sigma;<sub>ym</sub></th>
+            <th scope="col" class="text-nowrap">&sigma;<sub>zm</sub></th>
+
+        </tr>
+        </thead>
+        <tr>
+        <td>{{"%.3f"|format(weld.sigma_xi)}}</td>
+        <td>{{"%.3f"|format(weld.sigma_yi)}}</td>
+        <td>{{"%.3f"|format(weld.sigma_zi)}}</td>
+        <td>{{"%.3f"|format(weld.sigma_xj)}}</td>
+        <td>{{"%.3f"|format(weld.sigma_yj)}}</td>
+        <td>{{"%.3f"|format(weld.sigma_zj)}}</td>
+        <td>{{"%.3f"|format(weld.sigma_xm)}}</td>
+        <td>{{"%.3f"|format(weld.sigma_ym)}}</td>
+        <td>{{"%.3f"|format(weld.sigma_zm)}}</td>
+        </tr>
+    </table>
+    <table class="table table-striped table-hover table-sm table-condensed">
+        <tr>
+        <td>&sigma;<sub>i</sub>: {{"%.3f"|format(weld.sigma_i)}}</td>
+        <td>&sigma;<sub>j</sub>: {{"%.3f"|format(weld.sigma_j)}}</td>
+        <td>&sigma;<sub>m</sub>: {{"%.3f"|format(weld.sigma_m)}}</td>
+        </tr>
+    </table>
+</div>
+{% endfor %}
+
+{% endif %}
+</div>
+</div>
+
+<script type="text/javascript">
+
+var centroid = [{{centroid}}];
+
+</script>
+
+{% endblock content %}
