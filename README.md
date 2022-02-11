@@ -7,8 +7,8 @@ Site Specific Roadmap:
 - [ ] Database implementation for User logins with the intial purpose of allowing calculations to be saved 
 
 Tools Roadmap
-- [ ] Multispan Beam Analysis inclusive of load combinations and patterning
-- [ ] Retaining wall inclusive of allowing numerous user defined defined loads in addition to the typical soil and surcharge loads typically seen in these tools, don't know about anyone else but brick veneer, wind concentrated, and wind distributed loads are a common occurance than no software packages seem to address.
+- [ ] Multi-span Beam Analysis inclusive of load combinations and patterning
+- [ ] Retaining wall inclusive of allowing numerous user defined loads in addition to the typical soil and surcharge loads seen in these tools, don't know about anyone else but brick veneer, wind concentrated, and wind distributed loads are a common occurance that no software packages seem to address.
 - [ ] Wood Stud Walls
 - [ ] Strap Beam
 - [ ] Rigid Diaphragm -- Single floor diaphgragm to be expanded to cover multiple floors and check for irregularities
