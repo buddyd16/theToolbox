@@ -1,0 +1,372 @@
+
+{% extends "layout.html"%}
+
+{% block content %}
+<div class="container">
+<div class="row">
+<div class="col-sm">
+<h2>Concrete T or Rectangular Beam</h2>
+<h4>Inputs:</h4>
+<form class="form-floating" method=post action="">
+<table class="table table-dark w-auto small">
+  {% for field in form %}
+    <tr>
+    <td class="text-right text-nowrap">{{ field.label }}</td>
+    <td>{{ field }}</td>
+    <!-- <td>Field Name: {{ field.name }}</td> -->
+    </tr>
+  {% endfor %}
+</table>
+<p><input type=submit value=Compute></form></p>
+</div>
+<div class="col-7">
+<canvas id="bmCanvas" width="400" height="400"></canvas>
+{% if beam != None %}
+{% if web_beam.errors_count !=0 %}
+<h3>Errors:</h3>
+<table class="table table-hover">
+{% for error in web_beam.errors %}
+    <tr>
+    <td class="table-danger">{{error|safe}}</td>
+    </tr>
+{% endfor %}
+</table>
+{% endif %}
+{% if web_beam.warnings_count !=0 %}
+<h3>Warnings:</h3>
+<table class="table table-hover">
+{% for warning in web_beam.warnings %}
+    <tr>
+    <td class="table-warning">{{warning|safe}}</td>
+    </tr>
+{% endfor %}
+</table>
+{% endif %}
+<h3>Results:</h3>
+<hr/>
+  <!-- Geometry Card -->
+<div class="accordion" id="accordionGeometry">
+  <div class="card">
+    <div class="card-header" id="headingGeometry">
+      <h5 class="mb-0">
+        <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseGeometry" aria-expanded="false" aria-controls="collapseGeometry">
+          Geometry -- {{web_beam.icr_web|safe}} and {{web_beam.wt_web|safe}}
+        </button>
+      </h5>
+    </div>
+
+    <div id="collapseGeometry" class="collapse" aria-labelledby="headingGeometry" data-parent="#accordionGeometry">
+      <div class="card-body">
+          <table class="table table-sm table-hover">
+            {% for item in web_beam.geometry_output %}
+                <tr>
+                    <td class="text-right text-nowrap">{{item[0]|safe}}</td>
+                    <td>{{item[1]}}</td>
+                    <td class="text-left text-nowrap">{{item[2]|safe}}</td>
+                    <td>{{item[3]|safe}}</td>
+                </tr>
+            {% endfor %}
+           </table>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- Geometry Card -->
+  <!-- Flexure Card -->
+<div class="accordion" id="accordionFlexure">
+  <div class="card">
+    <div class="card-header" id="headingFlexure">
+      <h5 class="mb-0">
+        <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseFlexure" aria-expanded="false" aria-controls="collapseFlexure">
+          Flexure -- {{web_beam.flexure_output[14][0]|safe}}{{web_beam.flexure_output[14][1]|safe}} {{web_beam.flexure_output[14][2]|safe}}
+        </button>
+      </h5>
+    </div>
+
+    <div id="collapseFlexure" class="collapse" aria-labelledby="headingFlexure" data-parent="#accordionFlexure">
+      <div class="card-body">
+          <table class="table table-sm table-hover">
+            {% for item in web_beam.flexure_output %}
+                <tr>
+                    <td class="text-right text-nowrap">{{item[0]|safe}}</td>
+                    <td class="text-nowrap">{{item[1]}}</td>
+                    <td class="text-left text-nowrap">{{item[2]|safe}}</td>
+                    <td>{{item[3]|safe}}</td>
+                </tr>
+            {% endfor %}
+           </table>
+           <!-- Bottom Bar Table -->
+            <h4>Bottom Bar Details:</h4>
+            <table class="table table-sm table-bordered">
+              <thead>
+                <tr>
+                  <th scope="col">Bar &#8960; (in)</th>
+                  <th scope="col">Bar A<sub>s</sub> (in<sup>2</sup>)</th>
+                  <th scope="col"># of Bars</th>
+                  <th scope="col">Layer A<sub>s</sub> (in<sup>2</sup>)</th>
+                  <th scope="col">d (in)</th>
+                  <th scope="col">&#949;<sub>s</sub> (&#8240;)</th>
+                  <th scope="col">&#963;<sub>s</sub> (psi)</th>
+                  <th scope="col">F<sub>s</sub> (lbs)</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for rebar in web_beam.bottom_bar_table %}
+                  <tr>
+                    <td>{{rebar[0][0]}}</td>
+                    <td>{{rebar[0][1]}}</td>
+                    <td>{{rebar[1]}}</td>
+                    <td>{{rebar[2]}}</td>
+                    <td>{{rebar[3]}}</td>
+                    <td>{{rebar[4]}}</td>
+                    <td>{{rebar[5]}}</td>
+                    <td>{{rebar[6]}}</td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+            <!-- Top Bar Table -->
+            {% if web_beam.top_bar_table[0][1]!=0 %}
+            <h4>Top Bar Details:</h4>
+            <table class="table table-sm table-bordered">
+              <thead>
+                <tr>
+                  <th scope="col">Bar &#8960; (in)</th>
+                  <th scope="col">Bar A<sub>s</sub> (in<sup>2</sup>)</th>
+                  <th scope="col"># of Bars</th>
+                  <th scope="col">Layer A<sub>s</sub> (in<sup>2</sup>)</th>
+                  <th scope="col">d (in)</th>
+                  <th scope="col">&#949;<sub>s</sub> (&#8240;)</th>
+                  <th scope="col">&#963;'<sub>s</sub> (psi)</th>
+                  <th scope="col">F<sub>s</sub><sup>1</sup> (lbs)</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for rebar in web_beam.top_bar_table %}
+                  <tr>
+                    <td>{{rebar[0][0]}}</td>
+                    <td>{{rebar[0][1]}}</td>
+                    <td>{{rebar[1]}}</td>
+                    <td>{{rebar[2]}}</td>
+                    <td>{{rebar[3]}}</td>
+                    <td>{{rebar[4]}}</td>
+                    <td>{{rebar[5]}}</td>
+                    <td>{{rebar[6]}}</td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+            <ol>
+            <li>Bar force = A<sub>s</sub>*(&#963;'<sub>s</sub> - 0.85*F'<sub>c</sub>) *If the bar layer is inside the Whitney Block</li>
+            </ol>
+            {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- Flexure Card -->
+  <!-- Shear Card -->
+<div class="accordion" id="accordionShear">
+  <div class="card">
+    <div class="card-header" id="headingShear">
+      <h5 class="mb-0">
+        <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseShear" aria-expanded="false" aria-controls="collapseShear">
+          Shear -- {{web_beam.vc_web|safe}} and {{web_beam.phi_vn_max|safe}}
+        </button>
+      </h5>
+    </div>
+
+    <div id="collapseShear" class="collapse" aria-labelledby="headingShear" data-parent="#accordionShear">
+      <div class="card-body">
+          <table class="table table-sm table-hover">
+            {% for item in web_beam.shear_output %}
+                <tr>
+                    <td class="text-right text-nowrap">{{item[0]|safe}}</td>
+                    <td>{{item[1]|safe}}</td>
+                    <td class="text-left text-nowrap">{{item[2]|safe}}</td>
+                    <td>{{item[3]|safe}}</td>
+                </tr>
+            {% endfor %}
+           </table>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- shear Card -->
+  <!-- Torsion Card -->
+<div class="accordion" id="accordionTorsion">
+  <div class="card">
+    <div class="card-header" id="headingTorsion">
+      <h5 class="mb-0">
+        <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTorsion" aria-expanded="false" aria-controls="collapseTorsion">
+          Threshold Torsion -- {{web_beam.phitth_web|safe}}
+        </button>
+      </h5>
+    </div>
+
+    <div id="collapseTorsion" class="collapse" aria-labelledby="headingTorsion" data-parent="#accordionTorsion">
+      <div class="card-body">
+          <table class="table table-sm table-hover">
+            {% for item in web_beam.torsion_output %}
+                <tr>
+                    <td class="text-right text-nowrap">{{item[0]|safe}}</td>
+                    <td>{{item[1]|safe}}</td>
+                    <td class="text-left text-nowrap">{{item[2]|safe}}</td>
+                    <td>{{item[3]|safe}}</td>
+                </tr>
+            {% endfor %}
+           </table>
+           
+           <p> {{web_beam.torsion_aop_status}}
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- Torsion Card -->
+{% endif %}
+</div>
+</div>
+</div>
+</div>
+
+<script>
+var c = document.getElementById("bmCanvas");
+var ctx = c.getContext("2d");
+
+var xc = 200
+var yc = 200
+
+{% if beam != None %}
+
+var scale = {{360.0/beam.hbfbwmax}}
+var h = {{beam.h_in}}*scale
+var hf = {{beam.hf_in}}*scale
+var bf = {{beam.bf_in}}*scale
+var bw = {{beam.bw_in}}*scale
+var bbw = (2/3)*bw
+var pna = {{web_beam.PNA}}*scale
+var a = {{web_beam.a}}*scale
+
+ctx.font = "12px Arial"
+ctx.textBaseline = "middle";
+
+if (pna<hf){
+
+    ctx.beginPath();
+    ctx.setLineDash([3,5]);
+    ctx.moveTo(xc-(bf/2), 20+pna);
+    ctx.lineTo(xc+(bf/2), 20+pna);
+    ctx.closePath();
+    ctx.strokeStyle = "gray";
+    ctx.stroke();
+    
+    ctx.fillText("PNA",xc+(bf/2)+3, 20+pna);
+
+} else {
+
+    ctx.beginPath();
+    ctx.setLineDash([3,5]);
+    ctx.moveTo(xc-(bw/2), 20+pna);
+    ctx.lineTo(xc+(bw/2), 20+pna);
+    ctx.closePath();
+    ctx.strokeStyle = "gray";
+    ctx.stroke();
+    
+    ctx.fillText("PNA",xc+(bf/2)+3, 20+pna);
+
+}
+
+ctx.setLineDash([]);
+
+if (a<hf){
+
+    ctx.beginPath();
+    ctx.moveTo(xc-(bf/2), 20+a);
+    ctx.lineTo(xc+(bf/2), 20+a);
+    ctx.lineTo(xc+(bf/2), 20);
+    ctx.lineTo(xc-(bf/2), 20);
+    ctx.closePath();
+    ctx.strokeStyle = "rgba(245, 197, 66,0.5)";
+    ctx.fillStyle = "rgba(245, 197, 66,0.5)";
+    ctx.fill();
+    ctx.stroke();
+
+} else {
+
+    ctx.beginPath();
+    ctx.moveTo(xc-(bw/2), 20+a);
+    ctx.lineTo(xc+(bw/2), 20+a);
+    ctx.lineTo(xc+(bw/2), 20+hf);
+    ctx.lineTo(xc+(bf/2), 20+hf);
+    ctx.lineTo(xc+(bf/2), 20);
+    ctx.lineTo(xc-(bf/2), 20);
+    ctx.lineTo(xc-(bf/2), 20+hf);
+    ctx.lineTo(xc-(bw/2), 20+hf);
+    ctx.closePath();
+    ctx.strokeStyle = "rgba(245, 197, 66,0.5)";
+    ctx.fillStyle = "rgba(245, 197, 66,0.5)";
+    ctx.fill();
+    ctx.stroke();
+}
+
+
+{% for rebar in web_beam.bottom_bar_table %}
+
+var bbh = {{rebar[3]}}*scale
+var bbd = {{rebar[0][0]}}*scale
+
+ctx.beginPath();
+ctx.moveTo(xc-(bbw/2), 20+bbh);
+ctx.lineTo(xc+(bbw/2), 20+bbh);
+ctx.closePath();
+ctx.strokeStyle = "blue";
+ctx.lineWidth = bbd;
+ctx.stroke();
+
+{% endfor %}
+
+{% if web_beam.top_bar_table[0][1]!=0 %}
+{% for rebar in web_beam.top_bar_table %}
+
+var bth = {{rebar[3]}}*scale
+var tbd = {{rebar[0][0]}}*scale
+
+ctx.beginPath();
+ctx.moveTo(xc-(bbw/2), 20+bth);
+ctx.lineTo(xc+(bbw/2), 20+bth);
+ctx.closePath();
+ctx.strokeStyle = "green";
+ctx.lineWidth = tbd;
+ctx.stroke();
+
+{% endfor %}
+{% endif %}
+
+{% else %}
+
+var h = 360
+var hf = 80
+var bf = 360
+var bw = 120
+
+{% endif %}
+
+ctx.lineWidth = 2;
+
+ctx.beginPath();
+ctx.moveTo(xc-(bf/2), 20);
+ctx.lineTo(xc-(bf/2), 20+hf);
+ctx.lineTo(xc-(bw/2), 20+hf);
+ctx.lineTo(xc-(bw/2), 20+h);
+ctx.lineTo(xc+(bw/2), 20+h);
+ctx.lineTo(xc+(bw/2), 20+hf);
+ctx.lineTo(xc+(bf/2), 20+hf);
+ctx.lineTo(xc+(bf/2), 20);
+ctx.closePath();
+ctx.strokeStyle = "red";
+ctx.stroke();
+
+
+</script>
+
+{% endblock content %}

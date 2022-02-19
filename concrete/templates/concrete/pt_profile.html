@@ -1,0 +1,56 @@
+
+{% extends "layout.html"%}
+
+{% block content %}
+<div class="container">
+<div class="row">
+<div class="col-sm">
+<h3>PT Low Point Calculator:</h3>
+<form method=post action="">
+<table class="table table-striped w-auto small">
+  {% for field in form %}
+    <tr>
+    <td align="right">{{ field.label }}</td>
+    <td>{{ field }}</td>
+    <!-- <td>Field Name: {{ field.name }}</td> -->
+    </tr>
+  {% endfor %}
+</table>
+<p><input type=submit value=Compute></form></p>
+</div>
+
+<div class="col-sm">
+{% if result != None %}
+<table class="table table-sm table-hover">
+{% for text in result[0:6] %}
+<tr>
+{% if text[1]==1 %}
+<td class="table-danger"> {{text[0]|safe}} </td>
+{% elif text[1]==2 %}
+<td class="table-warning"> {{text[0]|safe}} </td>
+{% else %}
+<td> {{text[0]|safe}} </td>
+{% endif %} 
+</tr>
+{% endfor %}
+</table>
+{% endif %}
+<img style="max-width: 500px; margin-top: -7px;"src="{{ url_for('concrete_bp.static', filename='images/pt.svg')}}">
+</div>
+</div>
+<div class="row">
+{% if result != None %}
+<p><b>Detailed Results:</b></p>
+<table class="table table-sm table-hover">
+{% for text in result[6:] %}
+<tr>
+<td class="text-right text-nowrap"> {{text[0]|safe}} </td>
+<td class="text-left text-nowrap"> {{text[1]|safe}} </td>
+</tr>
+{% endfor %}
+</table>
+
+{% endif %}
+</div>
+</div>
+{% endblock content %}
