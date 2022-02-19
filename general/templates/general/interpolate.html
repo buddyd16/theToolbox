@@ -1,0 +1,118 @@
+
+{% extends "layout.html"%}
+
+{% block scripts %}
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js">
+</script>
+<script src="{{ url_for('static', filename='js/plotly-2.9.0.min.js') }}"></script>
+<script src="{{ url_for('general_bp.static', filename='js/GenEng.js') }}"></script>
+<script src="{{ url_for('general_bp.static', filename='js/InterpolationWeb.js') }}"></script>
+{% endblock scripts %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-sm">
+            <h3>Linear Interpolation:</h3>
+                <div class="container">
+                    <div class="row">
+                        <input id="btn_calc_linear" class="btn btn-dark float-right" type="button" value="Run Linear" />
+                    </div>
+                    <div class="row">
+                        <table class="table table-striped w-auto small">
+                            <tr>
+                                <td class="text-right text-nowrap">X<sub>1</sub>:</td>
+                                <td><input id="x1" name="x1" class="x1 input-sm linearuser" style="width:95px" type="number" step="any" value="0"></td>
+                                <td class="text-right text-nowrap">X<sub></sub>:</td>
+                                <td><input id="x" name="x" class="x input-sm linearuser" style="width:95px" type="number" step="any" value="0.5"></td>
+                                <td class="text-right text-nowrap">X<sub>2</sub>:</td>
+                                <td><input id="x2" name="x2" class="x2 input-sm linearuser" style="width:95px" type="number" step="any" value="1"></td>
+                            </tr>
+                            <tr>
+                                <td class="text-right text-nowrap">Y<sub>1</sub>:</td>
+                                <td><input id="y1" name="y1" class="y1 input-sm linearuser" style="width:95px" type="number" step="any" value="0"></td>
+                                <td class="text-right text-nowrap">Y<sub></sub>:</td>
+                                <td id="y" class="table-warning text-center text-nowrap"></td>
+                                <td class="text-right text-nowrap">Y<sub>2</sub>:</td>
+                                <td><input id="y2" name="y2" class="y2 input-sm linearuser" style="width:95px" type="number" step="any" value="1"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <canvas id="linearCanvas" style="width:100%;max-width:350px"></canvas>
+                    </div>
+                </div>
+
+        </div>
+        <div class="col-sm">
+            
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm">
+            <h3>Bi-Linear Interpolation:</h3>
+                <div class="container">
+                    <div class="row">
+                        <input id="btn_calc_bilinear" class="btn btn-dark float-right" type="button" value="Run Bi-Linear" />
+                    </div>
+                    <div class="row">
+                        <table class="table table-striped w-auto small">
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td class="text-right text-nowrap">X<sub>1</sub>:</td>
+                                <td><input id="bx1" name="bx1" class="bx1 input-sm bilinearuser" style="width:95px" type="number" step="any" value="0"></td>
+                                <td class="text-right text-nowrap">X<sub></sub>:</td>
+                                <td><input id="bx" name="bx" class="bx input-sm bilinearuser" style="width:95px" type="number" step="any" value="0.5"></td>
+                                <td class="text-right text-nowrap">X<sub>2</sub>:</td>
+                                <td><input id="bx2" name="bx2" class="bx2 input-sm bilinearuser" style="width:95px" type="number" step="any" value="1"></td>
+                            </tr>
+                            <tr>
+                                <td class="text-right text-nowrap">Y<sub>1</sub>:</td>
+                                <td><input id="by1" name="bx1" class="bx1 input-sm bilinearuser" style="width:95px" type="number" step="any" value="0"></td>
+                                <td class="text-right text-nowrap">F(X<sub>1</sub>,Y<sub>1</sub>):</td>
+                                <td><input id="bx1y1" name="bx1y1" class="bx1y1 input-sm bilinearuser" style="width:95px" type="number" step="any" value="0"></td>
+                                <td class="text-right text-nowrap">F(X,Y<sub>1</sub>):</td>
+                                <td id="bxy1" class="table-warning text-center text-nowrap bilinres"></td>
+                                <td class="text-right text-nowrap">F(X<sub>2</sub>,Y<sub>1</sub>):</td>
+                                <td><input id="bx2y1" name="bx2y1" class="bx2y1 input-sm bilinearuser" style="width:95px" type="number" step="any" value="1"></td>
+                            </tr>
+                            <tr>
+                                <td class="text-right text-nowrap">Y<sub></sub>:</td>
+                                <td><input id="by" name="by" class="by input-sm bilinearuser" style="width:95px" type="number" step="any" value="0.5"></td>
+                                <td class="text-right text-nowrap">F(X<sub>1</sub>,Y):</td>
+                                <td id="bx1y" class="table-warning text-center text-nowrap bilinres"></td>
+                                <td class="text-right text-nowrap">F(X,Y):</td>
+                                <td id="bxy" class="table-warning text-center text-nowrap bilinres"></td>
+                                <td class="text-right text-nowrap">F(X<sub>2</sub>,Y):</td>
+                                <td id="bx2y" class="table-warning text-center text-nowrap bilinres"></td>
+
+                            </tr>
+                            <tr>
+                                <td class="text-right text-nowrap">Y<sub>2</sub>:</td>
+                                <td><input id="by2" name="by2" class="by2 input-sm bilinearuser" style="width:95px" type="number" step="any" value="1"></td>
+                                <td class="text-right text-nowrap">F(X<sub>1</sub>,Y<sub>2</sub>):</td>
+                                <td><input id="bx1y2" name="bx1y2" class="bx1y2 input-sm bilinearuser" style="width:95px" type="number" step="any" value="1"></td>
+                                <td class="text-right text-nowrap">F(X,Y<sub>2</sub>):</td>
+                                <td id="bxy2" class="table-warning text-center text-nowrap bilinres"></td>
+                                <td class="text-right text-nowrap">F(X<sub>2</sub>,Y<sub>2</sub>):</td>
+                                <td><input id="bx2y2" name="bx2y2" class="bx2y2 input-sm bilinearuser" style="width:95px" type="number" step="any" value="1"></td>
+                            </tr>
+                        </table>
+                        <!-- Mathjax Formulas -->
+                        <table class="table table-striped w-auto small">
+                        </table>
+                    </div>
+                </div>
+
+        </div>
+    </div>
+    <div class="row">
+
+        <div id="bilinearChart" width="400px" height="400px"></div>
+
+    </div>
+</div>
+{% endblock content %}
