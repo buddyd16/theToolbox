@@ -1,0 +1,40 @@
+
+{% extends "layout.html"%}
+
+{% block content %}
+<div class="container">
+<div class="row">
+<div class="col-sm">
+<h3>getlist() test:</h3>
+<form method=post action="/test">
+<table id="dataTable" class="table table-striped w-auto small">
+    <tr>
+    <td>input1: </td>
+    <td><input name="test" type="number" step="any" value="0.0"></td>
+    </tr>
+    <tr>
+    <td>input2: </td>
+    <td><input name="test" type="number" step="any" value="0.0"></td>
+    </tr>
+    <tr>
+    <td>input3: </td>
+    <td><input name="test" type="number" step="any" value="0.0"></td>
+    </tr>
+    <tr>
+    <td>input4: </td>
+    <td><input name="test" type="number" step="any" value="0.0"></td>
+    </tr>
+</table>
+<input type=submit value=Submit>
+</form>
+{% if result != None %}
+{% for x in result %}
+<h4> {{x}} </h4>
+{% endfor %}
+{% endif %}
+</div>
+<div class="col-sm">
+</div>
+</div>
+</div>
+{% endblock content %}
