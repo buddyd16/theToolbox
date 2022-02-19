@@ -1,0 +1,82 @@
+{% extends "layout.html"%}
+
+{% block scripts %}
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" 
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js">
+</script>
+<script src="{{ url_for('wood_bp.static', filename='js/nds_common.js') }}"></script>
+<script src="{{ url_for('wood_bp.static', filename='js/nds_stud_wall.js') }}"></script>
+{% endblock scripts %}
+
+{% block content %}
+
+
+<div class="container">
+    <!-- Inputs -->
+    <div class="container">
+        <div class="row">
+            <h4>Wall Stud Geometry:</h4>
+        </div>
+        <div class="row">
+            <table class="table table-sm table-hover">
+                <tr>
+                    <td>Nominal Stud Size:</td>
+                    <td>                                 
+                        <select id="stud_b" class="stud_b input-sm user_param" name="stud_b" style="width:95px">
+                            <option value="2"> 2 </option>
+                            <option value="3"> 3 </option>
+                            <option value="4"> 4 </option>
+                            <option value="2_2"> (2)2 </option>
+                            <option value="3_2"> (3)2 </option>
+                            <option value="4_2"> (4)2 </option>
+                        </select>
+                        X
+                        <select id="stud_d" class="stud_d input-sm user_param" name="stud_d" style="width:95px">
+                            <option value="3"> 3 </option>
+                            <option value="4"> 4 </option>
+                            <option value="5"> 5 </option>
+                            <option value="6"> 6 </option>
+                            <option value="8"> 8 </option>
+                            <option value="10"> 10 </option>
+                            <option value="12"> 12 </option>
+                            <option value="14"> 14 </option>
+                            <option value="16"> 16 </option>
+                        </select>
+                    </td>
+                    <td>Actual Stud Geometry:</td>
+                    <td id="actual_stud_dims"></td>
+                </tr>
+                <tr>
+                    <td>Stud Spacing:</td>
+                    <td>
+                        <input id="stud_spacing" name="stud_spacing" class="stud_spacing input-sm user_param" style="width:95px" type="number" step="any" value="12.0"> in.
+                    </td>
+                </tr>
+                <tr>
+                    <td>Wall Height:</td>
+                    <td><input id="wall_height" name="wall_height" class="wall_height input-sm user_param" style="width:95px" type="number" step="any" value="12.0"> ft.</td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="checkbox" id="subtract_plates" name="subtract_plates" value="1">
+                        <label for="subtract_plates">Subtract Wall Plates from Height.</label>
+                    </td>
+                </tr>
+                <tr id="subtraction_plates_row">
+                    <td>Number of 2x plates to consider:</td>
+                    <td><input id="num_plates_subtract" name="num_plates_subtract" class="num_plates_subtract input-sm user_param" style="width:95px" type="number" step="any" value="3"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="checkbox" id="plate_crushing" name="plate_crushing" value="1">
+                        <label for="plate_crushing">Consider plate crushing.</label>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+{% endblock content %}
