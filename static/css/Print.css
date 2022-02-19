@@ -1,0 +1,123 @@
+@media print {
+
+    * {
+        color: black;
+        font: 9pt Arial, Helvetica, sans-serif;
+    }
+
+    html, body {
+        width: 100%;
+    }
+
+    body, main {
+        margin: 0;
+        padding: 0;
+    }
+
+    canvas {
+        page-break-inside: avoid;
+    }
+
+    header {
+        padding: 0;
+        margin: 0 0 9px 0;
+    }
+
+    header img {
+        display: none;
+    }
+
+    header h1 {
+        color: black;
+        font: 12pt Arial, Helvetica, sans-serif;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Remove navigation menus, buttons, and footers from printouts */
+    nav, aside, footer {
+        display: none;
+    }
+
+    /* Avoid page breaks inside lists */
+    ol, ul {
+        page-break-inside: avoid;
+    }
+
+    /* Avoid page breaks after headers */
+    h1, h2, h3, h4, h5, h6 {
+        break-after: avoid-page;
+        page-break-after: avoid;  /* Legacy code for older browsers */
+    }
+
+    h2 {
+        font-weight: bold;
+        margin: 9px 0px 0px 0px;
+    }
+
+    img {
+        page-break-before: avoid;
+        page-break-inside: avoid;
+        max-width: 50% !important;
+        margin: 0;
+    }
+
+    blockquote, table, pre {
+        page-break-inside: avoid;
+    }
+
+    ul, ol, dl {
+        page-break-before: avoid;
+    }
+
+    select {
+        text-align: center;
+        width: auto;
+        border: none;
+    }
+
+    table {
+        margin: 9px 0px 0px 0px;
+        border-collapse: collapse;
+        text-align: center;
+        vertical-align: center;
+        max-width: 100%;
+        page-break-inside: avoid;
+    }
+    
+    tr:nth-child(even){
+        background-color: #f2f2f2;
+    }
+    
+    th {
+        margin: 0;
+        padding: 2px;
+        border: 1px solid #dddddd;
+        text-align: center;
+        vertical-align: center;
+        background-color: #c6e7ff;
+    }
+
+    td {
+        margin: 0;
+        padding: 2px;
+        border: 1px solid #dddddd;
+        text-align: center;
+        vertical-align: center;
+    }
+
+    /*
+    Anything with the 'no-print' class will not be printed
+    */
+    .no-print {
+        display: none;
+    }
+    
+    /*
+    Set the page size, orientation, and margins
+    */
+    @page {
+    size: letter portrait;
+    margin: 1.27cm;
+    }
+}
