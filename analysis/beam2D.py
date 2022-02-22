@@ -148,7 +148,7 @@ class Beam2D():
         
         return spans
 
-    def computation_stations(self, num_stations=42):
+    def computation_stations(self, num_stations=26):
         '''
         define general computation points along the beam length for shear,
         moment, slope, and deflection plots
@@ -258,7 +258,14 @@ class Beam2D():
                     # we only need to pattern loads if the beam is not the only beam
                     # or if there are interior supports
                     
-                    calc_patterns = patterns
+                    if all(x==1 for x in offpatternfactors.values()):
+                        # if all the off pattern factors are 1 then
+                        # there is no reason to actually pattern
+                        
+                        calc_patterns = [[1]*len(self.spans())]
+                        
+                    else:
+                        calc_patterns = patterns
                 
                 else:
                     
@@ -400,6 +407,12 @@ class Beam2D():
                     self.eis_functions_sls[combo_key] = eisfunc
                     self.eid_functions_sls[combo_key] = eidfunc
                 
+                # with large numbers of patterns too much precision on the roots
+                # leads to large result arrays, round to the 7th decimal place
+                # as a compromise. Inform users this one done in GUI.
+                
+                self.rootstations = [round(i,7) for i in self.rootstations]
+                
                 self.rootstations = sorted(set(self.rootstations))
                 
                 self.printstations.extend(self.calcstations)
@@ -536,7 +549,7 @@ I_ft4 = I_in4 * (1/math.pow(12,4))
 n1 = g2d.Node2D(0, 0, "N1", 1)
 n2 = g2d.Node2D(60, 0, "N2", 2)
 
-beam = Beam2D("BM1", n1, n2, E_ksf, I_ft4,[0,0],1)
+beam = Beam2D("BM1", n1, n2, E_ksf, I_ft4,[1,1],1)
 
 beam.addinteriorsupport(10)
 beam.addinteriorsupport(20)
@@ -568,9 +581,7 @@ off_patt = {"L":0}
 
 beam.addLoads([load1,load2,load3,load4,load5, load6])
 
-beam.flexibility_analyze([combo1,combo2,combo3],aci_pats,off_patt)
-
-beam.flexibility_analyze([combo1,combo2,combo3],patterns,off_patt)
+beam.flexibility_analyze([combo1],patterns,off_patt)
 
 beam.ULS_envelopes()
 beam.SLS_envelopes()
