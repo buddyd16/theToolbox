@@ -24,7 +24,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 
-import analysis.ebloads as ebl
+#import analysis.ebloads as ebl
+import ebloads as ebl
 import numpy as np
 
 
@@ -169,16 +170,16 @@ def flexibility_solver(delta, reaction_points, L, fem, loadtype, span):
 
         elif fem == [0,1] and i == 0:
             m = reaction
-            reactions_as_loads.append(ebl.point_moment(m,L,L,loadtype, span))
+            reactions_as_loads.append(ebl.point_moment(m,L,L, loadtype, span))
 
         elif fem == [1,1] and i == 1:
             m = reaction
-            reactions_as_loads.append(ebl.point_moment(m,L,L,loadtype, span))
+            reactions_as_loads.append(ebl.point_moment(m,L,L, loadtype, span))
 
         else:
             p = reaction
             a = reaction_points[i]
-            reactions_as_loads.append(ebl.pl(p,a,L,loadtype, span))
+            reactions_as_loads.append(ebl.pl(p,a,L, loadtype, span))
 
         i+=1
 
