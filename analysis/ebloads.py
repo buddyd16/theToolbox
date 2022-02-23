@@ -30,6 +30,7 @@ from numpy import zeros
 import numpy as np
 import math
 
+
 class pl:
 
     def __init__(self, p, a, L, loadtype='D', span=1):
@@ -50,6 +51,9 @@ class pl:
 
         self.rl = (self.p*self.b)/self.L
         self.rr = (self.p*self.a)/self.L
+        self.ml = 0
+        self.mr = 0
+
         self.c4 = (((-1*self.rl * self.a ** 3) / 3)
                     - ((self.rr * self.a ** 3) / 3)
                     + ((self.rr * self.L * self.a ** 2) / 2))
@@ -193,6 +197,7 @@ class pl:
                     + self.c4)
         return eid
 
+
 class point_moment:
     def __init__(self, ma, a, L, loadtype='D', span=1):
         self.ma = float(ma)
@@ -210,6 +215,8 @@ class point_moment:
 
         self.rr = self.ma/self.L
         self.rl = -1.0*self.rr
+        self.ml = 0
+        self.mr = 0
 
         self.c2 = (-1.0/self.L) * ((self.ma*self.a**2) - (0.5*self.ma*self.a**2) + (self.rl * (self.L**3/6.0)) + (0.5*self.ma*self.L**2))
         self.c1 = ma*a + self.c2
@@ -334,6 +341,7 @@ class point_moment:
             eid = (1/6.0)*self.rl*x**3 + (0.5*self.ma*x**2) + (self.c2*x) + self.c4
         return eid
 
+
 class udl:
     def __init__(self, w1, a, b, L, loadtype='D', span=1):
 
@@ -362,6 +370,9 @@ class udl:
 
         self.rl = (self.w1 * self.c) - (((self.w1 * self.c) * (self.a + (self.c / 2))) / self.L)
         self.rr = (((self.w1 * self.c) * (self.a + (self.c / 2))) / self.L)
+        self.ml = 0
+        self.mr = 0
+
         self.c1 = 0
         self.c2 = ((-1 * self.w1 * self.a ** 2) / 2)
         self.c3 = self.rr * self.L
@@ -506,6 +517,7 @@ class udl:
 
         return [RL,ML,RR,MR]
 
+
 class trap:
     def __init__(self, w1, w2, a, b, L, loadtype='D', span=1):
 
@@ -539,8 +551,12 @@ class trap:
         self.s = (self.w2 -self.w1)/self.c
         self.xbar = (self.c * ((2 * self.w2) + self.w1)) / (3 * (self.w2 + self.w1))
         self.W = self.c * ((self.w1 + self.w2) / 2)
+
         self.rr = (self.W * (self.a + self.xbar)) / self.L
         self.rl = self.W - self.rr
+        self.ml = 0
+        self.mr = 0
+
         self.c1 = 0
         self.c2 = self.c1 + ((self.a ** 3 * self.s) / 6) + ((self.a ** 2 * (self.w1 - (self.s * self.a))) / 2) + ((((self.s * self.a) - (2 * self.w1)) * self.a ** 2) / 2)
         self.c3 = self.rr * self.L
@@ -685,6 +701,7 @@ class trap:
 
         return [RL,ML,RR,MR]
 
+
 class end_delta:
     def __init__(self, delta_i, delta_j, L, loadtype='D', span=1):
         '''
@@ -696,6 +713,9 @@ class end_delta:
 
         self.rl = 0
         self.rr = 0
+        self.ml = 0
+        self.mr = 0
+
         self.deltai = delta_i
         self.deltaj = delta_j
         self.L = L
@@ -785,6 +805,7 @@ class end_delta:
 
         return [RL,ML,RR,MR]
 
+
 class cant_right_slope:
     def __init__(self, slope,L, loadtype='D', span=1):
         self.slope = slope
@@ -792,19 +813,11 @@ class cant_right_slope:
         self.rl = 0
         self.rr = 0
         self.ml = 0
+        self.mr = 0
 
         self.kind = 'SLOPE'
         self.loadtype = loadtype
         self.span = span
-
-        self.x_graph = [0]
-        self.y_graph = [0]
-
-    def chart_load(self, x_scale=0, y_scale=0, arrows=0):
-        x=[0]
-        y=[0]
-
-        return x,y
 
     def piece_functions(self):
         '''
@@ -882,6 +895,7 @@ class cant_right_slope:
 
         return eid
 
+
 class cant_right_point:
     def __init__(self, p, a, L, Lb, loadtype='D', span=1):
 
@@ -904,6 +918,7 @@ class cant_right_point:
         self.rl = self.p
         self.rr = 0
         self.ml = -1.0*self.p*self.a
+        self.mr = 0
 
         # 0 length backspan indicates fixed-free beam initialize slope to 0
         if Lb == 0:
@@ -1033,6 +1048,7 @@ class cant_right_point:
             eid = self.c3*x + self.c4
         return eid
 
+
 class cant_right_point_moment:
     def __init__(self, ma, a, L, Lb, loadtype='D', span=1):
 
@@ -1054,6 +1070,7 @@ class cant_right_point_moment:
         self.rl = 0
         self.rr = 0
         self.ml = -1.0*self.ma
+        self.mr = 0
 
         # 0 length backspan indicates fixed-free beam initialize slope to 0
         if Lb == 0:
@@ -1170,6 +1187,7 @@ class cant_right_point_moment:
             eid = self.c3*x + self.c4
         return eid
 
+
 class cant_right_udl:
     def __init__(self, w1, a, b, L, Lb, loadtype='D', span=1):
 
@@ -1201,6 +1219,7 @@ class cant_right_udl:
         self.rl = self.w_tot
         self.rr = 0
         self.ml = -1.0*self.w_tot*(self.b-(self.c/2))
+        self.mr = 0
 
         # 0 length backspan indicates fixed-free beam initialize slope to 0
         if Lb == 0:
@@ -1370,6 +1389,7 @@ class cant_right_udl:
             eid = self.c5*x + self.c6
         return eid
 
+
 class cant_right_trap:
     def __init__(self, w1, w2, a, b, L, Lb, loadtype='D', span='1'):
 
@@ -1407,6 +1427,7 @@ class cant_right_trap:
         self.rl = self.w
         self.rr = 0
         self.ml = -1*self.w*self.d
+        self.mr = 0
 
         # 0 length backspan indicates fixed-free beam initialize slope to 0
         if Lb == 0:
@@ -1597,6 +1618,7 @@ class cant_right_trap:
             eid = self.c6*x + self.c7
         return eid
 
+
 class cant_left_slope:
     def __init__(self, slope, L, loadtype='D', span=1):
         self.L = float(L)
@@ -1611,6 +1633,7 @@ class cant_left_slope:
         self.rr = 0
         self.rl = 0
         self.mr = 0
+        self.ml = 0
 
     def piece_functions(self):
         '''
@@ -1691,6 +1714,7 @@ class cant_left_slope:
 
         return eid
 
+
 class cant_left_point:
     def __init__(self, p, a, L,Lb, loadtype='D', span=1):
 
@@ -1711,6 +1735,7 @@ class cant_left_point:
         self.rr = self.p
         self.rl = 0
         self.mr = -1*self.p*(self.L-self.a)
+        self.ml = 0
 
         # 0 length backspan indicates fixed-free beam initialize slope to 0
         if self.Lb == 0:
@@ -1829,6 +1854,7 @@ class cant_left_point:
 
         return eid
 
+
 class cant_left_point_moment:
     def __init__(self, ma, a, L, Lb, loadtype='D', span=1):
 
@@ -1849,6 +1875,7 @@ class cant_left_point_moment:
         self.rr = 0
         self.rl = 0
         self.mr = self.ma
+        self.ml = 0
 
         # 0 length backspan indicates fixed-free beam initialize slope to 0
         if Lb == 0:
@@ -1965,6 +1992,7 @@ class cant_left_point_moment:
             eid = (0.5)*self.ma*x**2 + self.c3*x + self.c4
         return eid
 
+
 class cant_left_udl:
     def __init__(self, w1, a, b, L, Lb, loadtype='D', span=1):
 
@@ -1996,6 +2024,7 @@ class cant_left_udl:
         self.rr = self.w_tot
         self.rl = 0
         self.mr = -1.0*self.w_tot*(self.L-(a+(self.c/2.0)))
+        self.ml = 0
 
         # 0 length backspan indicates fixed-free beam initialize slope to 0
         if Lb == 0:
@@ -2184,6 +2213,7 @@ class cant_left_udl:
             eid = ((-1.0/6.0) * self.w_tot * (x-(self.a+(0.5*self.c)))**3) + self.c5*x + self.c6
         return eid
 
+
 class cant_left_trap:
 
     def __init__(self, w1, w2, a, b, L, Lb, loadtype='D', span=1):
@@ -2224,6 +2254,7 @@ class cant_left_trap:
         self.rr = self.w
         self.rl=0
         self.mr = -1*self.rr*(self.L-self.cc)
+        self.ml = 0
 
         # 0 length backspan indicates fixed-free beam initialize slope to 0
         if Lb == 0:

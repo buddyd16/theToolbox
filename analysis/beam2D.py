@@ -85,10 +85,14 @@ class Beam2D():
         self.Ss_max = []             # List to hold Slope,max (Service Envelope)
         self.Ds_min = []             # List to hold Deflection,min (Service Envelope)
         self.Ds_max = []             # List to hold Deflection,max (Service Envelope)
+        self.FEF_basic = {}
+        self.FEF_sls = {}
+        self.FEF_uls = {}
         
         self.calcstations = []
         self.rootstations = []
         self.printstations = []
+        self.chartstations = []
         
         self.analyzed = False
 
@@ -261,8 +265,11 @@ class Beam2D():
                     if all(x==1 for x in offpatternfactors.values()):
                         # if all the off pattern factors are 1 then
                         # there is no reason to actually pattern
+                        # because the beam element may not be the only span
+                        # set the pattern of all 1's for each element
+                        # in one of the defined patterns
                         
-                        calc_patterns = [[1]*len(self.spans())]
+                        calc_patterns = [[1 for p in patterns[0]]]
                         
                     else:
                         calc_patterns = patterns
@@ -274,10 +281,10 @@ class Beam2D():
                     # do this so that a.) we don't need to copy all this work
                     # for a non-pattern case b.) keep resulting dictionaries
                     # consistent such that the results exist in a pattern key
-                    
-                    calc_patterns = [[1]*len(self.spans())]
+                    calc_patterns = [[ 1 for p in patterns[0]]]
                     
                 rdict = {}
+                fefdict = {}
                 vfunc = {}
                 mfunc = {}
                 eisfunc = {}
@@ -295,31 +302,45 @@ class Beam2D():
                     mfunctemp = []
                     eisfunctemp = []
                     eidfunctemp = []
+                    feftemp = [0,0,0,0]
 
                     pattern_key = pattern
                     
                     for load in self.Loads:
-                        if load.loadtype in combo.factors:
+                        
+
+                        if load.loadtype in combo.factors or load.loadtype == f'{combo_key}{pattern_key}':
                             # Load type is part of the current combo
-                            LF = combo.factors[load.loadtype]
                             
-                            if load.loadtype in offpatternfactors:
-                                # if the load type exists in the offpattern
-                                # factor list then the load is a type that 
-                                # should be pattterned
-                                LFoffpat = offpatternfactors[load.loadtype]
-
-                                # pattern is of the form [1,...,i]
-                                # where the index is equal to the span
-                                # since the list index starts at 0
-                                # subtract 1 from the load.span property
-                                # to align with the list indexs
-                                LFpat = pattern[load.span-1]
-
-                                if LFpat == 0:
-                                    LF = LF*LFoffpat
-                                else:
-                                    LF = LF
+                            if load.loadtype == f'{combo_key}{pattern_key}':
+                                # if the load is a result of the current combination
+                                # and pattern set the LF to 0.
+                                # this will be used to set the start slopes for
+                                # cantilevers
+                                
+                                LF = 1.0
+                            
+                            else:
+                            
+                                LF = combo.factors[load.loadtype]
+                                
+                                if load.loadtype in offpatternfactors:
+                                    # if the load type exists in the offpattern
+                                    # factor list then the load is a type that 
+                                    # should be pattterned
+                                    LFoffpat = offpatternfactors[load.loadtype]
+    
+                                    # pattern is of the form [1,...,i]
+                                    # where the index is equal to the span
+                                    # since the list index starts at 0
+                                    # subtract 1 from the load.span property
+                                    # to align with the list indexs
+                                    LFpat = pattern[load.span-1]
+    
+                                    if LFpat == 0:
+                                        LF = LF*LFoffpat
+                                    else:
+                                        LF = LF
 
                             if LF == 0:
                                 # 0 load factor therefore no reason to move 
@@ -339,6 +360,9 @@ class Beam2D():
                                 rltemp += load.rl*LF
                                 rrtemp += load.rr*LF
                                 
+                                # determine the fixed end forces
+                                feftemp = [i+(j*LF) for i,j in zip(feftemp,load.fef())]
+                                
                                 # determine the loads piecewise functions
                                 load_functions = load.piece_functions()
                                 
@@ -357,26 +381,37 @@ class Beam2D():
                     # the end slopes and deflections at the interior supports
                     # use the flexibibility method to solve for the redundant
                     # reactions.
-
-                    deformations = []
-                    deformations.extend(endSlopes)
-                    deformations.extend(intDelta)
-
-                    redundants, reaction_loads = solve2d.flexibility_solver(deformations,self.interiorSupports,self.span,self.endCondition,f'{combo_key}{pattern_key}',self.id)
                     
-                    for reaction in reaction_loads:
-                        rltemp += reaction.rl
-                        rrtemp += reaction.rr
+                    if self.endCondition==[0,0] and self.interiorSupports==[]:
                         
-                        load_functions = reaction.piece_functions()
+                        # if no end fixity and no interior supports then there
+                        # is no reason to run the flexibility solver.
                         
-                        vfunctemp = bmtools.combine_piecewise_functions(vfunctemp, load_functions[0], 1, 1)
-                        mfunctemp = bmtools.combine_piecewise_functions(mfunctemp, load_functions[1], 1, 1)
-                        eisfunctemp = bmtools.combine_piecewise_functions(eisfunctemp, load_functions[2], 1, 1)
-                        eidfunctemp = bmtools.combine_piecewise_functions(eidfunctemp, load_functions[3], 1, 1)
+                        redundants = []
+                    
+                    else:
+                        
+                        # solve for the redundant reactions using the flexibility
+                        # solver
+                        deformations = []
+                        deformations.extend(endSlopes)
+                        deformations.extend(intDelta)
+    
+                        redundants, reaction_loads = solve2d.flexibility_solver(deformations,self.interiorSupports,self.span,self.endCondition,f'{combo_key}{pattern_key}',self.id)
+                    
+                        for reaction in reaction_loads:
+                            rltemp += reaction.rl
+                            rrtemp += reaction.rr
+                            
+                            load_functions = reaction.piece_functions()
+                            
+                            vfunctemp = bmtools.combine_piecewise_functions(vfunctemp, load_functions[0], 1, 1)
+                            mfunctemp = bmtools.combine_piecewise_functions(mfunctemp, load_functions[1], 1, 1)
+                            eisfunctemp = bmtools.combine_piecewise_functions(eisfunctemp, load_functions[2], 1, 1)
+                            eidfunctemp = bmtools.combine_piecewise_functions(eidfunctemp, load_functions[3], 1, 1)
                     
                     rdict[f'{pattern_key}'] = {'rl':rltemp,'rr':rrtemp, 'redundants':redundants}
-                    
+                    fefdict[f'{pattern_key}'] = {'FL':feftemp[0],"ML":feftemp[1],"FR":feftemp[2],"MR":feftemp[3]}
                     vfunc[f'{pattern_key}'] = vfunctemp
                     mfunc[f'{pattern_key}'] = mfunctemp
                     eisfunc[f'{pattern_key}'] = eisfunctemp
@@ -394,11 +429,13 @@ class Beam2D():
                     self.m_functions_basic[combo_key] = mfunc
                     self.eis_functions_basic[combo_key] = eisfunc
                     self.eid_functions_basic[combo_key] = eidfunc
+                    self.FEF_basic[combo_key] = fefdict
                 
                 elif combo.combo_type == 'ULS':
                     self.reactions_uls[combo_key] = rdict
                     self.v_functions_uls[combo_key] = vfunc
                     self.m_functions_uls[combo_key] = mfunc
+                    self.FEF_uls[combo_key] = fefdict
                 
                 elif combo.combo_type == 'SLS':
                     self.reactions_sls[combo_key] = rdict
@@ -406,12 +443,13 @@ class Beam2D():
                     self.m_functions_sls[combo_key] = mfunc
                     self.eis_functions_sls[combo_key] = eisfunc
                     self.eid_functions_sls[combo_key] = eidfunc
+                    self.FEF_sls[combo_key] = fefdict
                 
                 # with large numbers of patterns too much precision on the roots
-                # leads to large result arrays, round to the 7th decimal place
-                # as a compromise. Inform users this one done in GUI.
+                # leads to large result arrays, round to the 5th decimal place
+                # as a compromise. Inform users this was done in GUI.
                 
-                self.rootstations = [round(i,7) for i in self.rootstations]
+                self.rootstations = [round(i,5) for i in self.rootstations]
                 
                 self.rootstations = sorted(set(self.rootstations))
                 
@@ -419,6 +457,7 @@ class Beam2D():
                 self.printstations.extend(self.rootstations)
                 
                 self.printstations = sorted(set(self.printstations))
+                self.chartstations = [i+self.node_i.x for i in self.printstations]
                 
                 self.analyzed = True
 
@@ -540,55 +579,131 @@ class Beam2D():
 
 # Test Area #
 
-E_ksi = 29000
-E_ksf = E_ksi * 144 # 144 in2/ 1 ft2
+if __name__== '__main__':
+    
+    E_ksi = 29000
+    E_ksf = E_ksi * 144 # 144 in2/ 1 ft2
 
-I_in4 = 30.8
-I_ft4 = I_in4 * (1/math.pow(12,4))
+    I_in4 = 30.8
+    I_ft4 = I_in4 * (1/math.pow(12,4))
 
-n1 = g2d.Node2D(0, 0, "N1", 1)
-n2 = g2d.Node2D(60, 0, "N2", 2)
+    n1 = g2d.Node2D(20, 0, "N1", 1)
+    n2 = g2d.Node2D(30, 0, "N2", 2)
 
-beam = Beam2D("BM1", n1, n2, E_ksf, I_ft4,[1,1],1)
+    beam = Beam2D("BM1", n1, n2, E_ksf, I_ft4,[0,0],3)
 
-beam.addinteriorsupport(10)
-beam.addinteriorsupport(20)
-beam.addinteriorsupport(30)
-beam.addinteriorsupport(40)
-beam.addinteriorsupport(50)
+    # beam.addinteriorsupport(10)
+    # beam.addinteriorsupport(20)
+    # beam.addinteriorsupport(30)
+    # beam.addinteriorsupport(40)
+    # beam.addinteriorsupport(50)
 
-print(beam.spans())
+    # print(beam.spans())
 
-beam.computation_stations()
-
-
-combo1 = LC.LoadCombo("combo1",{"D":1.2,"L":1.6},["L"],True,'ULS')
-combo2 = LC.LoadCombo("combo2",{"L":1.0},["L"],True,'SLS')
-combo3 = LC.LoadCombo('all D',{'D':1.0,"L":1.0},['L'],False,'ULS')
+    beam.computation_stations()
 
 
-load1 = ebl.udl(1, 0, 10, beam.span, "L", 1)
-load2 = ebl.udl(1, 10, 20, beam.span, "L", 2)
-load3 = ebl.udl(1, 20, 30, beam.span, "L", 3)
-load4 = ebl.udl(1, 30, 40, beam.span, "L", 4)
-load5 = ebl.udl(1, 40, 50, beam.span, "L", 5)
-load6 = ebl.udl(1, 50, 60, beam.span, "L", 6)
+    #combo1 = LC.LoadCombo("combo1",{"D":1.2,"L":1.6},["L"],True,'ULS')
+    #combo2 = LC.LoadCombo("combo2",{"L":1.0},["L"],True,'SLS')
+    #combo3 = LC.LoadCombo('all D',{'D':1.0,"L":1.0},['L'],False,'ULS')
 
-patterns = LC.Full_LoadPatterns(6)
-aci_pats = LC.ACI_LoadPatterns(6, False)
+    uls_combos = LC.IBC2018_ULS(1, 0.7, True)
+    sls_combos = LC.IBC2018_ASD(True,True)
+    basic_combos = LC.IBC2018_Basic(True,False)
 
-off_patt = {"L":0}
 
-beam.addLoads([load1,load2,load3,load4,load5, load6])
+    load1 = ebl.cant_right_udl(1, 0, 10, beam.span,0, "L", 3)
+    load2 = ebl.cant_right_udl(0.5, 0, 10, beam.span,0, "D", 3)
+    load3 = ebl.cant_right_point(1, 2, beam.span, 0, "Ex", 3)
 
-beam.flexibility_analyze([combo1],patterns,off_patt)
+    loads = [load1,load2,load3]
 
-beam.ULS_envelopes()
-beam.SLS_envelopes()
+    # load1 = ebl.udl(1, 0, 10, beam.span, "L", 1)
+    # load2 = ebl.udl(1, 10, 20, beam.span, "L", 2)
+    # load3 = ebl.udl(1, 20, 30, beam.span, "L", 3)
+    # load4 = ebl.udl(1, 30, 40, beam.span, "L", 4)
+    # load5 = ebl.udl(1, 40, 50, beam.span, "L", 5)
+    # load6 = ebl.udl(1, 50, 60, beam.span, "L", 6)
+    # load7 = ebl.udl(1, 50, 60, beam.span, "D", 6)
+    # load8 = ebl.udl(1, 0, 10, beam.span, "D", 1)
 
-fig, ax1 = plt.subplots()
+    # loads = [load1,load2,load3,load4,load5, load6, load7, load8]
 
-ax1.plot(beam.printstations,beam.Mu_max, linewidth=2.0)
-ax1.plot(beam.printstations,beam.Mu_min, linewidth=1.0)
+    applied_loads = {"D":False,"F":False,"L":False,"H":False,"Lr":False,"S":False,"R":False,"Wx":False,"Wy":False,"Ex":False,"Ey":False}
 
-plt.show()
+    for load in loads:
+        
+        if load.loadtype in applied_loads:
+            if not applied_loads[load.loadtype]:
+                
+                applied_loads[load.loadtype] = True
+        
+    uls_combos_trim = []
+    for combo in uls_combos:
+        
+        test = []
+        for kind in combo.principle_loads:
+            
+            test.append(applied_loads[kind])
+    
+        if any(test):
+            
+            uls_combos_trim.append(combo)
+            
+    print('Reduced ULS Combinations:')
+    for combo in uls_combos_trim:
+        print(combo.FormulaString())  
+        
+    sls_combos_trim = []
+    for combo in sls_combos:
+        
+        test = []
+        for kind in combo.principle_loads:
+            
+            test.append(applied_loads[kind])
+    
+        if any(test):
+            
+            sls_combos_trim.append(combo)
+            
+    print('Reduced SLS Combinations:')
+    for combo in sls_combos_trim:
+        print(combo.FormulaString()) 
+                
+
+    basic_combos_trim = []
+    for combo in basic_combos:
+        
+        test = []
+        for kind in combo.principle_loads:
+            
+            test.append(applied_loads[kind])
+    
+        if any(test):
+            
+            basic_combos_trim.append(combo)
+            
+    print('Reduced BASIC Combinations:')
+    for combo in basic_combos_trim:
+        print(combo.FormulaString()) 
+
+    patterns = LC.Full_LoadPatterns(3)
+    aci_pats = LC.ACI_LoadPatterns(3, False)
+
+    off_patt = {"L":0}
+
+    beam.addLoads(loads)
+
+    beam.flexibility_analyze(uls_combos_trim,patterns,off_patt)
+    beam.flexibility_analyze(basic_combos_trim,patterns,off_patt)
+    beam.flexibility_analyze(sls_combos_trim,patterns,off_patt)
+
+    beam.ULS_envelopes()
+    beam.SLS_envelopes()
+
+    fig, ax1 = plt.subplots()
+
+    ax1.plot(beam.chartstations,beam.Ds_max, linewidth=2.0)
+    ax1.plot(beam.chartstations,beam.Ds_min, linewidth=1.0)
+
+    plt.show()
