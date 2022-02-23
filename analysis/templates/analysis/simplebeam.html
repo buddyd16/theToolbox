@@ -2,8 +2,8 @@
 {% extends "layout.html"%}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/SimpleBeam.js') }}"></script>
-
+<script src="{{ url_for('analysis_bp.static', filename='js/SimpleBeam.js') }}"></script>
+<script src="{{ url_for('static', filename='js/plotly-2.9.0.min.js') }}"></script>
 {% endblock scripts %}
 
 {% block style %}
@@ -23,23 +23,38 @@
         
     </div>
     
+    <form method=post action="">
+    <div class="row">
+        <input type=submit value=Compute>
+    </div>
     <!-- Inputs -->
     <div class="row">
         <div id="tabs" class="bg-light">
             <!-- Nav pills -->
             <ul class="nav nav-tabs">
-              <li class="nav-item">
-                <a class="nav-link active" data-toggle="tab" href="#spanData">Span Data</a>
-              </li>
-            <li class="nav-item">
-                <a class="nav-link" data-toggle="tab" href="#combosLoads">Load information and Combinations</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" data-toggle="tab" href="#distributedLoads">Distributed Loads</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" data-toggle="tab" href="#concentratedLoads">Concentrated Loads</a>
-              </li>
+                <li class="nav-item">
+                    <a class="nav-link active" data-toggle="tab" href="#spanData">Span Data</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#combosLoads">Load information and Combinations</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#distributedLoads">Distributed Loads</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#concentratedLoads">Concentrated Loads</a>
+                </li>
+                {% if results != None %}
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#ulsResults">ULS Results</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#slsResults">SLS Results</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#basicResults">Basic Results</a>
+                </li>
+                {% endif %}
             </ul>
 
             <!-- Tab panes -->
@@ -50,37 +65,37 @@
                         <table id="spanTable" class="table table-sm table-dark w-auto">
                             <tr>
                             <td class="text-right">Span:</td>
-                            <td><input id="span" name="span" class="span input-sm chartUpdate" style="width:95px" type="number" step="any" min="0.25" value="10.0"></td>
+                            <td><input id="span" name="span" class="span input-sm chartUpdate" style="width:95px" type="number" step="any" min="0.25" value="{{ inputs["span"] }}"></td>
                             <td>ft</td>
                             </tr>
                             <tr>
                             <td class="text-right">E:</td>
-                            <td><input id="spanE" name="spanE" class="spanE input-sm" style="width:95px" type="number" step="any" min="0.1" value="29000.0"></td>
+                            <td><input id="spanE" name="spanE" class="spanE input-sm" style="width:95px" type="number" step="any" min="0.1" value="{{ inputs["E"] }}"></td>
                             <td>ksi</td>
                             </tr>
                             <tr>
                             <td class="text-right">I:</td>
-                            <td><input id="spanI" name="spanI" class="spanI input-sm" style="width:95px" type="number" step="any" min="0.1" value="30.8"></td>
+                            <td><input id="spanI" name="spanI" class="spanI input-sm" style="width:95px" type="number" step="any" min="0.1" value="{{ inputs["I"] }}"></td>
                             <td>in<sup>4</sup></td>
                             </tr>
                             <tr>
                             <td class="text-right">Overhang Left:</td>
-                            <td><input id="overhangLeft" name="overhangLeft" class="overhangLeft input-sm chartUpdate" style="width:95px" type="number" step="any" min="0" value="0.0"></td>
+                            <td><input id="overhangLeft" name="overhangLeft" class="overhangLeft input-sm chartUpdate" style="width:95px" type="number" step="any" min="0" value="{{ inputs["OverL"] }}"></td>
                             <td>ft</td>
                             </tr>
                             <tr>
                             <td class="text-right">Overhang Right:</td>
-                            <td><input id="overhangRight" name="overhangRight" class="overhangRight input-sm chartUpdate" style="width:95px" type="number" step="any" min="0" value="0.0"></td>
+                            <td><input id="overhangRight" name="overhangRight" class="overhangRight input-sm chartUpdate" style="width:95px" type="number" step="any" min="0" value="{{ inputs["OverR"] }}"></td>
                             <td>ft</td>
                             </tr>
                             <tr>
                             <td class="text-right">Fixed Left:</td>
-                            <td><input id="fixedLeft" name="fixedLeft" class="fixedLeft input-sm chartUpdate" type="checkbox" value="fixedLeft"></td>
+                            <td><input id="fixedLeft" name="fixedLeft" class="fixedLeft input-sm chartUpdate" type="checkbox" value="fixedLeft" {{ "checked" if inputs["fl"] == 1}}></td>
                             <td>Disables the left overhang and sets value to 0 if selected.</td>
                             </tr>
                             <tr>
                             <td class="text-right">Fixed Right:</td>
-                            <td><input id="fixedRight" name="fixedRight" class="fixedRight input-sm chartUpdate" type="checkbox" value="fixedRight"></td>
+                            <td><input id="fixedRight" name="fixedRight" class="fixedRight input-sm chartUpdate" type="checkbox" value="fixedRight" {{ "checked" if inputs["fr"] == 1}}></td>
                             <td>Disables the right overhang and sets value to 0 if selected.</td>
                             </tr>
                         </table>
@@ -91,9 +106,11 @@
                         <p>(The 6 Simplified ACI patterns will be used when the number of patterns exceeds 63 (6 spans) full general patterning is factorial)</p>
                         <table id="interiorsupportsTable" class="table table-sm table-dark w-auto chartUpdate">
                             <tbody>
+                                {% for support in inputs["intSups"] %}
+                                {% if loop.index0 == 0 %}
                                 <tr class="interiorsupportRow">
-                                    <td class="interiorsupportuid">R1</td>
-                                    <td><input id="interiorSupport" name="interiorSupport" class="interiorSupport input-sm" style="width:65px" type="number" step="any" min="0" value="0"></td>
+                                    <td class="interiorsupportuid">{{"R" ~loop.index}}</td>
+                                    <td><input id="interiorSupport" name="interiorSupport" class="interiorSupport input-sm" style="width:65px" type="number" step="any" min="0" value="{{support}}"></td>
                                     <td>ft</td>
 
                                     <!-- Button to Add a Support -->
@@ -105,6 +122,24 @@
                                     </button>
                                     </td>
                                 </tr>
+                                {% else %}
+                                <tr class="interiorsupportRow">
+                                    <td class="interiorsupportuid">{{"R" ~loop.index}}</td>
+                                    <td><input id="interiorSupport2" name="interiorSupport" class="interiorSupport input-sm" style="width:65px" type="number" step="any" min="0" value="{{support}}"></td>
+                                    <td>ft</td>
+                                    <td>
+                                        <button type="button" class="addSupport btn btn-secondary btn-success btn-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"></path></svg>
+                                        </button><a href="#" class="removeSupportButton badge badge-danger" style="margin-left: 5px">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"></path></svg></a>
+                                    </td>
+                                </tr>
+                                {% endif %}
+
+
+                                {% endfor %}
                             </tbody>
                         </table>
 
@@ -155,10 +190,10 @@
                             </thead>
                             <tbody>
                                 <tr class="patterfactorsRow">
-                                    <td><input id="Lpatternfactor" name="Lpatternfactor" class="Lpatternfactor input-sm" style="width:65px" type="number" step="any" value="0"></td>
-                                    <td><input id="Lrpatternfactor" name="Lrpatternfactor" class="Lrpatternfactor input-sm" style="width:65px" type="number" step="any" value="0"></td>
-                                    <td><input id="Spatternfactor" name="Spatternfactor" class="Spatternfactor input-sm" style="width:65px" type="number" step="any" value="0.5"></td>
-                                    <td><input id="Rpatternfactor" name="Rpatternfactor" class="Rpatternfactor input-sm" style="width:65px" type="number" step="any" value="0"></td>
+                                    <td><input id="Lpatternfactor" name="Lpatternfactor" class="Lpatternfactor input-sm" style="width:65px" type="number" step="any" value="{{inputs["offPat"][0]}}"></td>
+                                    <td><input id="Lrpatternfactor" name="Lrpatternfactor" class="Lrpatternfactor input-sm" style="width:65px" type="number" step="any" value="{{inputs["offPat"][1]}}"></td>
+                                    <td><input id="Spatternfactor" name="Spatternfactor" class="Spatternfactor input-sm" style="width:65px" type="number" step="any" value="{{inputs["offPat"][2]}}"></td>
+                                    <td><input id="Rpatternfactor" name="Rpatternfactor" class="Rpatternfactor input-sm" style="width:65px" type="number" step="any" value="{{inputs["offPat"][3]}}"></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -167,12 +202,43 @@
                     <div class="container-sm py-3">
                         <h5> Combinations for Shear and Moment:</h5>
                         <div class="form-check">
-                            <input type="radio" id="designCombo_IBC_ASD" class="designCombo form-check-input" name="designCombo" value="IBC_ASD">
+                            <input type="radio" id="designCombo_IBC_ASD" class="designCombo form-check-input" name="designCombo" value="IBC_ASD" {{ "checked" if inputs["combos"] == 0}}>
                             <label class="form-check-label" for="designCombo_IBC_ASD"><h6>IBC 2018 - ASD (Section 1605.3.1)</h6></label>
                         </div>
                         <div class="form-check">
-                            <input type="radio" id="designCombo_IBC_LRFD" class="designCombo form-check-input" name="designCombo" value="IBC_LRFD" checked>
+                            <input type="radio" id="designCombo_IBC_LRFD" class="designCombo form-check-input" name="designCombo" value="IBC_LRFD" {{ "checked" if inputs["combos"] == 1}}>
                             <label class="form-check-label" for="designCombo_IBC_LRFD"><h6>IBC 2018 - LRFD (Section 1605.2)</h6></label>
+                        </div>
+                        <div>
+                            <table id="combofs" class="table table-sm table-dark w-auto">
+                                <tr class="combof1Row">
+                                    <td>f1 :</td>
+                                    <td>
+                                        <select id="IBC_f1" class="IBC_f1 input-sm" name="IBC_f1" style="width:95px">
+                                            <option value="1" {{ "selected=""selected""" if inputs["f1"] == 1}}> 1 </option>
+                                            <option value="0.5" {{ "selected=""selected""" if inputs["f1"] != 1}}> 0.5 </option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr class="combof2Row">
+                                    <td>f2 :</td>
+                                    <td>
+                                        <select id="IBC_f2" class="IBC_f2 input-sm" name="IBC_f2" style="width:95px">
+                                            <option value="0.7" {{ "selected=""selected""" if inputs["f2"] == 0.7}}> 0.7 </option>
+                                            <option value="0.2" {{ "selected=""selected""" if inputs["f2"] != 0.7}}> 0.2 </option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr class="combof2Row">
+                                    <td>Auto Reverse Lateral Loads :</td>
+                                    <td>
+                                        <select id="latReverse" class="latReverse input-sm" name="latReverse" style="width:95px">
+                                            <option value="1" {{ "selected=""selected""" if inputs["latReverse"] == 1}}> Yes </option>
+                                            <option value="0" {{ "selected=""selected""" if inputs["latReverse"] != 1}}> No </option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
 
@@ -196,19 +262,21 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                {% for sls in inputs["sls"] %}
+                                {% if loop.index0 == 0 %}
                                 <tr class="serviceCombo">
-                                <td class="servicecombouid">S1</td>
-                                <td><input id="Dsfactor" name="Dsfactor" class="Dsfactor input-sm" style="width:65px" type="number" step="any" value="1"></td>
-                                <td><input id="Fsfactor" name="Fsfactor" class="Fsfactor input-sm" style="width:65px" type="number" step="any" value="0"></td>
-                                <td><input id="Lsfactor" name="Lsfactor" class="Lsfactor input-sm" style="width:65px" type="number" step="any" value="0"></td>
-                                <td><input id="Hsfactor" name="Hsfactor" class="Hsfactor input-sm" style="width:65px" type="number" step="any" value="0"></td>
-                                <td><input id="Lrsfactor" name="Lrsfactor" class="Lrsfactor input-sm" style="width:65px" type="number" step="any" value="0"></td>
-                                <td><input id="Ssfactor" name="Ssfactor" class="Ssfactor input-sm" style="width:65px" type="number" step="any" value="0"></td>
-                                <td><input id="Rsfactor" name="Rsfactor" class="Rsfactor input-sm" style="width:65px" type="number" step="any" value="0"></td>
-                                <td><input id="Wxsfactor" name="Wxsfactor" class="Wxsfactor input-sm" style="width:65px" type="number" step="any" value="0"></td>
-                                <td><input id="Wysfactor" name="Wysfactor" class="Wysfactor input-sm" style="width:65px" type="number" step="any" value="0"></td>
-                                <td><input id="Exsfactor" name="Exsfactor" class="Exsfactor input-sm" style="width:65px" type="number" step="any" value="0"></td>
-                                <td><input id="Eysfactor" name="Eysfactor" class="Eysfactor input-sm" style="width:65px" type="number" step="any" value="0"></td>
+                                <td class="servicecombouid">{{"S"~ loop.index}}</td>
+                                <td><input id="Dsfactor" name="Dsfactor" class="Dsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[0]}}"></td>
+                                <td><input id="Fsfactor" name="Fsfactor" class="Fsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[1]}}"></td>
+                                <td><input id="Lsfactor" name="Lsfactor" class="Lsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[2]}}"></td>
+                                <td><input id="Hsfactor" name="Hsfactor" class="Hsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[3]}}"></td>
+                                <td><input id="Lrsfactor" name="Lrsfactor" class="Lrsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[4]}}"></td>
+                                <td><input id="Ssfactor" name="Ssfactor" class="Ssfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[5]}}"></td>
+                                <td><input id="Rsfactor" name="Rsfactor" class="Rsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[6]}}"></td>
+                                <td><input id="Wxsfactor" name="Wxsfactor" class="Wxsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[7]}}"></td>
+                                <td><input id="Wysfactor" name="Wysfactor" class="Wysfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[8]}}"></td>
+                                <td><input id="Exsfactor" name="Exsfactor" class="Exsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[9]}}"></td>
+                                <td><input id="Eysfactor" name="Eysfactor" class="Eysfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[10]}}"></td>
                                 
                                 <!-- Button to Add a Combo -->
                                 <td>    
@@ -220,6 +288,31 @@
                                 </td>
                                 
                                 </tr>
+                                {% else %}
+                                <tr class="serviceCombo">
+                                    <td class="servicecombouid">{{"S"~ loop.index}}</td>
+                                    <td><input id="Dsfactor2" name="Dsfactor" class="Dsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[0]}}"></td>
+                                    <td><input id="Fsfactor2" name="Fsfactor" class="Fsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[1]}}"></td>
+                                    <td><input id="Lsfactor2" name="Lsfactor" class="Lsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[2]}}"></td>
+                                    <td><input id="Hsfactor2" name="Hsfactor" class="Hsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[3]}}"></td>
+                                    <td><input id="Lrsfactor2" name="Lrsfactor" class="Lrsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[4]}}"></td>
+                                    <td><input id="Ssfactor2" name="Ssfactor" class="Ssfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[5]}}"></td>
+                                    <td><input id="Rsfactor2" name="Rsfactor" class="Rsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[6]}}"></td>
+                                    <td><input id="Wxsfactor2" name="Wxsfactor" class="Wxsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[7]}}"></td>
+                                    <td><input id="Wysfactor2" name="Wysfactor" class="Wysfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[8]}}"></td>
+                                    <td><input id="Exsfactor2" name="Exsfactor" class="Exsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[9]}}"></td>
+                                    <td><input id="Eysfactor2" name="Eysfactor" class="Eysfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[10]}}"></td>
+                                    <td>
+                                        <button type="button" class="addServiceCombo btn btn-secondary btn-success btn-sm"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"></path></svg></button>
+                                        <a href="#" class="removeServiceCombo badge badge-danger" style="margin-left: 5px">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"></path>
+                                            </svg>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -242,27 +335,29 @@
                             </tr>
                         </thead>
                         <tbody>
+                            {% for distLoad in inputs["distLoads"] %}
+                            {% if loop.index0 == 0 %}
                             <tr class="userDistLoad">
-                            <td class="distloaduid">D1</td>
-                            <td><input id="w1" name="w1" class="w1 input-sm" style="width:95px" type="number" step="any" value="0.0"></td>
-                            <td><input id="trib1" name="trib1" class="trib1 input-sm" style="width:95px" type="number" step="any" value="1.0"></td>
-                            <td><input id="w2" name="w2" class="w2 input-sm" style="width:95px" type="number" step="any" value="0.0"></td>
-                            <td><input id="trib2" name="trib2" class="trib2 input-sm" style="width:95px" type="number" step="any" value="1.0"></td>
-                            <td><input id="dista" name="dista" class="dista input-sm" style="width:95px" type="number" step="any" value="0.0"></td>
-                            <td><input id="distb" name="distb" class="distb input-sm" style="width:95px" type="number" step="any" value="1.0"></td>
+                            <td class="distloaduid">{{"D" ~ loop.index}}</td>
+                            <td><input id="w1" name="w1" class="w1 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[0]}}"></td>
+                            <td><input id="trib1" name="trib1" class="trib1 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[1]}}"></td>
+                            <td><input id="w2" name="w2" class="w2 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[2]}}"></td>
+                            <td><input id="trib2" name="trib2" class="trib2 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[3]}}"></td>
+                            <td><input id="dista" name="dista" class="dista input-sm" style="width:95px" type="number" step="any" value="{{distLoad[4]}}"></td>
+                            <td><input id="distb" name="distb" class="distb input-sm" style="width:95px" type="number" step="any" value="{{distLoad[5]}}"></td>
                             <td>
                                 <select id="distloadType" class="distloadType input-sm" name="distloadType" style="width:95px">
-                                    <option value="D"> D </option>
-                                    <option value="F"> F </option>
-                                    <option value="L"> L </option>
-                                    <option value="H"> H </option>
-                                    <option value="Lr"> L<sub>r</sub> </option>
-                                    <option value="S"> S </option>
-                                    <option value="R"> R </option>
-                                    <option value="Wx"> Wx </option>
-                                    <option value="Wy"> Wy </option>
-                                    <option value="Ex"> Ex </option>
-                                    <option value="Ey"> Ey </option>
+                                    <option value="D" {{"selected=""selected""" if distLoad[6]=="D"}}> D </option>
+                                    <option value="F" {{"selected=""selected""" if distLoad[6]=="F"}}> F </option>
+                                    <option value="L" {{"selected=""selected""" if distLoad[6]=="L"}}> L </option>
+                                    <option value="H" {{"selected=""selected""" if distLoad[6]=="H"}}> H </option>
+                                    <option value="Lr" {{"selected=""selected""" if distLoad[6]=="Lr"}}> L<sub>r</sub> </option>
+                                    <option value="S" {{"selected=""selected""" if distLoad[6]=="S"}} > S </option>
+                                    <option value="R" {{"selected=""selected""" if distLoad[6]=="R"}}> R </option>
+                                    <option value="Wx" {{"selected=""selected""" if distLoad[6]=="Wx"}}> Wx </option>
+                                    <option value="Wy" {{"selected=""selected""" if distLoad[6]=="Wy"}}> Wy </option>
+                                    <option value="Ex" {{"selected=""selected""" if distLoad[6]=="Ex"}}> Ex </option>
+                                    <option value="Ey" {{"selected=""selected""" if distLoad[6]=="Ey"}}> Ey </option>
                                 </select>
                             </td>
                             <td>    
@@ -273,6 +368,46 @@
                             </button>
                             </td>
                             </tr>
+                            {% else %}
+                            <tr class="userDistLoad">
+                                <td class="distloaduid">{{"D" ~ loop.index}}</td>
+                                <td><input id="w1" name="w1" class="w1 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[0]}}"></td>
+                                <td><input id="trib1" name="trib1" class="trib1 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[1]}}"></td>
+                                <td><input id="w2" name="w2" class="w2 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[2]}}"></td>
+                                <td><input id="trib2" name="trib2" class="trib2 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[3]}}"></td>
+                                <td><input id="dista" name="dista" class="dista input-sm" style="width:95px" type="number" step="any" value="{{distLoad[4]}}"></td>
+                                <td><input id="distb" name="distb" class="distb input-sm" style="width:95px" type="number" step="any" value="{{distLoad[5]}}"></td>
+                                <td>
+                                    <select id="distloadType" class="distloadType input-sm" name="distloadType" style="width:95px">
+                                        <option value="D" {{"selected=""selected""" if distLoad[6]=="D"}}> D </option>
+                                        <option value="F" {{"selected=""selected""" if distLoad[6]=="F"}}> F </option>
+                                        <option value="L" {{"selected=""selected""" if distLoad[6]=="L"}}> L </option>
+                                        <option value="H" {{"selected=""selected""" if distLoad[6]=="H"}}> H </option>
+                                        <option value="Lr" {{"selected=""selected""" if distLoad[6]=="Lr"}}> L<sub>r</sub> </option>
+                                        <option value="S" {{"selected=""selected""" if distLoad[6]=="S"}} > S </option>
+                                        <option value="R" {{"selected=""selected""" if distLoad[6]=="R"}}> R </option>
+                                        <option value="Wx" {{"selected=""selected""" if distLoad[6]=="Wx"}}> Wx </option>
+                                        <option value="Wy" {{"selected=""selected""" if distLoad[6]=="Wy"}}> Wy </option>
+                                        <option value="Ex" {{"selected=""selected""" if distLoad[6]=="Ex"}}> Ex </option>
+                                        <option value="Ey" {{"selected=""selected""" if distLoad[6]=="Ey"}}> Ey </option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <button type="button" class="addDistLoad btn btn-secondary btn-success btn-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"></path>
+                                        </svg>
+                                    </button>
+                                    <a href="#" class="removeDistLoad badge badge-danger" style="margin-left: 5px">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path>
+                                            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"></path>
+                                        </svg>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
                         </tbody>
                     </table>
                     
@@ -294,23 +429,25 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        {% for ptLoad in inputs["pointLoads"] %}
+                                        {% if loop.index0 == 0 %}
                                         <tr class="userPointLoad">
-                                        <td class="pointloaduid">P1</td>
-                                        <td><input id="pointLoad" name="pointLoad" class="pointLoad input-sm" style="width:95px" type="number" step="any" value="0"></td>
-                                        <td><input id="pointLoada" name="pointLoada" class="pointLoada input-sm" style="width:95px" type="number" step="any" value="0.0"></td>
+                                        <td class="pointloaduid">{{"P" ~ loop.index}}</td>
+                                        <td><input id="pointLoad" name="pointLoad" class="pointLoad input-sm" style="width:95px" type="number" step="any" value="{{ptLoad[0]}}"></td>
+                                        <td><input id="pointLoada" name="pointLoada" class="pointLoada input-sm" style="width:95px" type="number" step="any" value="{{ptLoad[1]}}"></td>
                                         <td>
                                             <select id="pointloadType" class="pointloadType input-sm" name="pointloadType" style="width:95px">
-                                                <option value="D"> D </option>
-                                                <option value="F"> F </option>
-                                                <option value="L"> L </option>
-                                                <option value="H"> H </option>
-                                                <option value="Lr"> L<sub>r</sub> </option>
-                                                <option value="S"> S </option>
-                                                <option value="R"> R </option>
-                                                <option value="Wx"> Wx </option>
-                                                <option value="Wy"> Wy </option>
-                                                <option value="Ex"> Ex </option>
-                                                <option value="Ey"> Ey </option>
+                                                <option value="D" {{"selected=""selected""" if ptLoad[2]=="D"}}> D </option>
+                                                <option value="F" {{"selected=""selected""" if ptLoad[2]=="F"}}> F </option>
+                                                <option value="L" {{"selected=""selected""" if ptLoad[2]=="L"}}> L </option>
+                                                <option value="H" {{"selected=""selected""" if ptLoad[2]=="H"}}> H </option>
+                                                <option value="Lr" {{"selected=""selected""" if ptLoad[2]=="Lr"}}> L<sub>r</sub> </option>
+                                                <option value="S" {{"selected=""selected""" if ptLoad[2]=="S"}}> S </option>
+                                                <option value="R" {{"selected=""selected""" if ptLoad[2]=="R"}}> R </option>
+                                                <option value="Wx" {{"selected=""selected""" if ptLoad[2]=="Wx"}}> Wx </option>
+                                                <option value="Wy" {{"selected=""selected""" if ptLoad[2]=="Wy"}}> Wy </option>
+                                                <option value="Ex" {{"selected=""selected""" if ptLoad[2]=="Ex"}}> Ex </option>
+                                                <option value="Ey" {{"selected=""selected""" if ptLoad[2]=="Ey"}}> Ey </option>
                                             </select>
                                         </td>
                                         <td>    
@@ -321,6 +458,42 @@
                                         </button>
                                         </td>
                                         </tr>
+                                        {% else %}
+                                        <tr class="userPointLoad">
+                                            <td class="pointloaduid">{{"P" ~ loop.index}}</td>
+                                            <td><input id="pointLoad" name="pointLoad" class="pointLoad input-sm" style="width:95px" type="number" step="any" value="{{ptLoad[0]}}"></td>
+                                            <td><input id="pointLoada" name="pointLoada" class="pointLoada input-sm" style="width:95px" type="number" step="any" value="{{ptLoad[1]}}"></td>
+                                            <td>
+                                                <select id="pointloadType" class="pointloadType input-sm" name="pointloadType" style="width:95px">
+                                                    <option value="D" {{"selected=""selected""" if ptLoad[2]=="D"}}> D </option>
+                                                    <option value="F" {{"selected=""selected""" if ptLoad[2]=="F"}}> F </option>
+                                                    <option value="L" {{"selected=""selected""" if ptLoad[2]=="L"}}> L </option>
+                                                    <option value="H" {{"selected=""selected""" if ptLoad[2]=="H"}}> H </option>
+                                                    <option value="Lr" {{"selected=""selected""" if ptLoad[2]=="Lr"}}> L<sub>r</sub> </option>
+                                                    <option value="S" {{"selected=""selected""" if ptLoad[2]=="S"}}> S </option>
+                                                    <option value="R" {{"selected=""selected""" if ptLoad[2]=="R"}}> R </option>
+                                                    <option value="Wx" {{"selected=""selected""" if ptLoad[2]=="Wx"}}> Wx </option>
+                                                    <option value="Wy" {{"selected=""selected""" if ptLoad[2]=="Wy"}}> Wy </option>
+                                                    <option value="Ex" {{"selected=""selected""" if ptLoad[2]=="Ex"}}> Ex </option>
+                                                    <option value="Ey" {{"selected=""selected""" if ptLoad[2]=="Ey"}}> Ey </option>
+                                                </select>
+                                            </td>
+                                            <td class="text-nowrap">
+                                                <button type="button" class="addPointLoad btn btn-secondary btn-success btn-sm">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                                                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"></path>
+                                                    </svg>
+                                                </button>
+                                                <a href="#" class="removePointLoad badge badge-danger" style="margin-left: 5px">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path>
+                                                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"></path>
+                                                    </svg>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endif %}
+                                        {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
@@ -336,23 +509,25 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        {% for ptMo in inputs["pointMoments"] %}
+                                        {% if loop.index0 == 0 %}
                                         <tr class="userPointMoment">
-                                        <td class="pointmomentuid">M1</td>
-                                        <td><input id="pointMoment" name="pointMoment" class="pointMoment input-sm" style="width:95px" type="number" step="any" value="0"></td>
-                                        <td><input id="pointMomenta" name="pointMomenta" class="pointMomenta input-sm" style="width:95px" type="number" step="any" value="0.0"></td>
+                                        <td class="pointmomentuid">{{"M" ~ loop.index}}</td>
+                                        <td><input id="pointMoment" name="pointMoment" class="pointMoment input-sm" style="width:95px" type="number" step="any" value="{{ptMo[0]}}"></td>
+                                        <td><input id="pointMomenta" name="pointMomenta" class="pointMomenta input-sm" style="width:95px" type="number" step="any" value="{{ptMo[1]}}"></td>
                                         <td>
                                             <select id="pointMomentType" class="pointMomentType input-sm" name="pointMomentType" style="width:95px">
-                                                <option value="D"> D </option>
-                                                <option value="F"> F </option>
-                                                <option value="L"> L </option>
-                                                <option value="H"> H </option>
-                                                <option value="Lr"> L<sub>r</sub> </option>
-                                                <option value="S"> S </option>
-                                                <option value="R"> R </option>
-                                                <option value="Wx"> Wx </option>
-                                                <option value="Wy"> Wy </option>
-                                                <option value="Ex"> Ex </option>
-                                                <option value="Ey"> Ey </option>
+                                                <option value="D" {{"selected=""selected""" if ptMo[2]=="D"}}> D </option>
+                                                <option value="F" {{"selected=""selected""" if ptMo[2]=="F"}}> F </option>
+                                                <option value="L" {{"selected=""selected""" if ptMo[2]=="L"}}> L </option>
+                                                <option value="H" {{"selected=""selected""" if ptMo[2]=="H"}}> H </option>
+                                                <option value="Lr" {{"selected=""selected""" if ptMo[2]=="Lr"}}> L<sub>r</sub> </option>
+                                                <option value="S" {{"selected=""selected""" if ptMo[2]=="S"}}> S </option>
+                                                <option value="R" {{"selected=""selected""" if ptMo[2]=="R"}}> R </option>
+                                                <option value="Wx" {{"selected=""selected""" if ptMo[2]=="Wx"}}> Wx </option>
+                                                <option value="Wy" {{"selected=""selected""" if ptMo[2]=="Wy"}}> Wy </option>
+                                                <option value="Ex" {{"selected=""selected""" if ptMo[2]=="Ex"}}> Ex </option>
+                                                <option value="Ey" {{"selected=""selected""" if ptMo[2]=="Ey"}}> Ey </option>
                                             </select>
                                         </td>
                                         <td>    
@@ -363,37 +538,86 @@
                                         </button>
                                         </td>
                                         </tr>
+                                        {% else %}
+                                        <tr class="userPointMoment">
+                                            <td class="pointmomentuid">{{"M" ~ loop.index}}</td>
+                                            <td><input id="pointMoment" name="pointMoment" class="pointMoment input-sm" style="width:95px" type="number" step="any" value="{{ptMo[0]}}"></td>
+                                            <td><input id="pointMomenta" name="pointMomenta" class="pointMomenta input-sm" style="width:95px" type="number" step="any" value="{{ptMo[1]}}"></td>
+                                            <td>
+                                                <select id="pointMomentType" class="pointMomentType input-sm" name="pointMomentType" style="width:95px">
+                                                    <option value="D" {{"selected=""selected""" if ptMo[2]=="D"}}> D </option>
+                                                    <option value="F" {{"selected=""selected""" if ptMo[2]=="F"}}> F </option>
+                                                    <option value="L" {{"selected=""selected""" if ptMo[2]=="L"}}> L </option>
+                                                    <option value="H" {{"selected=""selected""" if ptMo[2]=="H"}}> H </option>
+                                                    <option value="Lr" {{"selected=""selected""" if ptMo[2]=="Lr"}}> L<sub>r</sub> </option>
+                                                    <option value="S" {{"selected=""selected""" if ptMo[2]=="S"}}> S </option>
+                                                    <option value="R" {{"selected=""selected""" if ptMo[2]=="R"}}> R </option>
+                                                    <option value="Wx" {{"selected=""selected""" if ptMo[2]=="Wx"}}> Wx </option>
+                                                    <option value="Wy" {{"selected=""selected""" if ptMo[2]=="Wy"}}> Wy </option>
+                                                    <option value="Ex" {{"selected=""selected""" if ptMo[2]=="Ex"}}> Ex </option>
+                                                    <option value="Ey" {{"selected=""selected""" if ptMo[2]=="Ey"}}> Ey </option>
+                                                </select>
+                                            </td>
+                                            <td class="text-nowrap">
+                                                <button type="button" class="addPointMoment btn btn-secondary btn-success btn-sm">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                                                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"></path>
+                                                    </svg>
+                                                </button>
+                                                <a href="#" class="removePointMoment badge badge-danger" style="margin-left: 5px">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path>
+                                                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"></path>
+                                                    </svg>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endif %}
+                                        {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                {% if results != None %}
+                <!-- ULS DATA -->
+                <div class="tab-pane container active" id="ulsResults">
+                    <div class="container-sm py-3">
+                        <div id="MuEnvelopePlot" width="800px" height="600px"></div>
+                    </div>
+                    <div class="container-sm py-3">
+                        <div id="VuEnvelopePlot" width="800px" height="600px"></div>
+                    </div>
+                </div>
+                <!-- SLS DATA -->
+                <div class="tab-pane container active" id="slsResults">
+                    <div class="container-sm py-3">
+                        <div id="DsEnvelopePlot" width="800px" height="600px"></div>
+                    </div>
+                    <div class="container-sm py-3">
+                        <div id="VsEnvelopePlot" width="800px" height="600px"></div>
+                    </div>
+                    <div class="container-sm py-3">
+                        <div id="MsEnvelopePlot" width="800px" height="600px"></div>
+                    </div>
+                    <div class="container-sm py-3">
+                        <div id="SsEnvelopePlot" width="800px" height="600px"></div>
+                    </div>
+                </div>
+                <!-- Basic DATA -->
+                <div class="tab-pane container active" id="basicResults">
+                    <div class="container-sm py-3">
+                        <table id="basicTable" class="table table-sm table-dark w-auto">
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
-    
-    <!-- Output -->
-    <!-- Shear -->
-    <div class="row">
-
-    </div>
-    
-    <!-- Moment -->
-    <div class="row">
-
-    </div>
-    
-    <!--Slope -->
-    <div class="row">
-
-    </div>
-
-    <!-- Deflection -->
-    <div class="row">
-
-    </div>
-
+    </form>
 </div>
 
 {% endblock content %}
