@@ -138,6 +138,28 @@ function main() {
         $("#overhangRight").attr('disabled',this.checked);
         UpdateChart();
     });
+    
+    // Add the descriptive text to the f1 decision
+    $("#IBC_f1").change(function(){
+        let f1 = $("#IBC_f1").val()
+
+        if ( f1 == "1"){
+            $('#IBC_f1_string').html("Public Assembly, L > 100 psf, or parking garage.")
+        } else {
+            $('#IBC_f1_string').html("Other L.")
+        }
+    });
+
+    // Add the descriptive text to the f2 decision
+    $("#IBC_f2").change(function(){
+        let f2 = $("#IBC_f2").val()
+
+        if ( f2 == "0.7"){
+            $('#IBC_f2_string').html("Roof configuration does not shed snow.")
+        } else {
+            $('#IBC_f2_string').html("Other roof configurations.")
+        }
+    });
 
     // Add row below the first service combindation
     $("tbody").on("click", ".addServiceComboFirst", function(){
@@ -597,7 +619,7 @@ function main() {
             ctx.lineTo(supp_left_x2,support_bottom);
             ctx.lineTo(supp_left_x3,support_bottom);
             ctx.fill();
-        }
+        };
 
         //Draw Right Support
         if ($('#fixedRight').is(":checked"))
@@ -620,7 +642,7 @@ function main() {
             ctx.beginPath();
             ctx.arc(supp_right_x,supp_right_y,supp_radius,0,2*Math.PI);
             ctx.fill();
-        }
+        };
 
         //Draw Interior Supports
         var int_supports = $(".interiorSupport");
@@ -631,6 +653,8 @@ function main() {
 
             if(x_ft !=0 && x_ft>0 && x_ft<main_span_ft){
                 var supp_x = (x_scale*(cant_left_ft+x_ft))+x_margin;
+                var supp_radius = support_height/2;
+                var supp_right_y = support_top + supp_radius;
                 
                 ctx.beginPath();
                 ctx.arc(supp_x,supp_right_y,supp_radius,0,2*Math.PI);
@@ -656,8 +680,6 @@ function main() {
         var w2t = $("input.trib2").map(function(){
             return Number($(this).val());
         }).get();
-
-        console.log(w1s,w1t,w2s,w2t);
 
     };
 };
