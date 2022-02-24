@@ -14,7 +14,8 @@ Tools Roadmap
     - [x] Beam Load functions
     - [x] Flexibility Method Solver
     - [x] Beam Class to pull it all together and store data as attributes to make access easier on the web side
-    - [ ] Data pre-processor to churn through all the form data and organize it to fit the calculation models
+    - [x] Data pre-processor to churn through all the form data and organize it to fit the calculation models
+    - [ ] Computation model
   - [ ] HTML Template
     - [x] Generalized Input to accept a list of inputs for repopulation of inputs after a POST method
     - [ ] Layout for ULS Results
