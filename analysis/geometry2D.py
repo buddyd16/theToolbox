@@ -41,7 +41,7 @@ class Node2D():
         self.x = x
         self.y = y
 
-        # Indetifiers
+        # Indentifiers
         self.userid = userid
         self.number = number
 

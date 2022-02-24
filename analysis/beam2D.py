@@ -25,16 +25,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 
 
-#import analysis.geometry2D as g2d
-#import analysis.ebloads as ebl
-#import analysis.loadcombos as LC
-#import analysis.flexibility2D as solve2d
+import analysis.geometry2D as g2d
+import analysis.ebloads as ebl
+import analysis.loadcombos as LC
+import analysis.flexibility2D as solve2d
+import analysis.beamtools as bmtools
 
-import geometry2D as g2d
-import ebloads as ebl
-import loadcombos as LC
-import flexibility2D as solve2d
-import beamtools as bmtools
+# import geometry2D as g2d
+# import ebloads as ebl
+# import loadcombos as LC
+# import flexibility2D as solve2d
+# import beamtools as bmtools
+
 import matplotlib.pyplot as plt
 import math
 
@@ -366,8 +368,8 @@ class Beam2D():
                                 # determine the loads piecewise functions
                                 load_functions = load.piece_functions()
                                 
-                                # determine combine the current loads functions
-                                # with the current piecewise functions for the beam
+                                # combine the current loads functions
+                                # with the piecewise functions for the beam
                                 vfunctemp = bmtools.combine_piecewise_functions(vfunctemp, load_functions[0], 1, LF)
                                 mfunctemp = bmtools.combine_piecewise_functions(mfunctemp, load_functions[1], 1, LF)
                                 eisfunctemp = bmtools.combine_piecewise_functions(eisfunctemp, load_functions[2], 1, LF)
@@ -446,10 +448,13 @@ class Beam2D():
                     self.FEF_sls[combo_key] = fefdict
                 
                 # with large numbers of patterns too much precision on the roots
-                # leads to large result arrays, round to the 5th decimal place
+                # leads to large result arrays, round to the 4th decimal place
                 # as a compromise. Inform users this was done in GUI.
+                # 4 decimal places is equivalent to 0.0012 inches or
+                # 0.01 mm if using metric, where the length basis is
+                # feet for imperial and meters for metric
                 
-                self.rootstations = [round(i,5) for i in self.rootstations]
+                self.rootstations = [round(i,4) for i in self.rootstations]
                 
                 self.rootstations = sorted(set(self.rootstations))
                 
@@ -629,7 +634,17 @@ if __name__== '__main__':
 
     # loads = [load1,load2,load3,load4,load5, load6, load7, load8]
 
-    applied_loads = {"D":False,"F":False,"L":False,"H":False,"Lr":False,"S":False,"R":False,"Wx":False,"Wy":False,"Ex":False,"Ey":False}
+    applied_loads = {"D":False,
+                     "F":False,
+                     "L":False,
+                     "H":False,
+                     "Lr":False,
+                     "S":False,
+                     "R":False,
+                     "Wx":False,
+                     "Wy":False,
+                     "Ex":False,
+                     "Ey":False}
 
     for load in loads:
         

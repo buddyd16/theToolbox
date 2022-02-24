@@ -196,7 +196,7 @@ def ACI_LoadPatterns(n, byspan=True):
         return patterns
 
 
-def IBC2018_Basic(lateral_reversal=True, sls = False):
+def IBC2018_Basic(lateral_reversal=True, sls=False):
 
     if sls:
         service = 'SLS'
