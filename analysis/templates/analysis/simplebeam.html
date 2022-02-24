@@ -80,12 +80,12 @@
                             </tr>
                             <tr>
                             <td class="text-right">Overhang Left:</td>
-                            <td><input id="overhangLeft" name="overhangLeft" class="overhangLeft input-sm chartUpdate" style="width:95px" type="number" step="any" min="0" value="{{ inputs["OverL"] }}"></td>
+                            <td><input id="overhangLeft" name="overhangLeft" class="overhangLeft input-sm chartUpdate" style="width:95px" type="number" step="any" min="0" value="{{ inputs["OverL"] }}" {{"disabled" if inputs["fl"] == 1}}></td>
                             <td>ft</td>
                             </tr>
                             <tr>
                             <td class="text-right">Overhang Right:</td>
-                            <td><input id="overhangRight" name="overhangRight" class="overhangRight input-sm chartUpdate" style="width:95px" type="number" step="any" min="0" value="{{ inputs["OverR"] }}"></td>
+                            <td><input id="overhangRight" name="overhangRight" class="overhangRight input-sm chartUpdate" style="width:95px" type="number" step="any" min="0" value="{{ inputs["OverR"] }}" {{"disabled" if inputs["fr"] == 1}}></td>
                             <td>ft</td>
                             </tr>
                             <tr>
@@ -179,6 +179,7 @@
                     <div class="container-sm py-3">
                         <h5> Off Pattern Factors</h5>
                         <p>Typically 0 for L, L<sub>r</sub>, and R and 0.5 for S</p>
+                        <p>Off Patterns of 1 will result in no patterning for that load type</p>
                         <table id="patternfactorTable" class="table table-sm table-dark w-auto">
                             <thead>
                                 <tr>
@@ -219,6 +220,13 @@
                                             <option value="0.5" {{ "selected=""selected""" if inputs["f1"] != 1}}> 0.5 </option>
                                         </select>
                                     </td>
+                                    <td id="IBC_f1_string">
+                                        {% if inputs["f1"] == 1 %}
+                                            Public Assembly, L > 100 psf, or parking garage.
+                                        {% else %}
+                                            other L.
+                                        {% endif %}
+                                    </td>
                                 </tr>
                                 <tr class="combof2Row">
                                     <td>f2 :</td>
@@ -228,6 +236,13 @@
                                             <option value="0.2" {{ "selected=""selected""" if inputs["f2"] != 0.7}}> 0.2 </option>
                                         </select>
                                     </td>
+                                    <td id="IBC_f2_string">
+                                        {% if inputs["f2"] == 0.7 %}
+                                            Roof configuration does not shed snow.
+                                        {% else %}
+                                            Other roof configurations.
+                                        {% endif %}
+                                    </td>
                                 </tr>
                                 <tr class="combof2Row">
                                     <td>Auto Reverse Lateral Loads :</td>
@@ -236,6 +251,9 @@
                                             <option value="1" {{ "selected=""selected""" if inputs["latReverse"] == 1}}> Yes </option>
                                             <option value="0" {{ "selected=""selected""" if inputs["latReverse"] != 1}}> No </option>
                                         </select>
+                                    </td>
+                                    <td>
+                                        Only applies to Generated Combos.
                                     </td>
                                 </tr>
                             </table>
