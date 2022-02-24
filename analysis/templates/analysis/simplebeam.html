@@ -46,6 +46,9 @@
                 </li>
                 {% if results != None %}
                 <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#genResults">General Results</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" data-toggle="tab" href="#ulsResults">ULS Results</a>
                 </li>
                 <li class="nav-item">
@@ -166,13 +169,13 @@
                             <dt class="col-sm-3">R</dt>
                             <dd class="col-sm-9">Rain load</dd>
                             <dt class="col-sm-3">Wx</dt>
-                            <dd class="col-sm-9">Wind Load in the X or 1 direction. (Combinations will apply +/- factors)</dd>
+                            <dd class="col-sm-9">Wind Load in the X or 1 direction.</dd>
                             <dt class="col-sm-3">Wy</dt>
-                            <dd class="col-sm-9">Wind Load in the Y or 2 direction. (Combinations will apply +/- factors)</dd>
+                            <dd class="col-sm-9">Wind Load in the Y or 2 direction.</dd>
                             <dt class="col-sm-3">Ex</dt>
-                            <dd class="col-sm-9">Vertical Seismic Load in the X or 1 direction as defined in Section 2.3.6 of ASCE 7. (Combinations will apply +/- factors)</dd>
+                            <dd class="col-sm-9">Vertical Seismic Load in the X or 1 direction as defined in Section 2.3.6 of ASCE 7.</dd>
                             <dt class="col-sm-3">Ey</dt>
-                            <dd class="col-sm-9">Vertical Seismic Load in the Y or 2 direction as defined in Section 2.3.6 of ASCE 7. (Combinations will apply +/- factors)</dd>
+                            <dd class="col-sm-9">Vertical Seismic Load in the Y or 2 direction as defined in Section 2.3.6 of ASCE 7.</dd>
                         </dl>
                     </div>
 
@@ -600,32 +603,45 @@
                 </div>
 
                 {% if results != None %}
-                <!-- ULS DATA -->
-                <div class="tab-pane container active" id="ulsResults">
+                <!-- General DATA -->
+                <div class="tab-pane container fade" id="genResults">
                     <div class="container-sm py-3">
-                        <div id="MuEnvelopePlot" width="800px" height="600px"></div>
+                        <h4>Calculation Log:</h4>
+                        <table class="table table-sm w-auto">
+                            {% for item in results['log'] %}
+                            <tr>
+                            <td>{{item}}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+                <!-- ULS DATA -->
+                <div class="tab-pane container fade" id="ulsResults">
+                    <div class="container-sm py-3">
+                        <div id="MuEnvelopePlot" class="w-100 plot"></div>
                     </div>
                     <div class="container-sm py-3">
-                        <div id="VuEnvelopePlot" width="800px" height="600px"></div>
+                        <div id="VuEnvelopePlot" class="w-100 plot"></div>
                     </div>
                 </div>
                 <!-- SLS DATA -->
-                <div class="tab-pane container active" id="slsResults">
+                <div class="tab-pane container fade" id="slsResults">
                     <div class="container-sm py-3">
-                        <div id="DsEnvelopePlot" width="800px" height="600px"></div>
+                        <div id="DsEnvelopePlot" class="w-100 plot"></div>
                     </div>
                     <div class="container-sm py-3">
-                        <div id="VsEnvelopePlot" width="800px" height="600px"></div>
+                        <div id="VsEnvelopePlot" class="w-100 plot"></div>
                     </div>
                     <div class="container-sm py-3">
-                        <div id="MsEnvelopePlot" width="800px" height="600px"></div>
+                        <div id="MsEnvelopePlot" class="w-100 plot"></div>
                     </div>
                     <div class="container-sm py-3">
-                        <div id="SsEnvelopePlot" width="800px" height="600px"></div>
+                        <div id="SsEnvelopePlot" class="w-100 plot"></div>
                     </div>
                 </div>
                 <!-- Basic DATA -->
-                <div class="tab-pane container active" id="basicResults">
+                <div class="tab-pane container fade" id="basicResults">
                     <div class="container-sm py-3">
                         <table id="basicTable" class="table table-sm table-dark w-auto">
                         </table>
@@ -640,22 +656,117 @@
 
 {% if results != None %}
 <script>
+    var marker_size = 4;
+    var plot_type = 'lines+markers';
     let mu_max_main = {{results['mainbeam'].Mu_max|safe}};
     let mu_min_main = {{results['mainbeam'].Mu_min|safe}};
+    let vu_max_main = {{results['mainbeam'].Vu_max|safe}};
+    let vu_min_main = {{results['mainbeam'].Vu_min|safe}};
+    let ds_max_main = {{results['mainbeam'].Ds_max|safe}};
+    let ds_min_main = {{results['mainbeam'].Ds_min|safe}};
+    let ss_max_main = {{results['mainbeam'].Ss_max|safe}};
+    let ss_min_main = {{results['mainbeam'].Ss_min|safe}};
+    let vs_max_main = {{results['mainbeam'].Vs_max|safe}};
+    let vs_min_main = {{results['mainbeam'].Vs_min|safe}};
+    let ms_max_main = {{results['mainbeam'].Ms_max|safe}};
+    let ms_min_main = {{results['mainbeam'].Ms_min|safe}};
+
     let x_main = {{results['mainbeam'].chartstations|safe}};
 
     var mu_max = {
         x: x_main,
         y: mu_max_main,
-        type: 'scatter',
-        name: 'Mu,max (main)'
+        mode: plot_type,
+        name: 'Mu,max (main)',
+        marker: {size: marker_size}
     };
 
     var mu_min = {
         x: x_main,
         y: mu_min_main,
-        type: 'scatter',
-        name: 'Mu,min (main)'
+        mode: plot_type,
+        name: 'Mu,min (main)',
+        marker: {size: marker_size}
+    };
+
+    var vu_max = {
+        x: x_main,
+        y: vu_max_main,
+        mode: plot_type,
+        name: 'Vu,max (main)',
+        marker: {size: marker_size}
+    };
+
+    var vu_min = {
+        x: x_main,
+        y: vu_min_main,
+        mode: plot_type,
+        name: 'Vu,min (main)',
+        marker: {size: marker_size}
+    };
+
+    var vs_max = {
+        x: x_main,
+        y: vs_max_main,
+        mode: plot_type,
+        name: 'Vs,max (main)',
+        marker: {size: marker_size}
+    };
+
+    var vs_min = {
+        x: x_main,
+        y: vs_min_main,
+        mode: plot_type,
+        name: 'Vs,min (main)',
+        marker: {size: marker_size}
+    };
+
+    var ms_max = {
+        x: x_main,
+        y: ms_max_main,
+        mode: plot_type,
+        name: 'Ms,max (main)',
+        marker: {size: marker_size}
+    };
+
+    var ms_min = {
+        x: x_main,
+        y: ms_min_main,
+        mode: plot_type,
+        name: 'Ms,min (main)',
+        marker: {size: marker_size}
+    };
+
+    var ss_max = {
+        x: x_main,
+        y: ss_max_main,
+        mode: plot_type,
+        name: 'Ss,max (main)',
+        marker: {size: marker_size}
+    };
+
+    var ss_min = {
+        x: x_main,
+        y: ss_min_main,
+        mode: plot_type,
+        name: 'Ss,min (main)',
+        marker: {size: marker_size}
+    };
+
+    var ds_max = {
+        x: x_main,
+        y: ds_max_main,
+        mode: plot_type,
+        name: 'Ds,max (main)',
+        marker: {size: marker_size}
+    };
+
+    var ds_min = {
+        x: x_main,
+        y: ds_min_main,
+        mode: plot_type,
+        name: 'Ds,min (main)',
+        marker: {size: marker_size}
     };
 
     {% if results['cantleft'] != None %}
@@ -664,26 +775,139 @@
         let mu_min_left = {{results['cantleft'].Mu_min|safe}};
         let vu_max_left = {{results['cantleft'].Vu_max|safe}};
         let vu_min_left = {{results['cantleft'].Vu_min|safe}};
+        let vs_max_left = {{results['cantleft'].Vs_max|safe}};
+        let vs_min_left = {{results['cantleft'].Vs_min|safe}};
+        let ms_max_left = {{results['cantleft'].Ms_max|safe}};
+        let ms_min_left = {{results['cantleft'].Ms_min|safe}};
+        let ss_max_left = {{results['cantleft'].Ss_max|safe}};
+        let ss_min_left = {{results['cantleft'].Ss_min|safe}};
+        let ds_max_left = {{results['cantleft'].Ds_max|safe}};
+        let ds_min_left = {{results['cantleft'].Ds_min|safe}};
+        var inlegend = true;
+
     {% else %}
         let x_left = [0];
         let mu_max_left = [0];
         let mu_min_left = [0];
         let vu_max_left = [0];
         let vu_min_left = [0];
+        let vs_max_left = [0];
+        let vs_min_left = [0];
+        let ms_max_left = [0];
+        let ms_min_left = [0];
+        let ss_max_left = [0];
+        let ss_min_left = [0];
+        let ds_max_left = [0];
+        let ds_min_left = [0];
+        var inlegend = false;
     {% endif %}
 
     var left_mu_max = {
         x: x_left,
         y: mu_max_left,
-        type: 'scatter',
-        name: 'Mu,max (left)'
+        mode: plot_type,
+        name: 'Mu,max (left)',
+        marker: {size: marker_size},
+        showlegend: inlegend
     };
 
     var left_mu_min = {
         x: x_left,
         y: mu_min_left,
-        type: 'scatter',
-        name: 'Mu,min (left)'
+        mode: plot_type,
+        name: 'Mu,min (left)',
+        marker: {size: marker_size},
+        showlegend: inlegend
+    };
+
+    var left_vu_max = {
+        x: x_left,
+        y: vu_max_left,
+        mode: plot_type,
+        name: 'Vu,max (left)',
+        marker: {size: marker_size},
+        showlegend: inlegend
+    };
+
+    var left_vu_min = {
+        x: x_left,
+        y: vu_min_left,
+        mode: plot_type,
+        name: 'Vu,min (left)',
+        marker: {size: marker_size},
+        showlegend: inlegend
+    };
+
+    var left_vs_max = {
+        x: x_left,
+        y: vs_max_left,
+        mode: plot_type,
+        name: 'Vs,max (left)',
+        marker: {size: marker_size},
+        showlegend: inlegend
+    };
+
+    var left_vs_min = {
+        x: x_left,
+        y: vs_min_left,
+        mode: plot_type,
+        name: 'Vs,min (left)',
+        marker: {size: marker_size},
+        showlegend: inlegend
+    };
+
+    var left_ms_max = {
+        x: x_left,
+        y: ms_max_left,
+        mode: plot_type,
+        name: 'Ms,max (left)',
+        marker: {size: marker_size},
+        showlegend: inlegend
+    };
+
+    var left_ms_min = {
+        x: x_left,
+        y: ms_min_left,
+        mode: plot_type,
+        name: 'Ms,min (left)',
+        marker: {size: marker_size},
+        showlegend: inlegend
+    };
+
+    var left_ss_max = {
+        x: x_left,
+        y: ss_max_left,
+        mode: plot_type,
+        name: 'Ss,max (left)',
+        marker: {size: marker_size},
+        showlegend: inlegend
+    };
+
+    var left_ss_min = {
+        x: x_left,
+        y: ss_min_left,
+        mode: plot_type,
+        name: 'Ss,min (left)',
+        marker: {size: marker_size},
+        showlegend: inlegend
+    };
+
+    var left_ds_max = {
+        x: x_left,
+        y: ds_max_left,
+        mode: plot_type,
+        name: 'Ds,max (left)',
+        marker: {size: marker_size},
+        showlegend: inlegend
+    };
+
+    var left_ds_min = {
+        x: x_left,
+        y: ds_min_left,
+        mode: plot_type,
+        name: 'Ds,min (left)',
+        marker: {size: marker_size},
+        showlegend: inlegend
     };
 
     {% if results['cantright'] != None %}
@@ -692,80 +916,201 @@
         let mu_min_right = {{results['cantright'].Mu_min|safe}};
         let vu_max_right = {{results['cantright'].Vu_max|safe}};
         let vu_min_right = {{results['cantright'].Vu_min|safe}};
+        let vs_max_right = {{results['cantright'].Vs_max|safe}};
+        let vs_min_right = {{results['cantright'].Vs_min|safe}};
+        let ms_max_right = {{results['cantright'].Ms_max|safe}};
+        let ms_min_right = {{results['cantright'].Ms_min|safe}};
+        let ss_max_right = {{results['cantright'].Ss_max|safe}};
+        let ss_min_right = {{results['cantright'].Ss_min|safe}};
+        let ds_max_right = {{results['cantright'].Ds_max|safe}};
+        let ds_min_right = {{results['cantright'].Ds_min|safe}};
+        var inlegend_right = true;
+
     {% else %}
         let x_right = [0];
         let mu_max_right = [0];
         let mu_min_right = [0];
         let vu_max_right = [0];
         let vu_min_right = [0];
+        let vs_max_right = [0];
+        let vs_min_right = [0];
+        let ms_max_right = [0];
+        let ms_min_right = [0];
+        let ss_max_right = [0];
+        let ss_min_right = [0];
+        let ds_max_right = [0];
+        let ds_min_right = [0];
+        var inlegend_right = false;
     {% endif %}
 
     var right_mu_max = {
         x: x_right,
         y: mu_max_right,
-        type: 'scatter',
-        name: 'Mu,max (right)'
+        mode: plot_type,
+        name: 'Mu,max (right)',
+        marker: {size: marker_size},
+        showlegend: inlegend_right
     };
 
     var right_mu_min = {
         x: x_right,
         y: mu_min_right,
-        type: 'scatter',
-        name: 'Mu,min (right)'
-    };
-
-    var mu_envelope = [mu_max,mu_min, left_mu_max, left_mu_min, right_mu_max, right_mu_min];
-
-    Plotly.newPlot("MuEnvelopePlot", mu_envelope);
-
-    let vu_max_main = {{results['mainbeam'].Vu_max|safe}};
-    let vu_min_main = {{results['mainbeam'].Vu_min|safe}};
-
-    var vu_max = {
-        x: x_main,
-        y: vu_max_main,
-        type: 'scatter',
-        name: 'Vu,max (main)'
-    };
-
-    var vu_min = {
-        x: x_main,
-        y: vu_min_main,
-        type: 'scatter',
-        name: 'Vu,min (main)'
-    };
-
-    var left_vu_max = {
-        x: x_left,
-        y: vu_max_left,
-        type: 'scatter',
-        name: 'Vu,max (left)'
-    };
-
-    var left_vu_min = {
-        x: x_left,
-        y: vu_min_left,
-        type: 'scatter',
-        name: 'Vu,min (left)'
+        mode: plot_type,
+        name: 'Mu,min (right)',
+        marker: {size: marker_size},
+        showlegend: inlegend_right
     };
 
     var right_vu_max = {
         x: x_right,
         y: vu_max_right,
-        type: 'scatter',
-        name: 'Vu,max (right)'
+        mode: plot_type,
+        name: 'Vu,max (right)',
+        marker: {size: marker_size},
+        showlegend: inlegend_right
     };
 
     var right_vu_min = {
         x: x_right,
         y: vu_min_right,
-        type: 'scatter',
-        name: 'Vu,min (right)'
+        mode: plot_type,
+        name: 'Vu,min (right)',
+        marker: {size: marker_size},
+        showlegend: inlegend_right
     };
 
+    var right_vs_max = {
+        x: x_right,
+        y: vs_max_right,
+        mode: plot_type,
+        name: 'Vs,max (right)',
+        marker: {size: marker_size},
+        showlegend: inlegend_right
+    };
+
+    var right_vs_min = {
+        x: x_right,
+        y: vs_min_right,
+        mode: plot_type,
+        name: 'Vs,min (right)',
+        marker: {size: marker_size},
+        showlegend: inlegend_right
+    };
+
+    var right_ms_max = {
+        x: x_right,
+        y: ms_max_right,
+        mode: plot_type,
+        name: 'Ms,max (right)',
+        marker: {size: marker_size},
+        showlegend: inlegend_right
+    };
+
+    var right_ms_min = {
+        x: x_right,
+        y: ms_min_right,
+        mode: plot_type,
+        name: 'Ms,min (right)',
+        marker: {size: marker_size},
+        showlegend: inlegend_right
+    };
+
+    var right_ss_max = {
+        x: x_right,
+        y: ss_max_right,
+        mode: plot_type,
+        name: 'Ss,max (right)',
+        marker: {size: marker_size},
+        showlegend: inlegend_right
+    };
+
+    var right_ss_min = {
+        x: x_right,
+        y: ss_min_right,
+        mode: plot_type,
+        name: 'Ss,min (right)',
+        marker: {size: marker_size},
+        showlegend: inlegend_right
+    };
+
+    var right_ds_max = {
+        x: x_right,
+        y: ds_max_right,
+        mode: plot_type,
+        name: 'Ds,max (right)',
+        marker: {size: marker_size},
+        showlegend: inlegend_right
+    };
+
+    var right_ds_min = {
+        x: x_right,
+        y: ds_min_right,
+        mode: plot_type,
+        name: 'Ds,min (right)',
+        marker: {size: marker_size},
+        showlegend: inlegend_right
+    };
+
+    var mu_envelope = [mu_max,mu_min, left_mu_max, left_mu_min, right_mu_max, right_mu_min];
     var vu_envelope = [vu_max,vu_min, left_vu_max, left_vu_min, right_vu_max, right_vu_min];
-    
-    Plotly.newPlot("VuEnvelopePlot", vu_envelope);
+    var vs_envelope = [vs_max,vs_min, left_vs_max, left_vs_min, right_vs_max, right_vs_min];
+    var ms_envelope = [ms_max,ms_min, left_ms_max, left_ms_min, right_ms_max, right_ms_min];
+    var ss_envelope = [ss_max,ss_min, left_ss_max, left_ss_min, right_ss_max, right_ss_min];
+    var ds_envelope = [ds_max,ds_min, left_ds_max, left_ds_min, right_ds_max, right_ds_min];
+
+    var w = 1000;
+    var h = 400;
+
+    var mu_layout = {
+        title: "ULS Moment Envelope (ft-kip)",
+        width: w,
+        height: h,
+    };
+
+    var vu_layout = {
+        title: "ULS Shear Envelope (kip)",
+        width: w,
+        height: h,
+    };
+
+    var vs_layout = {
+        title: "SLS Shear Envelope (kip)",
+        width: w,
+        height: h,
+    };
+
+    var ms_layout = {
+        title: "SLS Moment Envelope (ft-kip)",
+        width: w,
+        height: h,
+    };
+
+    var ss_layout = {
+        title: "SLS Slope Envelope (rad)",
+        width: w,
+        height: h,
+    };
+
+    var ds_layout = {
+        title: "SLS Deflection Envelope (in)",
+        width: w,
+        height: h,
+    };
+
+    var config = {responsive: true}
+
+    Plotly.newPlot("MuEnvelopePlot", mu_envelope, mu_layout, config);
+
+    Plotly.newPlot("VuEnvelopePlot", vu_envelope, vu_layout, config);
+
+    Plotly.newPlot("DsEnvelopePlot", ds_envelope, ds_layout, config);
+
+    Plotly.newPlot("VsEnvelopePlot", vs_envelope, vs_layout, config);
+
+    Plotly.newPlot("MsEnvelopePlot", ms_envelope, ms_layout, config);
+
+    Plotly.newPlot("SsEnvelopePlot", ss_envelope, ss_layout, config);
+
 </script>
 {% endif %}
 
