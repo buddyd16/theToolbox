@@ -37,7 +37,7 @@ import analysis.beamtools as bmtools
 # import flexibility2D as solve2d
 # import beamtools as bmtools
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import math
 
 
@@ -584,141 +584,141 @@ class Beam2D():
 
 # Test Area #
 
-if __name__== '__main__':
+# if __name__== '__main__':
     
-    E_ksi = 29000
-    E_ksf = E_ksi * 144 # 144 in2/ 1 ft2
+#     E_ksi = 29000
+#     E_ksf = E_ksi * 144 # 144 in2/ 1 ft2
 
-    I_in4 = 30.8
-    I_ft4 = I_in4 * (1/math.pow(12,4))
+#     I_in4 = 30.8
+#     I_ft4 = I_in4 * (1/math.pow(12,4))
 
-    n1 = g2d.Node2D(20, 0, "N1", 1)
-    n2 = g2d.Node2D(30, 0, "N2", 2)
+#     n1 = g2d.Node2D(20, 0, "N1", 1)
+#     n2 = g2d.Node2D(30, 0, "N2", 2)
 
-    beam = Beam2D("BM1", n1, n2, E_ksf, I_ft4,[0,0],3)
+#     beam = Beam2D("BM1", n1, n2, E_ksf, I_ft4,[0,0],3)
 
-    # beam.addinteriorsupport(10)
-    # beam.addinteriorsupport(20)
-    # beam.addinteriorsupport(30)
-    # beam.addinteriorsupport(40)
-    # beam.addinteriorsupport(50)
+#     # beam.addinteriorsupport(10)
+#     # beam.addinteriorsupport(20)
+#     # beam.addinteriorsupport(30)
+#     # beam.addinteriorsupport(40)
+#     # beam.addinteriorsupport(50)
 
-    # print(beam.spans())
+#     # print(beam.spans())
 
-    beam.computation_stations()
-
-
-    #combo1 = LC.LoadCombo("combo1",{"D":1.2,"L":1.6},["L"],True,'ULS')
-    #combo2 = LC.LoadCombo("combo2",{"L":1.0},["L"],True,'SLS')
-    #combo3 = LC.LoadCombo('all D',{'D':1.0,"L":1.0},['L'],False,'ULS')
-
-    uls_combos = LC.IBC2018_ULS(1, 0.7, True)
-    sls_combos = LC.IBC2018_ASD(True,True)
-    basic_combos = LC.IBC2018_Basic(True,False)
+#     beam.computation_stations()
 
 
-    load1 = ebl.cant_right_udl(1, 0, 10, beam.span,0, "L", 3)
-    load2 = ebl.cant_right_udl(0.5, 0, 10, beam.span,0, "D", 3)
-    load3 = ebl.cant_right_point(1, 2, beam.span, 0, "Ex", 3)
+#     #combo1 = LC.LoadCombo("combo1",{"D":1.2,"L":1.6},["L"],True,'ULS')
+#     #combo2 = LC.LoadCombo("combo2",{"L":1.0},["L"],True,'SLS')
+#     #combo3 = LC.LoadCombo('all D',{'D':1.0,"L":1.0},['L'],False,'ULS')
 
-    loads = [load1,load2,load3]
+#     uls_combos = LC.IBC2018_ULS(1, 0.7, True)
+#     sls_combos = LC.IBC2018_ASD(True,True)
+#     basic_combos = LC.IBC2018_Basic(True,False)
 
-    # load1 = ebl.udl(1, 0, 10, beam.span, "L", 1)
-    # load2 = ebl.udl(1, 10, 20, beam.span, "L", 2)
-    # load3 = ebl.udl(1, 20, 30, beam.span, "L", 3)
-    # load4 = ebl.udl(1, 30, 40, beam.span, "L", 4)
-    # load5 = ebl.udl(1, 40, 50, beam.span, "L", 5)
-    # load6 = ebl.udl(1, 50, 60, beam.span, "L", 6)
-    # load7 = ebl.udl(1, 50, 60, beam.span, "D", 6)
-    # load8 = ebl.udl(1, 0, 10, beam.span, "D", 1)
 
-    # loads = [load1,load2,load3,load4,load5, load6, load7, load8]
+#     load1 = ebl.cant_right_udl(1, 0, 10, beam.span,0, "L", 3)
+#     load2 = ebl.cant_right_udl(0.5, 0, 10, beam.span,0, "D", 3)
+#     load3 = ebl.cant_right_point(1, 2, beam.span, 0, "Ex", 3)
 
-    applied_loads = {"D":False,
-                     "F":False,
-                     "L":False,
-                     "H":False,
-                     "Lr":False,
-                     "S":False,
-                     "R":False,
-                     "Wx":False,
-                     "Wy":False,
-                     "Ex":False,
-                     "Ey":False}
+#     loads = [load1,load2,load3]
 
-    for load in loads:
+#     # load1 = ebl.udl(1, 0, 10, beam.span, "L", 1)
+#     # load2 = ebl.udl(1, 10, 20, beam.span, "L", 2)
+#     # load3 = ebl.udl(1, 20, 30, beam.span, "L", 3)
+#     # load4 = ebl.udl(1, 30, 40, beam.span, "L", 4)
+#     # load5 = ebl.udl(1, 40, 50, beam.span, "L", 5)
+#     # load6 = ebl.udl(1, 50, 60, beam.span, "L", 6)
+#     # load7 = ebl.udl(1, 50, 60, beam.span, "D", 6)
+#     # load8 = ebl.udl(1, 0, 10, beam.span, "D", 1)
+
+#     # loads = [load1,load2,load3,load4,load5, load6, load7, load8]
+
+#     applied_loads = {"D":False,
+#                      "F":False,
+#                      "L":False,
+#                      "H":False,
+#                      "Lr":False,
+#                      "S":False,
+#                      "R":False,
+#                      "Wx":False,
+#                      "Wy":False,
+#                      "Ex":False,
+#                      "Ey":False}
+
+#     for load in loads:
         
-        if load.loadtype in applied_loads:
-            if not applied_loads[load.loadtype]:
+#         if load.loadtype in applied_loads:
+#             if not applied_loads[load.loadtype]:
                 
-                applied_loads[load.loadtype] = True
+#                 applied_loads[load.loadtype] = True
         
-    uls_combos_trim = []
-    for combo in uls_combos:
+#     uls_combos_trim = []
+#     for combo in uls_combos:
         
-        test = []
-        for kind in combo.principle_loads:
+#         test = []
+#         for kind in combo.principle_loads:
             
-            test.append(applied_loads[kind])
+#             test.append(applied_loads[kind])
     
-        if any(test):
+#         if any(test):
             
-            uls_combos_trim.append(combo)
+#             uls_combos_trim.append(combo)
             
-    print('Reduced ULS Combinations:')
-    for combo in uls_combos_trim:
-        print(combo.FormulaString())  
+#     print('Reduced ULS Combinations:')
+#     for combo in uls_combos_trim:
+#         print(combo.FormulaString())  
         
-    sls_combos_trim = []
-    for combo in sls_combos:
+#     sls_combos_trim = []
+#     for combo in sls_combos:
         
-        test = []
-        for kind in combo.principle_loads:
+#         test = []
+#         for kind in combo.principle_loads:
             
-            test.append(applied_loads[kind])
+#             test.append(applied_loads[kind])
     
-        if any(test):
+#         if any(test):
             
-            sls_combos_trim.append(combo)
+#             sls_combos_trim.append(combo)
             
-    print('Reduced SLS Combinations:')
-    for combo in sls_combos_trim:
-        print(combo.FormulaString()) 
+#     print('Reduced SLS Combinations:')
+#     for combo in sls_combos_trim:
+#         print(combo.FormulaString()) 
                 
 
-    basic_combos_trim = []
-    for combo in basic_combos:
+#     basic_combos_trim = []
+#     for combo in basic_combos:
         
-        test = []
-        for kind in combo.principle_loads:
+#         test = []
+#         for kind in combo.principle_loads:
             
-            test.append(applied_loads[kind])
+#             test.append(applied_loads[kind])
     
-        if any(test):
+#         if any(test):
             
-            basic_combos_trim.append(combo)
+#             basic_combos_trim.append(combo)
             
-    print('Reduced BASIC Combinations:')
-    for combo in basic_combos_trim:
-        print(combo.FormulaString()) 
+#     print('Reduced BASIC Combinations:')
+#     for combo in basic_combos_trim:
+#         print(combo.FormulaString()) 
 
-    patterns = LC.Full_LoadPatterns(3)
-    aci_pats = LC.ACI_LoadPatterns(3, False)
+#     patterns = LC.Full_LoadPatterns(3)
+#     aci_pats = LC.ACI_LoadPatterns(3, False)
 
-    off_patt = {"L":0}
+#     off_patt = {"L":0}
 
-    beam.addLoads(loads)
+#     beam.addLoads(loads)
 
-    beam.flexibility_analyze(uls_combos_trim,patterns,off_patt)
-    beam.flexibility_analyze(basic_combos_trim,patterns,off_patt)
-    beam.flexibility_analyze(sls_combos_trim,patterns,off_patt)
+#     beam.flexibility_analyze(uls_combos_trim,patterns,off_patt)
+#     beam.flexibility_analyze(basic_combos_trim,patterns,off_patt)
+#     beam.flexibility_analyze(sls_combos_trim,patterns,off_patt)
 
-    beam.ULS_envelopes()
-    beam.SLS_envelopes()
+#     beam.ULS_envelopes()
+#     beam.SLS_envelopes()
 
-    fig, ax1 = plt.subplots()
+#     fig, ax1 = plt.subplots()
 
-    ax1.plot(beam.chartstations,beam.Ds_max, linewidth=2.0)
-    ax1.plot(beam.chartstations,beam.Ds_min, linewidth=1.0)
+#     ax1.plot(beam.chartstations,beam.Ds_max, linewidth=2.0)
+#     ax1.plot(beam.chartstations,beam.Ds_min, linewidth=1.0)
 
-    plt.show()
+#     plt.show()

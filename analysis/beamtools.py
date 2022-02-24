@@ -107,13 +107,16 @@ def eval_piece_function(piece_function,x):
     Given a peicewise function and an x evaluate the results
     '''
 
-    for line in piece_function:
-        if line[1][0] == 0 and x == 0:
-            res = poly_eval(line[0], x)
-        if line[1][0] < x <= line[1][1]:
-            res = poly_eval(line[0], x)
-        else:
-            pass
+    if piece_function == []:
+        res = 0
+    else:
+        for line in piece_function:
+            if line[1][0] == 0 and x == 0:
+                res = poly_eval(line[0], x)
+            if line[1][0] < x <= line[1][1]:
+                res = poly_eval(line[0], x)
+            else:
+                pass
 
     return res
 

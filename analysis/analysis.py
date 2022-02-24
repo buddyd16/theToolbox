@@ -166,7 +166,7 @@ def web_simplebeam():
             computation = anal_calc.SimpleBeam(inputs)
 
             # store the results for use by the Jinja templating
-            results = None
+            results = computation
         else:
             # store the results for use by the Jinja templating
             results = None
@@ -197,7 +197,7 @@ def web_simplebeam():
                   "pointLoads": [[0, 0, "D"]],
                   "pointMoments": [[0, 0, "D"]]}
 
-        results = 1
+        results = None
 
     return render_template('analysis/simplebeam.html',
                            inputs=inputs,

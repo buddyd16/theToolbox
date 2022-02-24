@@ -65,9 +65,9 @@ def SimpleBeam(inputs):
                      "Ex": False,
                      "Ey": False}
 
-    ############################################################################
+    ###########################################################################
     # Loads Pre-Process
-    ############################################################################
+    ###########################################################################
 
     # List the non-0 loads
     Loads = []
@@ -133,13 +133,13 @@ def SimpleBeam(inputs):
                 if not applied_loads[k]:
                     applied_loads[k] = True
 
-    ############################################################################
+    ###########################################################################
     # End Loads Pre-Process
-    ############################################################################
+    ###########################################################################
 
-    ############################################################################
+    ###########################################################################
     # Create and Process the Load Combinations
-    ############################################################################
+    ###########################################################################
 
     # Combo parameters
     IBC_f1 = inputs['f1']
@@ -204,13 +204,13 @@ def SimpleBeam(inputs):
     for combo in basic_combos:
         print(combo.FormulaString())
 
-    ############################################################################
+    ###########################################################################
     # End of the Load Combination Processing
-    ############################################################################
+    ###########################################################################
 
-    ############################################################################
+    ###########################################################################
     # Begin Geometry
-    ############################################################################
+    ###########################################################################
 
     # Get the material and section properties
     # and convert them to a consistent unit set
@@ -312,14 +312,13 @@ def SimpleBeam(inputs):
                 "S": inputs['offPat'][2],
                 "R": inputs['offPat'][3], }
 
-    print(off_patt)
-    ############################################################################
+    ###########################################################################
     # End Geometry
-    ############################################################################
+    ###########################################################################
 
-    ############################################################################
+    ###########################################################################
     # Process the Loads to their analytical class
-    ############################################################################
+    ###########################################################################
 
     # Get the main beam span set inlcuding interior supports
     mainSpans = mainBeam.spans()
@@ -343,10 +342,6 @@ def SimpleBeam(inputs):
     if cantRight is not None:
         globalSpans.append(cantRight.span+globalSpans[-1])
 
-    print(mainSpans)
-    print(globalSpans)
-    print(spanIDs)
-
     cantLeftLoads = []
     mainbeamLoads = []
     cantRightLoads = []
@@ -356,35 +351,373 @@ def SimpleBeam(inputs):
         type = load[0]
         kind = load[-1]
 
+        ##############################
+        # Point and Moment Load Types
+        ##############################
         if type == "POINT" or type == "MOMENT":
             p = load[1]
             a = load[2]
             # Get the index of the span start point
             # that is greater than a
-            globalIndex = next(
-                x for x, val in enumerate(globalSpans) if val > a)
+            globalIndex = next(x for x, val in enumerate(globalSpans) if val >= a)
             loadspanID = spanIDs[globalIndex]
 
             if cantLeft is not None and loadspanID == 1:
                 if type == "POINT":
                     cantLeftLoads.append(ebl.cant_left_point(
                         p, a, cantLeft.span, 0, kind, loadspanID))
+
+                    # Capture the end moment and shear applied to
+                    # the main span from the cantilever load here
+                    m = cantLeftLoads[-1].mr
+                    mainbeamLoads.append(ebl.point_moment(
+                        m, 0, mainBeam.span, kind, loadspanID))
+                    mainbeamLoads.append(
+                        ebl.pl(p, 0, mainBeam.span, kind, loadspanID))
+
                 else:
                     cantLeftLoads.append(ebl.cant_left_point_moment(
                         p, a, cantLeft.span, 0, kind, loadspanID))
 
-            if cantRight is not None and loadspanID == spanIDs[-1]:
+                    # Capture the end moment and shear applied to
+                    # the main span from the cantilever load here
+                    m = cantLeftLoads[-1].mr
+                    mainbeamLoads.append(ebl.point_moment(
+                        m, 0, mainBeam.span, kind, loadspanID))
+
+            elif cantRight is not None and loadspanID == spanIDs[-1]:
                 # if this is the right cantilever we need to subtract out
-                # the x coordinate of the left end of the beam from a
+                # the x coordinate of the right most support from a
                 # to give a in terms of the local length of the beam.
                 xa = a - nodes[-2].x
                 if type == "POINT":
                     cantRightLoads.append(ebl.cant_right_point(
                         p, xa, cantRight.span, 0, kind, loadspanID))
+
+                    # Capture the end moment and shear applied to
+                    # the main span from the cantilever load here
+                    m = -1*cantRightLoads[-1].ml
+                    mainbeamLoads.append(ebl.point_moment(
+                        m, mainBeam.span, mainBeam.span, kind, loadspanID))
+                    mainbeamLoads.append(ebl.pl(
+                            p, mainBeam.span, mainBeam.span, kind, loadspanID))
                 else:
                     cantRightLoads.append(ebl.cant_right_point_moment(
                         p, xa, cantRight.span, 0, kind, loadspanID))
 
-    ############################################################################
+                    # Capture the end moment and shear applied to
+                    # the main span from the cantilever load here
+                    m = -1*cantRightLoads[-1].ml
+                    mainbeamLoads.append(ebl.point_moment(
+                        m, mainBeam.span, mainBeam.span, kind, loadspanID))
+            else:
+                # checked if cantilevers were active and the spanID matched
+                # only remaining option is the load is in the main span
+
+                # knowing the load is in the main span
+                # subtract the left support node x value from a
+                # if there is no left overhange then we will be subtracting 0
+                # This will get the load point relative to the main beam local span
+                xa = a - mainBeam.node_i.x
+
+                if type == "POINT":
+                    mainbeamLoads.append(
+                        ebl.pl(p, xa, mainBeam.span, kind, loadspanID))
+                else:
+                    mainbeamLoads.append(
+                        ebl.point_moment(p, xa, mainBeam.span, kind, loadspanID))
+
+            ##############################
+            # End Point and Moment Load Types
+            ##############################
+
+            ##############################
+            # Variable (TRAP) Load Types
+            ##############################
+        else:
+            # Only Load types entering function are TRAP,POINT,MOMENT
+            # alreaddy checked above for POINT and MOMENT so no need for
+            # an elif here, just need the else.
+
+            # [type, w1, w2, a, b, k]
+            # [0,1,2,3,4,5]
+            w1 = load[1]
+            w2 = load[2]
+            a = load[3]
+            b = load[4]
+
+            # Since the load is applied over some finite length
+            # step through each span and solve the parametric eqn
+            # for the load length for t, if t is between 0 and 1
+            # then all or a portion of the load applies in the span
+            for i, span in enumerate(globalSpans):
+                # span = a + t (b-a)
+                # t < 0 then load starts after current span
+                # t >= 1 then the whole load is before the span
+                t = (span - a)/(b-a) # whoops need to validate b-a != 0
+
+                if t < 0:
+                    # load starts after span
+                    pass
+                elif i == 0 and t >= 0:
+                    # entire load is in the first span
+                    if t > 1:
+                        # load entirely in the first span
+                        if cantLeft is not None:
+                            # load applies to the cantilever
+                            cantLeftLoads.append(
+                                ebl.cant_left_trap(w1,w2,a,b,cantLeft.span,0,kind,spanIDs[i]))
+                            # Catch the loads at the support from the cantilever
+                            # here and apply them to the ebam
+                            p = cantLeftLoads[-1].rr
+                            m = cantLeftLoads[-1].mr
+                            mainbeamLoads.append(
+                                ebl.pl(p,0,mainBeam.span,kind,spanIDs[i]))
+                            mainbeamLoads.append(
+                                ebl.point_moment(m,0,mainBeam.span,kind,spanIDs[i]))
+                        
+                        else:
+                            # limitation of the app is you need a main span to have
+                            # a right cantilever, and globalSpans includes the
+                            # interior spans of the main span so we can apply
+                            # the load to the whole first span and it will be on
+                            # the mainbeam and in the mainbeams local coordinates.
+
+                            mainbeamLoads.append(
+                                ebl.trap(w1,w2,a,b,mainBeam.span,kind,spanIDs[i]))
+                    else:
+                        # load extends beyond first span
+                        # interpolate w2
+                        wc = w1 + (t*(w2-w1))
+                        c = span
+
+                        if cantLeft is not None:
+                            # load applies to the cantilever
+                            cantLeftLoads.append(
+                                ebl.cant_left_trap(w1,wc,a,c,cantLeft.span,0,kind,spanIDs[i]))
+                            # Catch the loads at the support from the cantilever
+                            # here and apply them to the ebam
+                            p = cantLeftLoads[-1].rr
+                            m = cantLeftLoads[-1].mr
+                            mainbeamLoads.append(
+                                ebl.pl(p,0,mainBeam.span,kind,spanIDs[i]))
+                            mainbeamLoads.append(
+                                ebl.point_moment(m,0,mainBeam.span,kind,spanIDs[i]))
+                        else:
+                            # limitation of the app is you need a main span to have
+                            # a right cantilever, and globalSpans includes the
+                            # interior spans of the main span so we can apply
+                            # the load to the whole first span and it will be on
+                            # the mainbeam and in the mainbeams local coordinates.
+
+                            mainbeamLoads.append(
+                                ebl.trap(w1,wc,a,c,mainBeam.span,kind,spanIDs[i]))
+
+                elif span != globalSpans[-1] and t > 0:
+                    # if we are not in the end span and we are not in the first
+                    # span then we are at some intermediate span within the main
+                    # span.
+
+                    # determine t for the previous span
+                    tp = (globalSpans[i-1]-a)/(b-a)
+
+                    # tp < 0 load starts in the span
+                    # tp >= 0 load starts at or prior to the span
+                    if tp <= 0:
+                        # the load starts in or at this span
+                        # subtract the left support x from a to get
+                        # a in the local system of the mainbeam
+                        xa = a - mainBeam.node_i.x
+                        
+                        # determine if w2 needs to be truncated
+                        if t <= 1:
+                            # then then the load encompasses the span
+                            # interpolate w2 and b
+                            wc = w1 + (t*(w2-w1))
+                            c = a + (t*(b-a))
+
+                            # c is in the global system need to subtract the 
+                            # left support x to get it to local
+                            xc = c - mainBeam.node_i.x
+
+                            mainbeamLoads.append(
+                                ebl.trap(w1,wc,xa,xc,mainBeam.span,kind,spanIDs[i]))
+                        else:
+                            # other option is t > 1 which means the load ends
+                            # in this span, and W2 does not need to be interpolated
+
+                            # b is in the global system need to subtract the 
+                            # left support x to get it to local
+                            xb = b - mainBeam.node_i.x
+
+                            mainbeamLoads.append(
+                                ebl.trap(w1,w2,xa,xb,mainBeam.span,kind,spanIDs[i]))
+                    else:
+                        # the load started prior to this span
+                        # interpolate w1
+                        wc = w1 + (tp*(w2-w1))
+                        # locally the load start point is the span start point
+                        xc = globalSpans[i-1] - mainBeam.node_i.x
+
+                        if t<=1:
+                            # then the load encompasses the span
+                            # interpolate w2 and b
+                            wd = w1 + (t*(w2-w1))
+                            d = a + (t*(b-a))
+
+                            xd = d - mainBeam.node_i.x
+
+                            mainbeamLoads.append(
+                                ebl.trap(wc,wd,xc,xd,mainBeam.span,kind,spanIDs[i]))
+                        elif t>1 and tp>=1:
+                            # Loads ends at the beginning of this span
+                            pass
+                        else:
+                            # other option is t>1 which means the load ends
+                            # in this span, and W2 does not require interpolation
+
+                            xb = b - mainBeam.node_i.x
+
+                            mainbeamLoads.append(
+                                ebl.trap(wc,w2,xc,xb,mainBeam.span,kind,spanIDs[i]))
+
+                elif span == globalSpans[-1] and t > 0:
+                    # we are in the last span
+                    # determine t for the previous span
+                    tp = (globalSpans[i-1]-a)/(b-a)
+
+                    # tp < 0 load starts in the span
+                    # tp >= 0 load starts at or prior to the span
+                    if tp <= 0:
+                        # load starts at or in this span
+
+                        if cantRight is not None:
+                            # a needs to be converted to the cantilever
+                            # local system
+                            xa = a - mainBeam.node_j.x
+
+                            # assume the load end point was not allowed
+                            # to go off the beam end
+                            xb = b - mainBeam.node_j.x
+
+                            cantRightLoads.append(
+                                ebl.cant_right_trap(w1,w2,xa,xb,cantRight.span,0,kind,spanIDs[i]))
+                            
+                            # Capture the end moment and shear applied to
+                            # the main span from the cantilever load here
+                            m = -1*cantRightLoads[-1].ml
+                            p = cantRightLoads[-1].rl
+                            mainbeamLoads.append(ebl.point_moment(
+                                m, mainBeam.span, mainBeam.span, kind, spanIDs[i]))
+                            mainbeamLoads.append(ebl.pl(
+                                    p, mainBeam.span, mainBeam.span, kind, spanIDs[i]))
+                        else:
+                            # we are in the last span of the main beam
+                            xa = a - mainBeam.node_i.x
+                            xb = b - mainBeam.node_i.x
+
+                            mainbeamLoads.append(
+                                ebl.trap(w1,w2,xa,xb,mainBeam.span,kind,spanIDs[i])
+                            )
+                    else:
+                        # Loaded started prior to this span
+                        # interpolate w1
+                        wc = w1 + (tp*(w2-w1))
+
+                        if cantRight is not None:
+                            # locally the load start point is the span start point
+                            xc = globalSpans[i-1] - mainBeam.node_j.x
+
+                            # assume the load end point was not allowed
+                            # to go off the beam end
+                            xb = b - mainBeam.node_j.x
+
+                            cantRightLoads.append(
+                                ebl.cant_right_trap(wc,w2,xc,xb,cantRight.span,0,kind,spanIDs[i]))
+
+                            # Capture the end moment and shear applied to
+                            # the main span from the cantilever load here
+                            m = -1*cantRightLoads[-1].ml
+                            p = cantRightLoads[-1].rl
+                            mainbeamLoads.append(ebl.point_moment(
+                                m, mainBeam.span, mainBeam.span, kind, spanIDs[i]))
+                            mainbeamLoads.append(ebl.pl(
+                                    p, mainBeam.span, mainBeam.span, kind, spanIDs[i]))
+                        else:
+                            # we are in the last beam span
+                            xc = globalSpans[i-1] - mainBeam.node_i.x
+                            xb = b - mainBeam.node_i.x
+
+                            mainbeamLoads.append(
+                                ebl.trap(wc,w2,xc,xb,mainBeam.span,kind,spanIDs[i]))
+
+                else:
+                    # if we don't meet any of the previous criteria maybe the
+                    # load data is bad, so just skip it
+                    pass
+
+    ###########################################################################
     # End Process the Loads to their analytical class
-    ############################################################################
+    ###########################################################################
+
+    ###########################################################################
+    # Apply Loads to the beams
+    ###########################################################################
+
+    if cantLeft is not None:
+        cantLeft.addLoads(cantLeftLoads)
+    
+    if cantRight is not None:
+        cantRight.addLoads(cantRightLoads)
+    
+    mainBeam.addLoads(mainbeamLoads)
+
+    ###########################################################################
+    # End Apply Loads to the beams
+    ###########################################################################
+
+    ###########################################################################
+    # Analyze the beams
+    ###########################################################################
+    mainBeam.computation_stations()
+
+    mainBeam.flexibility_analyze(uls_combos,patterns,off_patt)
+    mainBeam.flexibility_analyze(basic_combos,patterns,off_patt)
+    mainBeam.flexibility_analyze(sls_combos,patterns,off_patt)
+
+    mainBeam.ULS_envelopes()
+    mainBeam.SLS_envelopes()
+
+    for load in mainBeam.Loads:
+        if load.kind == "TRAP":
+            print(load.w1)
+            print(load.w2)
+            print(load.a)
+            print(load.b)
+            print(load.L)
+
+    if cantLeft is not None:
+        cantLeft.computation_stations()
+
+        cantLeft.flexibility_analyze(uls_combos,patterns,off_patt)
+        cantLeft.flexibility_analyze(basic_combos,patterns,off_patt)
+        cantLeft.flexibility_analyze(sls_combos,patterns,off_patt)
+
+        cantLeft.ULS_envelopes()
+        cantLeft.SLS_envelopes()
+
+    if cantRight is not None:
+        cantRight.computation_stations()
+
+        cantRight.flexibility_analyze(uls_combos,patterns,off_patt)
+        cantRight.flexibility_analyze(basic_combos,patterns,off_patt)
+        cantRight.flexibility_analyze(sls_combos,patterns,off_patt)
+
+        cantRight.ULS_envelopes()
+        cantRight.SLS_envelopes()
+
+    ###########################################################################
+    # End Analyze the beams
+    ###########################################################################
+
+    return {"mainbeam": mainBeam, "cantleft": cantLeft, "cantright": cantRight}
