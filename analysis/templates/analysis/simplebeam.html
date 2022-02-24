@@ -638,4 +638,135 @@
     </form>
 </div>
 
+{% if results != None %}
+<script>
+    let mu_max_main = {{results['mainbeam'].Mu_max|safe}};
+    let mu_min_main = {{results['mainbeam'].Mu_min|safe}};
+    let x_main = {{results['mainbeam'].chartstations|safe}};
+
+    var mu_max = {
+        x: x_main,
+        y: mu_max_main,
+        type: 'scatter',
+        name: 'Mu,max (main)'
+    };
+
+    var mu_min = {
+        x: x_main,
+        y: mu_min_main,
+        type: 'scatter',
+        name: 'Mu,min (main)'
+    };
+
+    {% if results['cantleft'] != None %}
+        let x_left = {{results['cantleft'].chartstations|safe}};
+        let mu_max_left = {{results['cantleft'].Mu_max|safe}};
+        let mu_min_left = {{results['cantleft'].Mu_min|safe}};
+        let vu_max_left = {{results['cantleft'].Vu_max|safe}};
+        let vu_min_left = {{results['cantleft'].Vu_min|safe}};
+    {% else %}
+        let x_left = [0];
+        let mu_max_left = [0];
+        let mu_min_left = [0];
+        let vu_max_left = [0];
+        let vu_min_left = [0];
+    {% endif %}
+
+    var left_mu_max = {
+        x: x_left,
+        y: mu_max_left,
+        type: 'scatter',
+        name: 'Mu,max (left)'
+    };
+
+    var left_mu_min = {
+        x: x_left,
+        y: mu_min_left,
+        type: 'scatter',
+        name: 'Mu,min (left)'
+    };
+
+    {% if results['cantright'] != None %}
+        let x_right = {{results['cantright'].chartstations|safe}};
+        let mu_max_right = {{results['cantright'].Mu_max|safe}};
+        let mu_min_right = {{results['cantright'].Mu_min|safe}};
+        let vu_max_right = {{results['cantright'].Vu_max|safe}};
+        let vu_min_right = {{results['cantright'].Vu_min|safe}};
+    {% else %}
+        let x_right = [0];
+        let mu_max_right = [0];
+        let mu_min_right = [0];
+        let vu_max_right = [0];
+        let vu_min_right = [0];
+    {% endif %}
+
+    var right_mu_max = {
+        x: x_right,
+        y: mu_max_right,
+        type: 'scatter',
+        name: 'Mu,max (right)'
+    };
+
+    var right_mu_min = {
+        x: x_right,
+        y: mu_min_right,
+        type: 'scatter',
+        name: 'Mu,min (right)'
+    };
+
+    var mu_envelope = [mu_max,mu_min, left_mu_max, left_mu_min, right_mu_max, right_mu_min];
+
+    Plotly.newPlot("MuEnvelopePlot", mu_envelope);
+
+    let vu_max_main = {{results['mainbeam'].Vu_max|safe}};
+    let vu_min_main = {{results['mainbeam'].Vu_min|safe}};
+
+    var vu_max = {
+        x: x_main,
+        y: vu_max_main,
+        type: 'scatter',
+        name: 'Vu,max (main)'
+    };
+
+    var vu_min = {
+        x: x_main,
+        y: vu_min_main,
+        type: 'scatter',
+        name: 'Vu,min (main)'
+    };
+
+    var left_vu_max = {
+        x: x_left,
+        y: vu_max_left,
+        type: 'scatter',
+        name: 'Vu,max (left)'
+    };
+
+    var left_vu_min = {
+        x: x_left,
+        y: vu_min_left,
+        type: 'scatter',
+        name: 'Vu,min (left)'
+    };
+
+    var right_vu_max = {
+        x: x_right,
+        y: vu_max_right,
+        type: 'scatter',
+        name: 'Vu,max (right)'
+    };
+
+    var right_vu_min = {
+        x: x_right,
+        y: vu_min_right,
+        type: 'scatter',
+        name: 'Vu,min (right)'
+    };
+
+    var vu_envelope = [vu_max,vu_min, left_vu_max, left_vu_min, right_vu_max, right_vu_min];
+    
+    Plotly.newPlot("VuEnvelopePlot", vu_envelope);
+</script>
+{% endif %}
+
 {% endblock content %}
