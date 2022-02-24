@@ -316,7 +316,7 @@ class Beam2D():
                             
                             if load.loadtype == f'{combo_key}{pattern_key}':
                                 # if the load is a result of the current combination
-                                # and pattern set the LF to 0.
+                                # and pattern set the LF to 1.
                                 # this will be used to set the start slopes for
                                 # cantilevers
                                 
@@ -581,6 +581,45 @@ class Beam2D():
                     else:
                         self.Ds_max = [max(k,(conv*j)/(self.Em*self.Ixx)) for k,j in zip(self.Ds_max,eidtemp)]
                         self.Ds_min = [min(k,(conv*j)/(self.Em*self.Ixx)) for k,j in zip(self.Ds_min,eidtemp)]
+    
+    def slope_to_cant(self,other_beam,left=True):
+
+        output_loads = []
+        if left:
+            x = 0
+        
+        else:
+            x = self.span
+        
+        for combo, pat_dict in self.eis_functions_basic.items():
+            combo_key = combo
+
+            for pat, eis_func in pat_dict.items():
+                pat_key = pat
+                load_type = f'{combo_key}{pat_key}'
+
+                slope = bmtools.eval_piece_function(eis_func,x)
+
+                if left:
+                    output_loads.append(ebl.cant_left_slope(slope, other_beam.span,load_type, self.id))
+                else:
+                    output_loads.append(ebl.cant_right_slope(slope, other_beam.span,load_type, self.id))
+        
+        for combo, pat_dict in self.eis_functions_sls.items():
+            combo_key = combo
+
+            for pat, eis_func in pat_dict.items():
+                pat_key = pat
+                load_type = f'{combo_key}{pat_key}'
+
+                slope = bmtools.eval_piece_function(eis_func,x)
+
+                if left:
+                    output_loads.append(ebl.cant_left_slope(slope, other_beam.span,load_type, self.id))
+                else:
+                    output_loads.append(ebl.cant_right_slope(slope, other_beam.span,load_type, self.id))
+        
+        return output_loads
 
 # Test Area #
 

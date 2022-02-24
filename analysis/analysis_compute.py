@@ -26,6 +26,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # These imports are for when flask is live
 
+import enum
 import analysis.geometry2D as g2d
 import analysis.ebloads as ebl
 import analysis.loadcombos as LC
@@ -45,7 +46,9 @@ import analysis.beam2D as b2d
 import math
 
 
-def SimpleBeam(inputs):
+def SimpleBeam(inputs, log=True):
+
+    computation_log = []
 
     LoadKinds = ['D', 'F', 'L', 'H', 'Lr', 'S', 'R', 'Wx', 'Wy', 'Ex', 'Ey']
 
@@ -133,6 +136,12 @@ def SimpleBeam(inputs):
                 if not applied_loads[k]:
                     applied_loads[k] = True
 
+    if log:
+        computation_log.append("Raw Load Input :")
+
+        for load in Loads:
+            computation_log.append(f"{load}")
+
     ###########################################################################
     # End Loads Pre-Process
     ###########################################################################
@@ -187,10 +196,6 @@ def SimpleBeam(inputs):
         if any(test):
             uls_combos.append(combo)
 
-    print('Reduced ULS Combinations:')
-    for combo in uls_combos:
-        print(combo.FormulaString())
-
     # Trim out Basic Combos
     basic_combos = []
     for combo in basic_combos_bulk:
@@ -199,10 +204,38 @@ def SimpleBeam(inputs):
             test.append(applied_loads[kind])
         if any(test):
             basic_combos.append(combo)
+    
+    if log:
+        computation_log.append("Load Combination Processing :")
+        computation_log.append('Applied Load Type Key:')
+        for k,v in applied_loads.items():
+            computation_log.append(f'{k} : {v}')
+        
+        computation_log.append('IBC f1,f2:')
+        computation_log.append(f"f1:{IBC_f1}")
+        computation_log.append(f"f2:{IBC_f2}")
 
-    print('Reduced Basic Combinations:')
-    for combo in basic_combos:
-        print(combo.FormulaString())
+        computation_log.append(f'Lateral Reversal:{lateralReverse}')
+
+        computation_log.append('Full ULS Combinations:')
+        for combo in uls_combos_bulk:
+            computation_log.append(combo.FormulaString())
+
+        computation_log.append('Applied Reduced ULS Combinations:')
+        for combo in uls_combos:
+            computation_log.append(combo.FormulaString())
+
+        computation_log.append('Full Basic Combinations:')
+        for combo in basic_combos_bulk:
+            computation_log.append(combo.FormulaString())
+
+        computation_log.append('Applied Reduced Basic Combinations:')
+        for combo in basic_combos:
+            computation_log.append(combo.FormulaString())
+        
+        computation_log.append('Applied SLS Combinations:')
+        for combo in sls_combos:
+            computation_log.append(combo.FormulaString())
 
     ###########################################################################
     # End of the Load Combination Processing
@@ -255,8 +288,6 @@ def SimpleBeam(inputs):
     if overhangRight_ft != 0:
         num_spans += 1
 
-    print(f'# Spans: {num_spans}')
-
     if overhangLeft_ft != 0:
         n2 = g2d.Node2D(overhangLeft_ft, 0, "N2", 2)
         nodes.append(n2)
@@ -303,14 +334,44 @@ def SimpleBeam(inputs):
     else:
         patterns = LC.ACI_LoadPatterns(num_spans, False)
 
-    print('Load Patterns:')
-    print(patterns)
-
     # set the offPattern dictionary
     off_patt = {"L": inputs['offPat'][0],
                 "Lr": inputs['offPat'][1],
                 "S": inputs['offPat'][2],
                 "R": inputs['offPat'][3], }
+
+    if log:
+        computation_log.append('Geometry:')
+        computation_log.append(f'E: {E_ksi} ksi converted to E: {E_ksf} ksf')
+        computation_log.append(f'Ixx: {I_in4} in4 converted to Ixx: {I_ft4} ft4')
+        computation_log.append('Nodes:')
+        for node in nodes:
+            computation_log.append(f'Node:{node.userid} - Node #:{node.number} - ({node.x:4f},{node.y:4f})')
+        
+        computation_log.append(f"Left Overhang: {overhangLeft_ft} ft")
+        computation_log.append(f"Right Overhang: {overhangRight_ft} ft")
+
+        computation_log.append(f"Main span: {mainSpan_ft} ft")
+        computation_log.append("Additional Supports @ :")
+        for support in interiorSupports_ft:
+            computation_log.append(f"local: {support} ft -- global: {support+n1.x} ft")
+        computation_log.append(f'End Fixity: {endFixity}')
+
+        computation_log.append(f'Number of Spans: {num_spans}')
+        computation_log.append('Load Patterns:')
+
+        if num_spans < 7:
+            computation_log.append('Full Patterning')
+        else:
+            computation_log.append('ACI Reduced Patterning')
+
+        for pattern in patterns:
+            computation_log.append(f'{pattern}')
+        
+        computation_log.append('Off Pattern Factors:')
+        for k,v in off_patt.items():
+            computation_log.append(f'{k}: {v}')
+
 
     ###########################################################################
     # End Geometry
@@ -345,6 +406,12 @@ def SimpleBeam(inputs):
     cantLeftLoads = []
     mainbeamLoads = []
     cantRightLoads = []
+
+    if log:
+        computation_log.append("Process Loads to Analytical:")
+        computation_log.append("global Spans:")
+        for i,j in enumerate(globalSpans):
+            computation_log.append(f"{j} ft -- ID: {spanIDs[i]}")
 
     for load in Loads:
 
@@ -446,6 +513,9 @@ def SimpleBeam(inputs):
             a = load[3]
             b = load[4]
 
+            print("globalspans:")
+            print(globalSpans)
+
             # Since the load is applied over some finite length
             # step through each span and solve the parametric eqn
             # for the load length for t, if t is between 0 and 1
@@ -456,14 +526,26 @@ def SimpleBeam(inputs):
                 # t >= 1 then the whole load is before the span
                 t = (span - a)/(b-a) # whoops need to validate b-a != 0
 
+                # test 1
                 if t < 0:
                     # load starts after span
                     pass
+
+                # test 2
                 elif i == 0 and t >= 0:
                     # entire load is in the first span
+
+                    # test 2-1a
                     if t > 1:
                         # load entirely in the first span
+                        
+                        # test 2-1aa
                         if cantLeft is not None:
+                            print("test 2-1aa -- w/cantLeft")
+                            print(f"w1:{w1},w2:{w2},a:{a},b:{b},{kind},id:{spanIDs[i]}")
+                            if log:
+                                computation_log.append("test 2-1aa -- w/cantLeft")
+                                computation_log.append(f"w1:{w1},w2:{w2},a:{a},b:{b},{kind},id:{spanIDs[i]}")
                             # load applies to the cantilever
                             cantLeftLoads.append(
                                 ebl.cant_left_trap(w1,w2,a,b,cantLeft.span,0,kind,spanIDs[i]))
@@ -476,7 +558,13 @@ def SimpleBeam(inputs):
                             mainbeamLoads.append(
                                 ebl.point_moment(m,0,mainBeam.span,kind,spanIDs[i]))
                         
+                        #test 2-1ab
                         else:
+                            print("test 2-1ab -- no cantLeft")
+                            print(f"w1:{w1},w2:{w2},a:{a},b:{b},{kind},id:{spanIDs[i]}")
+                            if log:
+                                computation_log.append("test 2-1ab -- no cantLeft")
+                                computation_log.append(f"w1:{w1},w2:{w2},a:{a},b:{b},{kind},id:{spanIDs[i]}")
                             # limitation of the app is you need a main span to have
                             # a right cantilever, and globalSpans includes the
                             # interior spans of the main span so we can apply
@@ -485,13 +573,21 @@ def SimpleBeam(inputs):
 
                             mainbeamLoads.append(
                                 ebl.trap(w1,w2,a,b,mainBeam.span,kind,spanIDs[i]))
+                    
+                    # test 2-1b
                     else:
                         # load extends beyond first span
                         # interpolate w2
                         wc = w1 + (t*(w2-w1))
                         c = span
-
+                        
+                        # test 2-1ba
                         if cantLeft is not None:
+                            print("test 2-1ba -- w/ cantLeft")
+                            print(f"w1:{w1},w2:{wc},a:{a},b:{c},{kind},id:{spanIDs[i]}")
+                            if log:
+                                computation_log.append("test 2-1ba -- w/ cantLeft")
+                                computation_log.append(f"w1:{w1},w2:{wc},a:{a},b:{c},{kind},id:{spanIDs[i]}")
                             # load applies to the cantilever
                             cantLeftLoads.append(
                                 ebl.cant_left_trap(w1,wc,a,c,cantLeft.span,0,kind,spanIDs[i]))
@@ -503,7 +599,16 @@ def SimpleBeam(inputs):
                                 ebl.pl(p,0,mainBeam.span,kind,spanIDs[i]))
                             mainbeamLoads.append(
                                 ebl.point_moment(m,0,mainBeam.span,kind,spanIDs[i]))
+                        
+                        # test 2-1bb
                         else:
+                            print("test 2-1bb -- no cantLeft")
+                            print(f"w1:{w1},w2:{wc},a:{a},b:{c},{kind},id:{spanIDs[i]}")
+
+                            if log:
+                                computation_log.append("test 2-1bb -- no cantLeft")
+                                computation_log.append(f"w1:{w1},w2:{wc},a:{a},b:{c},{kind},id:{spanIDs[i]}")
+
                             # limitation of the app is you need a main span to have
                             # a right cantilever, and globalSpans includes the
                             # interior spans of the main span so we can apply
@@ -513,6 +618,7 @@ def SimpleBeam(inputs):
                             mainbeamLoads.append(
                                 ebl.trap(w1,wc,a,c,mainBeam.span,kind,spanIDs[i]))
 
+                # test 2-2
                 elif span != globalSpans[-1] and t > 0:
                     # if we are not in the end span and we are not in the first
                     # span then we are at some intermediate span within the main
@@ -523,6 +629,8 @@ def SimpleBeam(inputs):
 
                     # tp < 0 load starts in the span
                     # tp >= 0 load starts at or prior to the span
+
+                    # test 2-2a
                     if tp <= 0:
                         # the load starts in or at this span
                         # subtract the left support x from a to get
@@ -530,6 +638,8 @@ def SimpleBeam(inputs):
                         xa = a - mainBeam.node_i.x
                         
                         # determine if w2 needs to be truncated
+                        
+                        # test 2-2aa
                         if t <= 1:
                             # then then the load encompasses the span
                             # interpolate w2 and b
@@ -540,8 +650,17 @@ def SimpleBeam(inputs):
                             # left support x to get it to local
                             xc = c - mainBeam.node_i.x
 
+                            print("test 2-2aa")
+                            print(f"w1:{w1},w2:{wc},a:{xa},b:{xc},{kind},id:{spanIDs[i]}")
+
+                            if log:
+                                computation_log.append("test 2-2aa")
+                                computation_log.append(f"w1:{w1},w2:{wc},a:{xa},b:{xc},{kind},id:{spanIDs[i]}")
+
                             mainbeamLoads.append(
                                 ebl.trap(w1,wc,xa,xc,mainBeam.span,kind,spanIDs[i]))
+                        
+                        # test 2-2ab
                         else:
                             # other option is t > 1 which means the load ends
                             # in this span, and W2 does not need to be interpolated
@@ -550,8 +669,17 @@ def SimpleBeam(inputs):
                             # left support x to get it to local
                             xb = b - mainBeam.node_i.x
 
+                            print("test 2-2ab")
+                            print(f"w1:{w1},w2:{w2},a:{xa},b:{xb},{kind},id:{spanIDs[i]}")
+
+                            if log:
+                                computation_log.append("test 2-2ab")
+                                computation_log.append(f"w1:{w1},w2:{w2},a:{xa},b:{xb},{kind},id:{spanIDs[i]}")
+
                             mainbeamLoads.append(
                                 ebl.trap(w1,w2,xa,xb,mainBeam.span,kind,spanIDs[i]))
+
+                    # test 2-2b
                     else:
                         # the load started prior to this span
                         # interpolate w1
@@ -559,6 +687,7 @@ def SimpleBeam(inputs):
                         # locally the load start point is the span start point
                         xc = globalSpans[i-1] - mainBeam.node_i.x
 
+                        # test 2-2ba
                         if t<=1:
                             # then the load encompasses the span
                             # interpolate w2 and b
@@ -566,21 +695,45 @@ def SimpleBeam(inputs):
                             d = a + (t*(b-a))
 
                             xd = d - mainBeam.node_i.x
+                            
+                            print("test 2-2ba")
+                            print(f"w1:{wc},w2:{wd},a:{xc},b:{xd},{kind},id:{spanIDs[i]}")
+
+                            if log:
+                                computation_log.append("test 2-2ba")
+                                computation_log.append(f"w1:{wc},w2:{wd},a:{xc},b:{xd},{kind},id:{spanIDs[i]}")
 
                             mainbeamLoads.append(
                                 ebl.trap(wc,wd,xc,xd,mainBeam.span,kind,spanIDs[i]))
+
+                        # test 2-2bb
                         elif t>1 and tp>=1:
                             # Loads ends at the beginning of this span
+                            print("test 2-2bb")
+                            print("pass")
+                            if log:
+                                computation_log.append("test 2-2bb")
+                                computation_log.append("pass")
                             pass
+
+                        # test 2-2bc
                         else:
                             # other option is t>1 which means the load ends
                             # in this span, and W2 does not require interpolation
 
                             xb = b - mainBeam.node_i.x
 
+                            print("test 2-2bc")
+                            print(f"w1:{wc},w2:{w2},a:{xc},b:{xb},{kind},id:{spanIDs[i]}")
+
+                            if log:
+                                computation_log.append("test 2-2bc")
+                                computation_log.append(f"w1: {wc}, w2: {w2}, a: {xc}, b: {xb}, {kind}, id: {spanIDs[i]}")
+
                             mainbeamLoads.append(
                                 ebl.trap(wc,w2,xc,xb,mainBeam.span,kind,spanIDs[i]))
 
+                # test 2-3
                 elif span == globalSpans[-1] and t > 0:
                     # we are in the last span
                     # determine t for the previous span
@@ -588,9 +741,12 @@ def SimpleBeam(inputs):
 
                     # tp < 0 load starts in the span
                     # tp >= 0 load starts at or prior to the span
+
+                    # test 2-3a
                     if tp <= 0:
                         # load starts at or in this span
 
+                        # test 2-3aa
                         if cantRight is not None:
                             # a needs to be converted to the cantilever
                             # local system
@@ -599,6 +755,13 @@ def SimpleBeam(inputs):
                             # assume the load end point was not allowed
                             # to go off the beam end
                             xb = b - mainBeam.node_j.x
+
+                            print("test 2-3aa -- w/ cantRight")
+                            print(f"w1:{w1},w2:{w2},a:{xa},b:{xb},{kind},id:{spanIDs[i]}")
+
+                            if log:
+                                computation_log.append("test 2-3aa -- w/ cantRight")
+                                computation_log.append(f"w1:{w1},w2:{w2},a:{xa},b:{xb},{kind},id:{spanIDs[i]}")
 
                             cantRightLoads.append(
                                 ebl.cant_right_trap(w1,w2,xa,xb,cantRight.span,0,kind,spanIDs[i]))
@@ -611,19 +774,29 @@ def SimpleBeam(inputs):
                                 m, mainBeam.span, mainBeam.span, kind, spanIDs[i]))
                             mainbeamLoads.append(ebl.pl(
                                     p, mainBeam.span, mainBeam.span, kind, spanIDs[i]))
+                        # test 2-3ab
                         else:
                             # we are in the last span of the main beam
                             xa = a - mainBeam.node_i.x
                             xb = b - mainBeam.node_i.x
 
+                            print("test 2-3ab -- no cantRight")
+                            print(f"w1:{w1},w2:{w2},a:{xa},b:{xb},{kind},id:{spanIDs[i]}")
+
+                            if log:
+                                computation_log.append("test 2-3ab -- no cantRight")
+                                computation_log.append(f"w1:{w1},w2:{w2},a:{xa},b:{xb},{kind},id:{spanIDs[i]}")
+
                             mainbeamLoads.append(
-                                ebl.trap(w1,w2,xa,xb,mainBeam.span,kind,spanIDs[i])
-                            )
+                                ebl.trap(w1,w2,xa,xb,mainBeam.span,kind,spanIDs[i]))
+                    
+                    # test 2-3b
                     else:
                         # Loaded started prior to this span
                         # interpolate w1
                         wc = w1 + (tp*(w2-w1))
 
+                        # test 2-3ba
                         if cantRight is not None:
                             # locally the load start point is the span start point
                             xc = globalSpans[i-1] - mainBeam.node_j.x
@@ -632,26 +805,93 @@ def SimpleBeam(inputs):
                             # to go off the beam end
                             xb = b - mainBeam.node_j.x
 
-                            cantRightLoads.append(
-                                ebl.cant_right_trap(wc,w2,xc,xb,cantRight.span,0,kind,spanIDs[i]))
+                            # test 2-3baa
+                            if xc == xb:
+                                print("test 2-3baa")
+                                print("pass -- xc == xb")
+                                if log:
+                                    computation_log.append("test 2-3baa")
+                                    computation_log.append("pass -- xc == xb")
+                                pass
+                            
+                            # test 2-3bab
+                            elif xb < xc:
+                                print("test 2-3bab")
+                                print("pass -- xb < xc, load not in this span")
+                                if log:
+                                    computation_log.append("test 2-3bab")
+                                    computation_log.append("pass -- xb < xc, load not in this span")
+                                pass
+                            
+                            # test 2-3bac
+                            else:
+                                print("test 2-3bac -- w/ cantRight")
+                                print(f"w1:{wc},w2:{w2},a:{xc},b:{xb},{kind},id:{spanIDs[i]}")
 
-                            # Capture the end moment and shear applied to
-                            # the main span from the cantilever load here
-                            m = -1*cantRightLoads[-1].ml
-                            p = cantRightLoads[-1].rl
-                            mainbeamLoads.append(ebl.point_moment(
-                                m, mainBeam.span, mainBeam.span, kind, spanIDs[i]))
-                            mainbeamLoads.append(ebl.pl(
-                                    p, mainBeam.span, mainBeam.span, kind, spanIDs[i]))
+                                if log:
+                                    computation_log.append("test 2-3bac -- w/ cantRight")
+                                    computation_log.append(f"w1:{wc},w2:{w2},a:{xc},b:{xb},{kind},id:{spanIDs[i]}")
+
+                                cantRightLoads.append(
+                                    ebl.cant_right_trap(wc,w2,xc,xb,cantRight.span,0,kind,spanIDs[i]))
+
+                                # Capture the end moment and shear applied to
+                                # the main span from the cantilever load here
+                                m = -1*cantRightLoads[-1].ml
+                                p = cantRightLoads[-1].rl
+                                mainbeamLoads.append(ebl.point_moment(
+                                    m, mainBeam.span, mainBeam.span, kind, spanIDs[i]))
+                                mainbeamLoads.append(ebl.pl(
+                                        p, mainBeam.span, mainBeam.span, kind, spanIDs[i]))
+
+                        # test 2-3bb
                         else:
                             # we are in the last beam span
                             xc = globalSpans[i-1] - mainBeam.node_i.x
                             xb = b - mainBeam.node_i.x
 
-                            mainbeamLoads.append(
-                                ebl.trap(wc,w2,xc,xb,mainBeam.span,kind,spanIDs[i]))
+                            # one last check to see if we landed on a support
+                            # test 2-3bba
+                            if xc == xb:
 
+                                print("test 2-3bba")
+                                print("pass -- xc == xb")
+
+                                if log:
+                                    computation_log.append("test 2-3bba")
+                                    computation_log.append("pass -- xc == xb")
+
+                                pass
+                            
+                            # test 2-3bbb
+                            elif xb < xc:
+                                print("test 2-3bbb")
+                                print("pass -- xb < xc, load not in this span")
+                                if log:
+                                    computation_log.append("test 2-3bbb")
+                                    computation_log.append("pass -- xb < xc, load not in this span")
+                                pass
+                            # test 2-3bbc
+                            else:
+
+                                print("test 2-3bbc")
+                                print(f"w1:{wc},w2:{w2},a:{xc},b:{xb},{kind},id:{spanIDs[i]}")
+
+                                if log:
+                                    computation_log.append("test 2-3bbc")
+                                    computation_log.append(f"w1:{wc},w2:{w2},a:{xc},b:{xb},{kind},id:{spanIDs[i]}")
+
+                                mainbeamLoads.append(
+                                    ebl.trap(wc,w2,xc,xb,mainBeam.span,kind,spanIDs[i]))
+                # test 2-4
                 else:
+                    print("test 2-4")
+                    print("something wrong with load data")
+
+                    if log:
+                        computation_log.append("test 2-4")
+                        computation_log.append("something wrong with load data")
+
                     # if we don't meet any of the previous criteria maybe the
                     # load data is bad, so just skip it
                     pass
@@ -688,15 +928,14 @@ def SimpleBeam(inputs):
     mainBeam.ULS_envelopes()
     mainBeam.SLS_envelopes()
 
-    for load in mainBeam.Loads:
-        if load.kind == "TRAP":
-            print(load.w1)
-            print(load.w2)
-            print(load.a)
-            print(load.b)
-            print(load.L)
-
     if cantLeft is not None:
+
+        # need to correct the SLS and Basic starting slope to account
+        # for the joint rotation
+        cantLeftslopefrommain = mainBeam.slope_to_cant(cantLeft,True)
+
+        cantLeft.addLoads(cantLeftslopefrommain)
+
         cantLeft.computation_stations()
 
         cantLeft.flexibility_analyze(uls_combos,patterns,off_patt)
@@ -707,6 +946,13 @@ def SimpleBeam(inputs):
         cantLeft.SLS_envelopes()
 
     if cantRight is not None:
+
+        # need to correct the SLS and Basic starting slope to account
+        # for the joint rotation
+        cantRightslopefrommain = mainBeam.slope_to_cant(cantRight,False)
+
+        cantRight.addLoads(cantRightslopefrommain)
+
         cantRight.computation_stations()
 
         cantRight.flexibility_analyze(uls_combos,patterns,off_patt)
@@ -720,4 +966,4 @@ def SimpleBeam(inputs):
     # End Analyze the beams
     ###########################################################################
 
-    return {"mainbeam": mainBeam, "cantleft": cantLeft, "cantright": cantRight}
+    return {"mainbeam": mainBeam, "cantleft": cantLeft, "cantright": cantRight, "log": computation_log}
