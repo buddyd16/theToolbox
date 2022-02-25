@@ -267,14 +267,14 @@ function main() {
         var id_iterator = '_'+Number($("#distloadTable tbody tr").length + 1).toString()
         var $newRow = '<tr class=\"userDistLoad\">' +
                         '<td class=\"distloaduid\">D'+ id_iterator +'</td>' +
-                        '<td><input id=\"w1'+ id_iterator +'\" name=\"w1\" class=\"w1 input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0.0\"></td>' +
-                        '<td><input id=\"trib1'+ id_iterator +'\" name=\"trib1\" class=\"trib1 input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"1.0\"></td>' +
-                        '<td><input id=\"w2'+ id_iterator +'\" name=\"w2\" class=\"w2 input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0.0\"></td>' +
-                        '<td><input id=\"trib2'+ id_iterator +'\" name=\"trib2\" class=\"trib2 input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"1.0\"></td>' +
-                        '<td><input id=\"dista'+ id_iterator +'\" name=\"dista\" class=\"dista input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0.0\"></td>' +
-                        '<td><input id=\"distb'+ id_iterator +'\" name=\"distb\" class=\"distb input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"1.0\"></td>' +
+                        '<td><input id=\"w1'+ id_iterator +'\" name=\"w1\" class=\"w1 input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0.0\" onChange=\"UpdateChart();\"></td>' +
+                        '<td><input id=\"trib1'+ id_iterator +'\" name=\"trib1\" class=\"trib1 input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"1.0\" onChange=\"UpdateChart();\"></td>' +
+                        '<td><input id=\"w2'+ id_iterator +'\" name=\"w2\" class=\"w2 input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0.0\" onChange=\"UpdateChart();\"></td>' +
+                        '<td><input id=\"trib2'+ id_iterator +'\" name=\"trib2\" class=\"trib2 input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"1.0\" onChange=\"UpdateChart();\"></td>' +
+                        '<td><input id=\"dista'+ id_iterator +'\" name=\"dista\" class=\"dista input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0.0\" onChange=\"UpdateChart();\"></td>' +
+                        '<td><input id=\"distb'+ id_iterator +'\" name=\"distb\" class=\"distb input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"1.0\" onChange=\"UpdateChart();\"></td>' +
                         '<td>' +
-                        '<select id=\"distloadType\" class=\"distloadType input-sm\" name=\"distloadType\" style=\"width:95px\">' +
+                        '<select id=\"distloadType\" class=\"distloadType input-sm\" name=\"distloadType\" style=\"width:95px\" onChange=\"UpdateChart();\">' +
                         '<option value=\"D\"> D </option>' +
                         '<option value=\"F\"> F </option>' +
                         '<option value=\"L\"> L </option>' +
@@ -370,10 +370,10 @@ function main() {
         //new row
         var $newRow = '<tr class=\"userPointLoad\">' +
                         '<td class=\"pointloaduid\">P'+ Number($("#pointloadTable tbody tr").length + 1).toString() +'</td>' +
-                        '<td><input id=\"pointLoad'+ Number($("#pointloadTable tbody tr").length + 1).toString() +'\" name=\"pointLoad\" class=\"pointLoad input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0\"></td>' +
-                        '<td><input id=\"pointLoada'+ Number($("#pointloadTable tbody tr").length + 1).toString() +'\" name=\"pointLoada\" class=\"pointLoada input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0.0\"></td>' +
+                        '<td><input id=\"pointLoad'+ Number($("#pointloadTable tbody tr").length + 1).toString() +'\" name=\"pointLoad\" class=\"pointLoad input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0\" onChange=\"UpdateChart();\"></td>' +
+                        '<td><input id=\"pointLoada'+ Number($("#pointloadTable tbody tr").length + 1).toString() +'\" name=\"pointLoada\" class=\"pointLoada input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0.0\" onChange=\"UpdateChart();\"></td>' +
                         '<td>' +
-                        '<select id=\"pointloadType\" class=\"pointloadType input-sm\" name=\"pointloadType\" style=\"width:95px\">' +
+                        '<select id=\"pointloadType\" class=\"pointloadType input-sm\" name=\"pointloadType\" style=\"width:95px\" onChange=\"UpdateChart();\">' +
                         '<option value=\"D\"> D </option>' +
                         '<option value=\"F\"> F </option>' +
                         '<option value=\"L\"> L </option>' +
@@ -469,10 +469,10 @@ function main() {
         //new row
         var $newRow = '<tr class=\"userPointMoment\">' +
                         '<td class=\"pointmomentuid\">M'+ Number($("#pointmomentTable tbody tr").length + 1).toString() +'</td>' +
-                        '<td><input id=\"pointMoment'+ Number($("#pointmomentTable tbody tr").length + 1).toString() +'\" name=\"pointMoment\" class=\"pointMoment input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0\"></td>' +
-                        '<td><input id=\"pointMomenta'+ Number($("#pointmomentTable tbody tr").length + 1).toString() +'\" name=\"pointMomenta\" class=\"pointMomenta input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0.0\"></td>' +
+                        '<td><input id=\"pointMoment'+ Number($("#pointmomentTable tbody tr").length + 1).toString() +'\" name=\"pointMoment\" class=\"pointMoment input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0\" onChange=\"UpdateChart();\"></td>' +
+                        '<td><input id=\"pointMomenta'+ Number($("#pointmomentTable tbody tr").length + 1).toString() +'\" name=\"pointMomenta\" class=\"pointMomenta input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0.0\" onChange=\"UpdateChart();\"></td>' +
                         '<td>' +
-                        '<select id=\"pointMomentType\" class=\"pointMomentType input-sm\" name=\"pointMomentType\" style=\"width:95px\">' +
+                        '<select id=\"pointMomentType\" class=\"pointMomentType input-sm\" name=\"pointMomentType\" style=\"width:95px\" onChange=\"UpdateChart();\">' +
                         '<option value=\"D\"> D </option>' +
                         '<option value=\"F\"> F </option>' +
                         '<option value=\"L\"> L </option>' +
@@ -559,129 +559,6 @@ function main() {
         UpdateChart();
     });
 
-    function UpdateChart(){
-        // Get the canvas element size
-        var canvas = document.getElementById("bmCanvas");
-        var canvas_x = canvas.width;
-        var canvas_y = canvas.height;
-        var ctx = canvas.getContext("2d");
-
-        // Clear the Canvas
-        ctx.clearRect(0,0,canvas_x, canvas_y);
-
-        // beam y and i,j
-        var x_margin = 20;
-        var beam_y = canvas.height-67;
-        var beam_i = x_margin;
-        var beam_j = canvas.width-x_margin;
-        var beam_span_px = beam_j-beam_i;
-        var support_top = beam_y+3;
-        var support_bottom = beam_y+33;
-        var support_height = support_bottom-support_top;
-
-        // determine the overall beam span length
-        // and determine the scale factor for the canvas
-        // x coordinates
-        var main_span_ft = Number($("#span").val());
-        var cant_left_ft = Number($("#overhangLeft").val());
-        var cant_right_ft = Number($("#overhangRight").val());
-        var total_span_ft = main_span_ft+cant_left_ft+cant_right_ft;
-        var x_scale = beam_span_px/total_span_ft;
-
-        //Draw the beam
-        ctx.beginPath();
-        ctx.lineWidth=6;
-        ctx.moveTo(beam_i,beam_y);
-        ctx.lineTo(beam_j,beam_y);
-        ctx.stroke();
-
-        //Draw Left Support
-        if ($('#fixedLeft').is(":checked"))
-        {
-            var supp_left_fix_x = beam_i;
-            var supp_left_fix_base = beam_y - 40;
-            var supp_left_fix_top = beam_y + 40;
-
-            ctx.beginPath();
-            ctx.lineWidth=6;
-            ctx.moveTo(supp_left_fix_x,supp_left_fix_base);
-            ctx.lineTo(supp_left_fix_x,supp_left_fix_top);
-            ctx.stroke();
-
-        } else {
-            var supp_left_x1 = (x_scale*cant_left_ft)+x_margin;
-            var supp_left_x2 = supp_left_x1-15;
-            var supp_left_x3 = supp_left_x1+15;
-
-            ctx.beginPath();
-            ctx.lineWidth=1;
-            ctx.moveTo(supp_left_x1,support_top);
-            ctx.lineTo(supp_left_x2,support_bottom);
-            ctx.lineTo(supp_left_x3,support_bottom);
-            ctx.fill();
-        };
-
-        //Draw Right Support
-        if ($('#fixedRight').is(":checked"))
-        {
-            var supp_right_fix_x = beam_j;
-            var supp_right_fix_base = beam_y - 40;
-            var supp_right_fix_top = beam_y + 40;
-
-            ctx.beginPath();
-            ctx.lineWidth=6;
-            ctx.moveTo(supp_right_fix_x,supp_right_fix_base);
-            ctx.lineTo(supp_right_fix_x,supp_right_fix_top);
-            ctx.stroke();
-
-        } else {
-            var supp_right_x = (x_scale*(total_span_ft-cant_right_ft))+x_margin;
-            var supp_radius = support_height/2;
-            var supp_right_y = support_top + supp_radius;
-
-            ctx.beginPath();
-            ctx.arc(supp_right_x,supp_right_y,supp_radius,0,2*Math.PI);
-            ctx.fill();
-        };
-
-        //Draw Interior Supports
-        var int_supports = $(".interiorSupport");
-
-        for(var i = 0; i < int_supports.length; i++){
-
-            var x_ft = Number($(int_supports[i]).val());
-
-            if(x_ft !=0 && x_ft>0 && x_ft<main_span_ft){
-                var supp_x = (x_scale*(cant_left_ft+x_ft))+x_margin;
-                var supp_radius = support_height/2;
-                var supp_right_y = support_top + supp_radius;
-                
-                ctx.beginPath();
-                ctx.arc(supp_x,supp_right_y,supp_radius,0,2*Math.PI);
-                ctx.fill();
-            };
-
-        };
-
-        //Distributed loads
-
-        var w1s = $("input.w1").map(function(){
-            return Number($(this).val());
-        }).get();
-
-        var w1t = $("input.trib1").map(function(){
-            return Number($(this).val());
-        }).get();
-
-        var w2s = $("input.w2").map(function(){
-            return Number($(this).val());
-        }).get();
-
-        var w2t = $("input.trib2").map(function(){
-            return Number($(this).val());
-        }).get();
-
-    };
 };
 
 // Ensure the full HTML document loads before running any functions
