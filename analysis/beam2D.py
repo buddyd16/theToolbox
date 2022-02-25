@@ -475,34 +475,40 @@ class Beam2D():
                 
                 for patern, piece_function in value.items():
                     
-                    vtemp = [bmtools.eval_piece_function(piece_function, j) for j in self.printstations]
-                    
-                    if i == 0:
-                        
-                        self.Vu_max = [j for j in vtemp]
-                        self.Vu_min = [j for j in vtemp]
-                        i+=1
-                    
+                    if piece_function == []:
+                        pass
                     else:
-                        self.Vu_max = [max(k,j) for k,j in zip(self.Vu_max,vtemp)]
-                        self.Vu_min = [min(k,j) for k,j in zip(self.Vu_min,vtemp)]
+                        vtemp = [bmtools.eval_piece_function(piece_function, j) for j in self.printstations]
+                        
+                        if i == 0:
+                            
+                            self.Vu_max = [j for j in vtemp]
+                            self.Vu_min = [j for j in vtemp]
+                            i+=1
+                        
+                        else:
+                            self.Vu_max = [max(k,j) for k,j in zip(self.Vu_max,vtemp)]
+                            self.Vu_min = [min(k,j) for k,j in zip(self.Vu_min,vtemp)]
                         
             i = 0
             for key, value in self.m_functions_uls.items():
                 
                 for patern, piece_function in value.items():
                     
-                    mtemp = [bmtools.eval_piece_function(piece_function, j) for j in self.printstations]
-                    
-                    if i == 0:
-                        
-                        self.Mu_max = [j for j in mtemp]
-                        self.Mu_min = [j for j in mtemp]
-                        i+=1
-                    
+                    if piece_function == []:
+                        pass
                     else:
-                        self.Mu_max = [max(k,j) for k,j in zip(self.Mu_max,mtemp)]
-                        self.Mu_min = [min(k,j) for k,j in zip(self.Mu_min,mtemp)]
+                        mtemp = [bmtools.eval_piece_function(piece_function, j) for j in self.printstations]
+                        
+                        if i == 0:
+                            
+                            self.Mu_max = [j for j in mtemp]
+                            self.Mu_min = [j for j in mtemp]
+                            i+=1
+                        
+                        else:
+                            self.Mu_max = [max(k,j) for k,j in zip(self.Mu_max,mtemp)]
+                            self.Mu_min = [min(k,j) for k,j in zip(self.Mu_min,mtemp)]
 
     def SLS_envelopes(self, conv = 12):
         '''
@@ -519,68 +525,80 @@ class Beam2D():
                 
                 for patern, piece_function in value.items():
                     
-                    vtemp = [bmtools.eval_piece_function(piece_function, j) for j in self.printstations]
-                    
-                    if i == 0:
-                        
-                        self.Vs_max = [j for j in vtemp]
-                        self.Vs_min = [j for j in vtemp]
-                        i+=1
-                    
+                    if piece_function == []:
+                        pass
                     else:
-                        self.Vs_max = [max(k,j) for k,j in zip(self.Vs_max,vtemp)]
-                        self.Vs_min = [min(k,j) for k,j in zip(self.Vs_min,vtemp)]
+                        vtemp = [bmtools.eval_piece_function(piece_function, j) for j in self.printstations]
+                        
+                        if i == 0:
+                            
+                            self.Vs_max = [j for j in vtemp]
+                            self.Vs_min = [j for j in vtemp]
+                            i+=1
+                        
+                        else:
+                            self.Vs_max = [max(k,j) for k,j in zip(self.Vs_max,vtemp)]
+                            self.Vs_min = [min(k,j) for k,j in zip(self.Vs_min,vtemp)]
                         
             i = 0
             for key, value in self.m_functions_sls.items():
                 
                 for patern, piece_function in value.items():
                     
-                    mtemp = [bmtools.eval_piece_function(piece_function, j) for j in self.printstations]
-                    
-                    if i == 0:
-                        
-                        self.Ms_max = [j for j in mtemp]
-                        self.Ms_min = [j for j in mtemp]
-                        i+=1
-                    
+                    if piece_function == []:
+                        pass
                     else:
-                        self.Ms_max = [max(k,j) for k,j in zip(self.Ms_max,mtemp)]
-                        self.Ms_min = [min(k,j) for k,j in zip(self.Ms_min,mtemp)]
+                        mtemp = [bmtools.eval_piece_function(piece_function, j) for j in self.printstations]
+                        
+                        if i == 0:
+                            
+                            self.Ms_max = [j for j in mtemp]
+                            self.Ms_min = [j for j in mtemp]
+                            i+=1
+                        
+                        else:
+                            self.Ms_max = [max(k,j) for k,j in zip(self.Ms_max,mtemp)]
+                            self.Ms_min = [min(k,j) for k,j in zip(self.Ms_min,mtemp)]
                 
             i = 0
             for key, value in self.eis_functions_sls.items():
                 
                 for patern, piece_function in value.items():
                     
-                    eistemp = [bmtools.eval_piece_function(piece_function, j) for j in self.printstations]
-                    
-                    if i == 0:
-                        
-                        self.Ss_max = [j/(self.Em*self.Ixx) for j in eistemp]
-                        self.Ss_min = [j/(self.Em*self.Ixx) for j in eistemp]
-                        i+=1
-                    
+                    if piece_function == []:
+                        pass
                     else:
-                        self.Ss_max = [max(k,j/(self.Em*self.Ixx)) for k,j in zip(self.Ss_max,eistemp)]
-                        self.Ss_min = [min(k,j/(self.Em*self.Ixx)) for k,j in zip(self.Ss_min,eistemp)]
+                        eistemp = [bmtools.eval_piece_function(piece_function, j) for j in self.printstations]
+                        
+                        if i == 0:
+                            
+                            self.Ss_max = [j/(self.Em*self.Ixx) for j in eistemp]
+                            self.Ss_min = [j/(self.Em*self.Ixx) for j in eistemp]
+                            i+=1
+                        
+                        else:
+                            self.Ss_max = [max(k,j/(self.Em*self.Ixx)) for k,j in zip(self.Ss_max,eistemp)]
+                            self.Ss_min = [min(k,j/(self.Em*self.Ixx)) for k,j in zip(self.Ss_min,eistemp)]
                         
             i = 0
             for key, value in self.eid_functions_sls.items():
                 
                 for patern, piece_function in value.items():
                     
-                    eidtemp = [bmtools.eval_piece_function(piece_function, j) for j in self.printstations]
-                    
-                    if i == 0:
-                        
-                        self.Ds_max = [(conv*j)/(self.Em*self.Ixx) for j in eidtemp]
-                        self.Ds_min = [(conv*j)/(self.Em*self.Ixx) for j in eidtemp]
-                        i+=1
-                    
+                    if piece_function == []:
+                        pass
                     else:
-                        self.Ds_max = [max(k,(conv*j)/(self.Em*self.Ixx)) for k,j in zip(self.Ds_max,eidtemp)]
-                        self.Ds_min = [min(k,(conv*j)/(self.Em*self.Ixx)) for k,j in zip(self.Ds_min,eidtemp)]
+                        eidtemp = [bmtools.eval_piece_function(piece_function, j) for j in self.printstations]
+                        
+                        if i == 0:
+                            
+                            self.Ds_max = [(conv*j)/(self.Em*self.Ixx) for j in eidtemp]
+                            self.Ds_min = [(conv*j)/(self.Em*self.Ixx) for j in eidtemp]
+                            i+=1
+                        
+                        else:
+                            self.Ds_max = [max(k,(conv*j)/(self.Em*self.Ixx)) for k,j in zip(self.Ds_max,eidtemp)]
+                            self.Ds_min = [min(k,(conv*j)/(self.Em*self.Ixx)) for k,j in zip(self.Ds_min,eidtemp)]
     
     def slope_to_cant(self,other_beam,left=True):
 
