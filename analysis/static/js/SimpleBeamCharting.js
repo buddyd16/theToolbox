@@ -102,8 +102,6 @@ function UpdateChart(){
 
     };
 
-    let maxw = 0;
-
     //Distributed loads
     var w1s = $("input.w1").map(function(){
         return Number($(this).val());
@@ -131,11 +129,45 @@ function UpdateChart(){
 
     var dist_type = $("select.distloadType").map(function(){
         return $(this).val();
-    }).get()
+    }).get();
+
+    // Point load data
+    var p_p = $("input.pointLoad").map(function(){
+        return Number($(this).val());
+    }).get();
+
+    var p_a = $("input.pointLoada").map(function(){
+        return Number($(this).val());
+    }).get();
+
+    var p_type = $("select.pointloadType").map(function(){
+        return $(this).val();
+    }).get();
+
+    // Point moment data
+    var m_m = $("input.pointMoment").map(function(){
+        return Number($(this).val());
+    }).get();
+
+    var m_a = $("input.pointMomenta").map(function(){
+        return Number($(this).val());
+    }).get();
+
+    var m_type = $("select.pointMomentType").map(function(){
+        return $(this).val();
+    }).get();
 
     let distloads = [];
+    let pointloads = [];
+    let pointmoments = [];
     let appliedtypes = [];
 
+    // max value holders
+    let maxw = 0;
+    let maxp = 0;
+    let maxm = 0;
+
+    // aggregate dist loads
     for(i = 0; i<w1s.length; i++){
         let w1 = w1s[i]*w1t[i];
         let w2 = w2s[i]*w2t[i];
@@ -149,9 +181,6 @@ function UpdateChart(){
         } else {
 
             distloads.push([w1,w2,dist_a[i],dist_b[i],dist_type[i]]);
-            
-            console.log(dist_type[i]);
-            console.log(!_.contains(appliedtypes,dist_type[i]));
 
             if(!_.contains(appliedtypes,dist_type[i])){
                 appliedtypes.push(dist_type[i])
@@ -160,18 +189,54 @@ function UpdateChart(){
 
     };
 
-    console.log(distloads);
-    console.log(appliedtypes);
+    // aggregate point loads
+    for(i = 0; i<p_p.length; i++){
+        let p = p_p[i];
+
+        maxp = Math.max(maxp,Math.abs(p));
+
+        if ( p == 0 ) {
+
+        } else {
+
+            pointloads.push([p,p_a[i],p_type[i]]);
+
+            if(!_.contains(appliedtypes,p_type[i])){
+                appliedtypes.push(p_type[i])
+            }
+        }
+
+    };
+
+    // aggregate point moments
+    for(i = 0; i<m_m.length; i++){
+        let m = m_m[i];
+
+        maxm = Math.max(maxm,Math.abs(m));
+
+        if ( m == 0 ) {
+
+        } else {
+
+            pointmoments.push([m,m_a[i],m_type[i]]);
+
+            if(!_.contains(appliedtypes,m_type[i])){
+                appliedtypes.push(m_type[i])
+            }
+        }
+
+    };
+
     let num_types = appliedtypes.length;
 
     let hload = 320/num_types;
     hload = Math.min(hload,50);
 
     let dist_y_scale = hload/maxw;
+    let p_y_scale =  hload/maxp;
+    let m_scale = Math.min(hload,40)/maxm;
 
-    console.log('hload: '+hload)
-    console.log(dist_y_scale);
-
+    // start y pixel for each load type
     let loadtypey = []
     for(i = 0; i<appliedtypes.length; i++){
         // start y pixel coordinate for each load
@@ -179,19 +244,15 @@ function UpdateChart(){
         loadtypey.push(330-(i*hload));
     }
 
-    console.log(loadtypey);
-
     let globalloads = ['D','F','L','H','Lr','S','R','Wx','Wy','Ex','Ey'];
     let colormap = ["rgba(0,51,102,0.3)","rgba(102,255,255,0.3)","rgba(255,51,0,0.3)","rgba(153,102,51,0.3)","rgba(255,102,102)","rgba(204,255,204,0.3)","rgba(51,102,255,0.3)","rgba(255,51,153,0.3)","rgba(255,153,153,0.3)","rgba(0,153,51,0.3)","rgba(102,255,102,0.3)"];
 
+    // draw the dist loads
     for(i = 0; i<distloads.length; i++){
         // get the load type index for this load
         let thisloadindex = _.indexOf(appliedtypes,distloads[i][4]);
         let indexforcolor = _.indexOf(globalloads,distloads[i][4]);
         let thiscolor = colormap[indexforcolor];
-
-        console.log((dist_y_scale*distloads[i][0]));
-        console.log(loadtypey[thisloadindex]);
 
         let y1 = loadtypey[thisloadindex];
         let y2 = y1 - (dist_y_scale*distloads[i][0]);
@@ -213,4 +274,79 @@ function UpdateChart(){
         ctx.fillStyle = "rgb(0,0,0)";
     }
 
+    // draw point loads
+    for(i = 0; i<pointloads.length; i++){
+        // get the load type index for this load
+        let thisloadindex = _.indexOf(appliedtypes,pointloads[i][2]);
+        let indexforcolor = _.indexOf(globalloads,pointloads[i][2]);
+        let thiscolor = colormap[indexforcolor];
+
+        let arrowh = 0.1*(p_y_scale*pointloads[i][0]);
+
+        let y1 = loadtypey[thisloadindex];
+        let y2 = y1 - (p_y_scale*pointloads[i][0]);
+        let y3 = y1 - arrowh;
+        let x1 = x_margin + (x_scale*pointloads[i][1]);
+        let x2 = x1 - Math.abs(arrowh);
+        let x3 = x1 + Math.abs(arrowh);
+
+        ctx.strokeStyle = thiscolor;
+        ctx.beginPath();
+        ctx.lineWidth=3;
+        ctx.moveTo(x1,y2);
+        ctx.lineTo(x1,y1);
+        ctx.lineTo(x2,y3);
+        ctx.lineTo(x1,y1);
+        ctx.lineTo(x3,y3);
+        ctx.stroke();
+
+        ctx.strokeStyle = "rgb(0,0,0)";
+    }
+
+    // draw point moments
+    for(i = 0; i<pointmoments.length; i++){
+        // get the load type index for this load
+        let thisloadindex = _.indexOf(appliedtypes,pointmoments[i][2]);
+        let indexforcolor = _.indexOf(globalloads,pointmoments[i][2]);
+        let thiscolor = colormap[indexforcolor];
+
+        console.log(thisloadindex);
+        let r = Math.abs(m_scale*(0.5*pointmoments[i][0]));
+        let arrowh = 0.1*r;
+
+        let y1 = loadtypey[thisloadindex];
+        let xc = x_margin + (x_scale*pointmoments[i][1]);
+
+        let a_start =0;
+        let a_end = 0;
+        let x1 = 0;
+
+        if(pointmoments[i][0] < 0){
+            a_start = Math.PI;
+            a_end = Math.PI/2;
+            x1 = xc - r;
+        } else {
+            a_start = Math.PI/2;
+            a_end = 2*Math.PI;
+            x1 = xc + r
+        }
+
+        let ya = y1 - arrowh;
+        let x2 = x1 - Math.abs(arrowh);
+        let x3 = x1 + Math.abs(arrowh);
+
+        ctx.strokeStyle = thiscolor;
+        ctx.beginPath();
+        ctx.lineWidth=3;
+        ctx.arc(xc,y1,r,a_start,a_end);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x2,ya);
+        ctx.lineTo(x1,y1);
+        ctx.lineTo(x3,ya);
+        ctx.stroke();
+
+        ctx.strokeStyle = "rgb(0,0,0)";
+    }
 };
