@@ -629,8 +629,13 @@ def SimpleBeam(inputs, log=True):
                             # the load to the whole first span and it will be on
                             # the mainbeam and in the mainbeams local coordinates.
 
-                            mainbeamLoads.append(
-                                ebl.trap(w1,wc,a,c,mainBeam.span,kind,spanIDs[i]))
+                            if a == c:
+                                print("test 2-1bb -- no cantLeft")
+                                print("a=c, catch div/0")
+                                pass
+                            else:
+                                mainbeamLoads.append(
+                                    ebl.trap(w1,wc,a,c,mainBeam.span,kind,spanIDs[i]))
 
                 # test 2-2
                 elif span != globalSpans[-1] and t > 0:
