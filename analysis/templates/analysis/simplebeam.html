@@ -2,6 +2,8 @@
 {% extends "layout.html"%}
 
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/underscore@1.13.2/underscore-umd-min.js"></script>
+<script src="{{ url_for('analysis_bp.static', filename='js/SimpleBeamCharting.js') }}"></script>
 <script src="{{ url_for('analysis_bp.static', filename='js/SimpleBeam.js') }}"></script>
 <script src="{{ url_for('static', filename='js/plotly-2.9.0.min.js') }}"></script>
 {% endblock scripts %}
@@ -360,14 +362,14 @@
                             {% if loop.index0 == 0 %}
                             <tr class="userDistLoad">
                             <td class="distloaduid">{{"D" ~ loop.index}}</td>
-                            <td><input id="w1" name="w1" class="w1 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[0]}}"></td>
-                            <td><input id="trib1" name="trib1" class="trib1 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[1]}}"></td>
-                            <td><input id="w2" name="w2" class="w2 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[2]}}"></td>
-                            <td><input id="trib2" name="trib2" class="trib2 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[3]}}"></td>
-                            <td><input id="dista" name="dista" class="dista input-sm" style="width:95px" type="number" step="any" value="{{distLoad[4]}}"></td>
-                            <td><input id="distb" name="distb" class="distb input-sm" style="width:95px" type="number" step="any" value="{{distLoad[5]}}"></td>
+                            <td><input id="w1" name="w1" class="w1 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[0]}}" onChange="UpdateChart();"></td>
+                            <td><input id="trib1" name="trib1" class="trib1 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[1]}}" onChange="UpdateChart();"></td>
+                            <td><input id="w2" name="w2" class="w2 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[2]}}" onChange="UpdateChart();"></td>
+                            <td><input id="trib2" name="trib2" class="trib2 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[3]}}" onChange="UpdateChart();"></td>
+                            <td><input id="dista" name="dista" class="dista input-sm" style="width:95px" type="number" step="any" value="{{distLoad[4]}}" onChange="UpdateChart();"></td>
+                            <td><input id="distb" name="distb" class="distb input-sm" style="width:95px" type="number" step="any" value="{{distLoad[5]}}" onChange="UpdateChart();"></td>
                             <td>
-                                <select id="distloadType" class="distloadType input-sm" name="distloadType" style="width:95px">
+                                <select id="distloadType" class="distloadType input-sm" name="distloadType" style="width:95px" onChange="UpdateChart();">
                                     <option value="D" {{"selected=""selected""" if distLoad[6]=="D"}}> D </option>
                                     <option value="F" {{"selected=""selected""" if distLoad[6]=="F"}}> F </option>
                                     <option value="L" {{"selected=""selected""" if distLoad[6]=="L"}}> L </option>
@@ -392,14 +394,14 @@
                             {% else %}
                             <tr class="userDistLoad">
                                 <td class="distloaduid">{{"D" ~ loop.index}}</td>
-                                <td><input id="w1" name="w1" class="w1 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[0]}}"></td>
-                                <td><input id="trib1" name="trib1" class="trib1 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[1]}}"></td>
-                                <td><input id="w2" name="w2" class="w2 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[2]}}"></td>
-                                <td><input id="trib2" name="trib2" class="trib2 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[3]}}"></td>
-                                <td><input id="dista" name="dista" class="dista input-sm" style="width:95px" type="number" step="any" value="{{distLoad[4]}}"></td>
-                                <td><input id="distb" name="distb" class="distb input-sm" style="width:95px" type="number" step="any" value="{{distLoad[5]}}"></td>
+                                <td><input id="w1" name="w1" class="w1 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[0]}}" onChange="UpdateChart();"></td>
+                                <td><input id="trib1" name="trib1" class="trib1 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[1]}}" onChange="UpdateChart();"></td>
+                                <td><input id="w2" name="w2" class="w2 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[2]}}" onChange="UpdateChart();"></td>
+                                <td><input id="trib2" name="trib2" class="trib2 input-sm" style="width:95px" type="number" step="any" value="{{distLoad[3]}}" onChange="UpdateChart();"></td>
+                                <td><input id="dista" name="dista" class="dista input-sm" style="width:95px" type="number" step="any" value="{{distLoad[4]}}" onChange="UpdateChart();"></td>
+                                <td><input id="distb" name="distb" class="distb input-sm" style="width:95px" type="number" step="any" value="{{distLoad[5]}}" onChange="UpdateChart();"></td>
                                 <td>
-                                    <select id="distloadType" class="distloadType input-sm" name="distloadType" style="width:95px">
+                                    <select id="distloadType" class="distloadType input-sm" name="distloadType" style="width:95px" onChange="UpdateChart();">
                                         <option value="D" {{"selected=""selected""" if distLoad[6]=="D"}}> D </option>
                                         <option value="F" {{"selected=""selected""" if distLoad[6]=="F"}}> F </option>
                                         <option value="L" {{"selected=""selected""" if distLoad[6]=="L"}}> L </option>
@@ -454,10 +456,10 @@
                                         {% if loop.index0 == 0 %}
                                         <tr class="userPointLoad">
                                         <td class="pointloaduid">{{"P" ~ loop.index}}</td>
-                                        <td><input id="pointLoad" name="pointLoad" class="pointLoad input-sm" style="width:95px" type="number" step="any" value="{{ptLoad[0]}}"></td>
-                                        <td><input id="pointLoada" name="pointLoada" class="pointLoada input-sm" style="width:95px" type="number" step="any" value="{{ptLoad[1]}}"></td>
+                                        <td><input id="pointLoad" name="pointLoad" class="pointLoad input-sm" style="width:95px" type="number" step="any" value="{{ptLoad[0]}}" onChange="UpdateChart();"></td>
+                                        <td><input id="pointLoada" name="pointLoada" class="pointLoada input-sm" style="width:95px" type="number" step="any" value="{{ptLoad[1]}}" onChange="UpdateChart();"></td>
                                         <td>
-                                            <select id="pointloadType" class="pointloadType input-sm" name="pointloadType" style="width:95px">
+                                            <select id="pointloadType" class="pointloadType input-sm" name="pointloadType" style="width:95px" onChange="UpdateChart();">
                                                 <option value="D" {{"selected=""selected""" if ptLoad[2]=="D"}}> D </option>
                                                 <option value="F" {{"selected=""selected""" if ptLoad[2]=="F"}}> F </option>
                                                 <option value="L" {{"selected=""selected""" if ptLoad[2]=="L"}}> L </option>
@@ -482,10 +484,10 @@
                                         {% else %}
                                         <tr class="userPointLoad">
                                             <td class="pointloaduid">{{"P" ~ loop.index}}</td>
-                                            <td><input id="pointLoad" name="pointLoad" class="pointLoad input-sm" style="width:95px" type="number" step="any" value="{{ptLoad[0]}}"></td>
-                                            <td><input id="pointLoada" name="pointLoada" class="pointLoada input-sm" style="width:95px" type="number" step="any" value="{{ptLoad[1]}}"></td>
+                                            <td><input id="pointLoad" name="pointLoad" class="pointLoad input-sm" style="width:95px" type="number" step="any" value="{{ptLoad[0]}}" onChange="UpdateChart();"></td>
+                                            <td><input id="pointLoada" name="pointLoada" class="pointLoada input-sm" style="width:95px" type="number" step="any" value="{{ptLoad[1]}}" onChange="UpdateChart();"></td>
                                             <td>
-                                                <select id="pointloadType" class="pointloadType input-sm" name="pointloadType" style="width:95px">
+                                                <select id="pointloadType" class="pointloadType input-sm" name="pointloadType" style="width:95px" onChange="UpdateChart();">
                                                     <option value="D" {{"selected=""selected""" if ptLoad[2]=="D"}}> D </option>
                                                     <option value="F" {{"selected=""selected""" if ptLoad[2]=="F"}}> F </option>
                                                     <option value="L" {{"selected=""selected""" if ptLoad[2]=="L"}}> L </option>
@@ -534,10 +536,10 @@
                                         {% if loop.index0 == 0 %}
                                         <tr class="userPointMoment">
                                         <td class="pointmomentuid">{{"M" ~ loop.index}}</td>
-                                        <td><input id="pointMoment" name="pointMoment" class="pointMoment input-sm" style="width:95px" type="number" step="any" value="{{ptMo[0]}}"></td>
-                                        <td><input id="pointMomenta" name="pointMomenta" class="pointMomenta input-sm" style="width:95px" type="number" step="any" value="{{ptMo[1]}}"></td>
+                                        <td><input id="pointMoment" name="pointMoment" class="pointMoment input-sm" style="width:95px" type="number" step="any" value="{{ptMo[0]}}" onChange="UpdateChart();"></td>
+                                        <td><input id="pointMomenta" name="pointMomenta" class="pointMomenta input-sm" style="width:95px" type="number" step="any" value="{{ptMo[1]}}" onChange="UpdateChart();"></td>
                                         <td>
-                                            <select id="pointMomentType" class="pointMomentType input-sm" name="pointMomentType" style="width:95px">
+                                            <select id="pointMomentType" class="pointMomentType input-sm" name="pointMomentType" style="width:95px" onChange="UpdateChart();">
                                                 <option value="D" {{"selected=""selected""" if ptMo[2]=="D"}}> D </option>
                                                 <option value="F" {{"selected=""selected""" if ptMo[2]=="F"}}> F </option>
                                                 <option value="L" {{"selected=""selected""" if ptMo[2]=="L"}}> L </option>
@@ -562,10 +564,10 @@
                                         {% else %}
                                         <tr class="userPointMoment">
                                             <td class="pointmomentuid">{{"M" ~ loop.index}}</td>
-                                            <td><input id="pointMoment" name="pointMoment" class="pointMoment input-sm" style="width:95px" type="number" step="any" value="{{ptMo[0]}}"></td>
-                                            <td><input id="pointMomenta" name="pointMomenta" class="pointMomenta input-sm" style="width:95px" type="number" step="any" value="{{ptMo[1]}}"></td>
+                                            <td><input id="pointMoment" name="pointMoment" class="pointMoment input-sm" style="width:95px" type="number" step="any" value="{{ptMo[0]}}" onChange="UpdateChart();"></td>
+                                            <td><input id="pointMomenta" name="pointMomenta" class="pointMomenta input-sm" style="width:95px" type="number" step="any" value="{{ptMo[1]}}" onChange="UpdateChart();"></td>
                                             <td>
-                                                <select id="pointMomentType" class="pointMomentType input-sm" name="pointMomentType" style="width:95px">
+                                                <select id="pointMomentType" class="pointMomentType input-sm" name="pointMomentType" style="width:95px" onChange="UpdateChart();">
                                                     <option value="D" {{"selected=""selected""" if ptMo[2]=="D"}}> D </option>
                                                     <option value="F" {{"selected=""selected""" if ptMo[2]=="F"}}> F </option>
                                                     <option value="L" {{"selected=""selected""" if ptMo[2]=="L"}}> L </option>
