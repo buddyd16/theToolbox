@@ -60,6 +60,9 @@
                     <a class="nav-link" data-toggle="tab" href="#basicResults">Basic Results</a>
                 </li>
                 {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#HELP">Help</a>
+                </li>
             </ul>
 
             <!-- Tab panes -->
@@ -154,34 +157,6 @@
                 <!-- COMBOS AND LOAD DATA -->
                 <div class="tab-pane container fade" id="combosLoads">
                     <div class="container-sm py-3">
-                        <h5> Supported Load Types:</h5>
-                        <dl class="row">
-                            <dt class="col-sm-3">D</dt>
-                            <dd class="col-sm-9">Dead Load</dd>
-                            <dt class="col-sm-3">F</dt>
-                            <dd class="col-sm-9">Load due to fluids with well-defined pressures and maximum heights.</dd>
-                            <dt class="col-sm-3">L</dt>
-                            <dd class="col-sm-9">Live Loads</dd>
-                            <dt class="col-sm-3">H</dt>
-                            <dd class="col-sm-9">Load due to lateral earth pressures, ground water pressure or pressure of bulk materials.</dd>
-                            <dt class="col-sm-3">L<sub>r</sub></dt>
-                            <dd class="col-sm-9">Roof live load</dd>
-                            <dt class="col-sm-3">S</dt>
-                            <dd class="col-sm-9">Snow load</dd>
-                            <dt class="col-sm-3">R</dt>
-                            <dd class="col-sm-9">Rain load</dd>
-                            <dt class="col-sm-3">Wx</dt>
-                            <dd class="col-sm-9">Wind Load in the X or 1 direction.</dd>
-                            <dt class="col-sm-3">Wy</dt>
-                            <dd class="col-sm-9">Wind Load in the Y or 2 direction.</dd>
-                            <dt class="col-sm-3">Ex</dt>
-                            <dd class="col-sm-9">Vertical Seismic Load in the X or 1 direction as defined in Section 2.3.6 of ASCE 7.</dd>
-                            <dt class="col-sm-3">Ey</dt>
-                            <dd class="col-sm-9">Vertical Seismic Load in the Y or 2 direction as defined in Section 2.3.6 of ASCE 7.</dd>
-                        </dl>
-                    </div>
-
-                    <div class="container-sm py-3">
                         <h5> Off Pattern Factors</h5>
                         <p>Typically 0 for L, L<sub>r</sub>, and R and 0.5 for S</p>
                         <p>Off Patterns of 1 will result in no patterning for that load type</p>
@@ -206,7 +181,7 @@
                     </div>
 
                     <div class="container-sm py-3">
-                        <h5> Combinations for Shear and Moment:</h5>
+                        <h5> Ultimate Combinations for Shear and Moment (ULS):</h5>
                         <div class="form-check">
                             <input type="radio" id="designCombo_IBC_ASD" class="designCombo form-check-input" name="designCombo" value="IBC_ASD" {{ "checked" if inputs["combos"] == 0}}>
                             <label class="form-check-label" for="designCombo_IBC_ASD"><h6>IBC 2018 - ASD (Section 1605.3.1)</h6></label>
@@ -266,7 +241,7 @@
                     </div>
 
                     <div class="container-sm py-3">
-                        <h5> Service Combinations (Used for Slope/Rotation and Deflection)</h5>
+                        <h5> Service Combinations (SLS):</h5>
                         <table id="servicecomboTable" class="table table-sm table-dark w-auto">
                             <thead>
                                 <tr>
@@ -650,6 +625,37 @@
                     </div>
                 </div>
                 {% endif %}
+
+                <!-- HELP Data -->
+                <div class="tab-pane container fade" id="HELP">
+                    <div class="container-sm py-3">
+                        <h5> Supported Load Types:</h5>
+                        <dl class="row">
+                            <dt class="col-sm-3">D</dt>
+                            <dd class="col-sm-9">Dead Load</dd>
+                            <dt class="col-sm-3">F</dt>
+                            <dd class="col-sm-9">Load due to fluids with well-defined pressures and maximum heights.</dd>
+                            <dt class="col-sm-3">L</dt>
+                            <dd class="col-sm-9">Live Loads</dd>
+                            <dt class="col-sm-3">H</dt>
+                            <dd class="col-sm-9">Load due to lateral earth pressures, ground water pressure or pressure of bulk materials.</dd>
+                            <dt class="col-sm-3">L<sub>r</sub></dt>
+                            <dd class="col-sm-9">Roof live load</dd>
+                            <dt class="col-sm-3">S</dt>
+                            <dd class="col-sm-9">Snow load</dd>
+                            <dt class="col-sm-3">R</dt>
+                            <dd class="col-sm-9">Rain load</dd>
+                            <dt class="col-sm-3">Wx</dt>
+                            <dd class="col-sm-9">Wind Load in the X or 1 direction.</dd>
+                            <dt class="col-sm-3">Wy</dt>
+                            <dd class="col-sm-9">Wind Load in the Y or 2 direction.</dd>
+                            <dt class="col-sm-3">Ex</dt>
+                            <dd class="col-sm-9">Vertical Seismic Load in the X or 1 direction as defined in Section 2.3.6 of ASCE 7.</dd>
+                            <dt class="col-sm-3">Ey</dt>
+                            <dd class="col-sm-9">Vertical Seismic Load in the Y or 2 direction as defined in Section 2.3.6 of ASCE 7.</dd>
+                        </dl>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
