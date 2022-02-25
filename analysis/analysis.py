@@ -113,7 +113,7 @@ def web_simplebeam():
                               float(dl_a[i]),
                               float(dl_b[i]),
                               dl_k[i]])
-
+        
         # Get the Point Loads
         pl_p = request.form.getlist('pointLoad')
         pl_a = request.form.getlist('pointLoada')
