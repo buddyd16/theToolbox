@@ -241,11 +241,56 @@ function UpdateChart(){
     for(i = 0; i<appliedtypes.length; i++){
         // start y pixel coordinate for each load
         // type.
-        loadtypey.push(330-(i*hload));
+        loadtypey.push(330-(i*hload)-(i));
+        console.log(loadtypey);
+    }
+
+    // draw and label the load lines
+    for(i = 0; i<appliedtypes.length; i++){
+        let label = appliedtypes[i]
+        let x1 = 2;
+        let x2 = 998;
+        let y = loadtypey[i];
+
+        ctx.beginPath();
+        ctx.lineWidth=1;
+        ctx.setLineDash([15,10]);
+        ctx.moveTo(x1,y);
+        ctx.lineTo(x2,y);
+        ctx.stroke();
+
+        // label the line
+        ctx.font = '12px serif';
+        ctx.fillText(label, x1+2, y-2, 12);
+
+        // rest to solid lines for later
+        ctx.setLineDash([]);
     }
 
     let globalloads = ['D','F','L','H','Lr','S','R','Wx','Wy','Ex','Ey'];
-    let colormap = ["rgba(0,51,102,0.3)","rgba(102,255,255,0.3)","rgba(255,51,0,0.3)","rgba(153,102,51,0.3)","rgba(255,102,102)","rgba(204,255,204,0.3)","rgba(51,102,255,0.3)","rgba(255,51,153,0.3)","rgba(255,153,153,0.3)","rgba(0,153,51,0.3)","rgba(102,255,102,0.3)"];
+    let colormap = ["rgba(44,62,80,0.5)",
+                    "rgba(127,140,141,0.5)",
+                    "rgba(169,50,38,0.5)",
+                    "rgba(243,156,18,0.5)",
+                    "rgba(231,76,60,0.5)",
+                    "rgba(123,125,125,0.5)",
+                    "rgba(22,160,133,0.5)",
+                    "rgba(41,128,185,0.5)",
+                    "rgba(52,152,219,0.5)",
+                    "rgba(125,60,152,0.5)",
+                    "rgba(155,89,182,0.5)"];
+    
+    let colormapalt = ["rgba(44,62,80,0.8)",
+                        "rgba(127,140,141,0.8)",
+                        "rgba(169,50,38,0.8)",
+                        "rgba(243,156,18,0.8)",
+                        "rgba(231,76,60,0.8)",
+                        "rgba(123,125,125,0.8)",
+                        "rgba(22,160,133,0.8)",
+                        "rgba(41,128,185,0.8)",
+                        "rgba(52,152,219,0.8)",
+                        "rgba(125,60,152,0.8)",
+                        "rgba(155,89,182,0.8)"];
 
     // draw the dist loads
     for(i = 0; i<distloads.length; i++){
@@ -279,7 +324,7 @@ function UpdateChart(){
         // get the load type index for this load
         let thisloadindex = _.indexOf(appliedtypes,pointloads[i][2]);
         let indexforcolor = _.indexOf(globalloads,pointloads[i][2]);
-        let thiscolor = colormap[indexforcolor];
+        let thiscolor = colormapalt[indexforcolor];
 
         let arrowh = 0.1*(p_y_scale*pointloads[i][0]);
 
@@ -308,7 +353,7 @@ function UpdateChart(){
         // get the load type index for this load
         let thisloadindex = _.indexOf(appliedtypes,pointmoments[i][2]);
         let indexforcolor = _.indexOf(globalloads,pointmoments[i][2]);
-        let thiscolor = colormap[indexforcolor];
+        let thiscolor = colormapalt[indexforcolor];
 
         console.log(thisloadindex);
         let r = Math.abs(m_scale*(0.5*pointmoments[i][0]));
