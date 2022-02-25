@@ -90,6 +90,20 @@ def SimpleBeam(inputs, log=True):
             # this will catch that and not add a load of 0's to
             # the load list
             pass
+        elif w1 == -1*w2:
+            # if w1 and w2 are equal but opposite sign there will be a div/0
+            # error in the centroid calcultion for the load, rather than rework
+            # the load class catch it here and split it into two loads.
+            c = b-a
+            newba = c/2 + a
+            Loads.append([type, w1, 0.0, a, newba, k])
+            Loads.append([type, 0.0, w2, newba, b, k])
+
+            # flip switch on applied loads type
+            if k in applied_loads:
+                if not applied_loads[k]:
+                    applied_loads[k] = True
+                    
         else:
             # Type will always be index[0]
             # Kind will always be index[-1]
