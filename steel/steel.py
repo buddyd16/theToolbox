@@ -11,7 +11,7 @@ steel_bp = Blueprint('steel_bp', __name__,
 @steel_bp.route('/steeldb')
 def web_steeldb():
 
-    return render_template('steel/steeldb.html')
+    return render_template('steel/steeldb.html', title='steel shape database')
 
 @steel_bp.route('/steeldbapi')
 def api_aiscdb():
@@ -133,4 +133,4 @@ def web_elastic_weld_group():
         throat_calc = None
         centroid = 0
     
-    return render_template('steel/weldgroup.html',segments=segments, loadInputs = loadInputs, sigma=sigma, appliedLoad=appliedLoad, weldgroup=group, throat=throat_calc, centroid=centroid)
+    return render_template('steel/weldgroup.html',segments=segments, loadInputs = loadInputs, sigma=sigma, appliedLoad=appliedLoad, weldgroup=group, throat=throat_calc, centroid=centroid, title='elastic weld group')
