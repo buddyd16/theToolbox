@@ -55,6 +55,7 @@ class Beam2D():
         self.Ixx = Ixx                      # Beam moment of inertia about
                                             # the axis of bending
         self.endCondition = endCondition    # Beam end condition 1-fixed 0-pin
+        self.endCondSum = sum(endCondition)
 
         self.id = userid                    # The span id of this beam
 
@@ -67,6 +68,8 @@ class Beam2D():
         self.reactions_sls = {}     # Dictionary to hold Service Reactions
         self.v_functions_uls = {}
         self.m_functions_uls = {}
+        self.eis_functions_uls = {}
+        self.eid_functions_uls = {}
         self.v_functions_sls = {}
         self.m_functions_sls = {}
         self.eis_functions_sls = {}
@@ -90,6 +93,7 @@ class Beam2D():
         self.FEF_basic = {}
         self.FEF_sls = {}
         self.FEF_uls = {}
+        self.appliedcombos = {}
         
         self.calcstations = []
         self.rootstations = []
@@ -259,6 +263,8 @@ class Beam2D():
 
                 combo_key = combo.name
 
+                self.appliedcombos[f'{combo_key}'] = {'comboformula': combo.FormulaString()}
+
                 if combo.patterned and (self.id != 1 or self.interiorSupports !=[]):
 
                     # we only need to pattern loads if the beam is not the only beam
@@ -412,13 +418,13 @@ class Beam2D():
                             eisfunctemp = bmtools.combine_piecewise_functions(eisfunctemp, load_functions[2], 1, 1)
                             eidfunctemp = bmtools.combine_piecewise_functions(eidfunctemp, load_functions[3], 1, 1)
                     
-                    rdict[f'{pattern_key}'] = {'rl':rltemp,'rr':rrtemp, 'redundants':redundants}
+                    rdict[f'{pattern_key}'] = {'rl':rltemp,'rr':rrtemp, 'redundants':[-1*i for i in redundants] }
                     fefdict[f'{pattern_key}'] = {'FL':feftemp[0],"ML":feftemp[1],"FR":feftemp[2],"MR":feftemp[3]}
                     vfunc[f'{pattern_key}'] = vfunctemp
                     mfunc[f'{pattern_key}'] = mfunctemp
                     eisfunc[f'{pattern_key}'] = eisfunctemp
                     eidfunc[f'{pattern_key}'] = eidfunctemp
-                    
+
                     shear_roots = bmtools.roots_piecewise_function(vfunctemp)
                     slope_roots = bmtools.roots_piecewise_function(eisfunctemp)
                     
@@ -437,6 +443,8 @@ class Beam2D():
                     self.reactions_uls[combo_key] = rdict
                     self.v_functions_uls[combo_key] = vfunc
                     self.m_functions_uls[combo_key] = mfunc
+                    self.eis_functions_uls[combo_key] = eisfunc
+                    self.eid_functions_uls[combo_key] = eidfunc
                     self.FEF_uls[combo_key] = fefdict
                 
                 elif combo.combo_type == 'SLS':
@@ -471,6 +479,8 @@ class Beam2D():
         if self.analyzed:
             
             i = 0
+            print(self.reactions_uls)
+
             for key, value in self.v_functions_uls.items():
                 
                 for patern, piece_function in value.items():

@@ -176,24 +176,47 @@ def SimpleBeam(inputs, log=True):
     # Design Load Combinations
     if inputs['combos'] == 0:
         uls_combos_bulk = LC.IBC2018_ASD(lateralReverse, False)
-    else:
+    
+    elif inputs['combos'] == 1:
         uls_combos_bulk = LC.IBC2018_ULS(IBC_f1, IBC_f2, lateralReverse)
+    else:
+        uls_combos_bulk = []
+
+    # User defined Ultimate Combinations
+    user_uls_combos = []
+
+    for i, userCombo in enumerate(inputs['uls']):
+        userid = f'User_ULS{i+1}'
+
+        loadFactors = {}
+        pattern = []
+        for j, factor in enumerate(userCombo):
+            if factor == 0 or j == len(userCombo)-1:
+                pass
+            else:
+                loadFactors[LoadKinds[j]] = factor
+                pattern = userCombo[-1]
+                
+        if loadFactors == {}:
+            pass
+        else:
+            user_uls_combos.append(LC.LoadCombo(userid, loadFactors,
+                                       patterned=pattern, combo_type='ULS'))
 
     # User defined Service Combinations
     sls_combos = []
 
     for i, userCombo in enumerate(inputs['sls']):
-        userid = f'S{i}'
+        userid = f'S{i+1}'
 
         loadFactors = {}
         pattern = []
         for j, factor in enumerate(userCombo):
-            if factor == 0:
+            if factor == 0 or j == len(userCombo)-1:
                 pass
             else:
                 loadFactors[LoadKinds[j]] = factor
-                if LoadKinds[j] in ['L', 'Lr', 'S', 'R']:
-                    pattern = True
+                pattern = userCombo[-1]
 
         sls_combos.append(LC.LoadCombo(userid, loadFactors,
                                        patterned=pattern, combo_type='SLS'))
@@ -209,6 +232,9 @@ def SimpleBeam(inputs, log=True):
             test.append(applied_loads[kind])
         if any(test):
             uls_combos.append(combo)
+    
+    for combo in user_uls_combos:
+        uls_combos.append(combo)
 
     # Trim out Basic Combos
     basic_combos = []

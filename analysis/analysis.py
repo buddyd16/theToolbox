@@ -52,6 +52,8 @@ def web_simplebeam():
         # Get ULS Load Combo Selection
         if request.form.get('designCombo') == 'IBC_ASD':
             ULScombos = 0
+        elif request.form.get('designCombo') == 'USER':
+            ULScombos = 2
         else:
             ULScombos = 1
 
@@ -63,6 +65,42 @@ def web_simplebeam():
 
         # Get Lateral revesal choice
         latReverse  = int(request.form.get('latReverse'))
+
+        # Get the User ultimate combinations
+        uls_D = request.form.getlist('Dufactor')
+        uls_F = request.form.getlist('Fufactor')
+        uls_L = request.form.getlist('Lufactor')
+        uls_H = request.form.getlist('Hufactor')
+        uls_Lr = request.form.getlist('Lrufactor')
+        uls_S = request.form.getlist('Sufactor')
+        uls_R = request.form.getlist('Rufactor')
+        uls_Wx = request.form.getlist('Wxufactor')
+        uls_Wy = request.form.getlist('Wyufactor')
+        uls_Ex = request.form.getlist('Exufactor')
+        uls_Ey = request.form.getlist('Eyufactor')
+        uls_pattern = request.form.getlist('ulspattern')
+
+        ulsCombos = []
+        for i, j in enumerate(uls_D):
+
+            if uls_pattern[i] == '0':
+                pat = False
+            else:
+                pat = True
+            print(pat)
+            ulsCombos.append([float(j),
+                              float(uls_F[i]),
+                              float(uls_L[i]),
+                              float(uls_H[i]),
+                              float(uls_Lr[i]),
+                              float(uls_S[i]),
+                              float(uls_R[i]),
+                              float(uls_Wx[i]),
+                              float(uls_Wy[i]),
+                              float(uls_Ex[i]),
+                              float(uls_Ey[i]),
+                              pat])
+
 
         # Get the User service combinations
         sls_D = request.form.getlist('Dsfactor')
@@ -76,9 +114,16 @@ def web_simplebeam():
         sls_Wy = request.form.getlist('Wysfactor')
         sls_Ex = request.form.getlist('Exsfactor')
         sls_Ey = request.form.getlist('Eysfactor')
+        sls_pattern = request.form.getlist('slspattern')
 
         slsCombos = []
         for i, j in enumerate(sls_D):
+
+            if sls_pattern[i] == '0':
+                pat = False
+            else:
+                pat = True
+            print(pat)
             slsCombos.append([float(j),
                               float(sls_F[i]),
                               float(sls_L[i]),
@@ -89,7 +134,8 @@ def web_simplebeam():
                               float(sls_Wx[i]),
                               float(sls_Wy[i]),
                               float(sls_Ex[i]),
-                              float(sls_Ey[i]),])
+                              float(sls_Ey[i]),
+                              pat])
 
         # Get the Distributed Loads
         dl_w1 = request.form.getlist('w1')
@@ -152,6 +198,7 @@ def web_simplebeam():
                   "f1": IBC_f1,
                   "f2": IBC_f2,
                   "latReverse": latReverse,
+                  "uls": ulsCombos,
                   "sls": slsCombos,
                   "distLoads": distLoads,
                   "pointLoads": pointLoads,
@@ -182,17 +229,18 @@ def web_simplebeam():
                   "f1": 0.5,
                   "f2": 0.2,
                   "latReverse": 1,
-                  "sls": [[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                          [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                          [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-                          [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-                          [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-                          [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-                          [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-                          [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-                          [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]],
+                  "uls": [[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+                  "sls": [[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                          [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+                          [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+                          [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+                          [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]],
                   "distLoads": [[0, 1, 0, 1, 0, 1, "D"]],
                   "pointLoads": [[0, 0, "D"]],
                   "pointMoments": [[0, 0, "D"]]}
@@ -201,4 +249,4 @@ def web_simplebeam():
 
     return render_template('analysis/simplebeam.html',
                            inputs=inputs,
-                           results=results)
+                           results=results, title="Simple Beam")
