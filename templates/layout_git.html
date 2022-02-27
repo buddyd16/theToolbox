@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>The Structural Toolbox</title>
+    <title>The Structural Toolbox {% if title != None %}- {{title}}{% endif %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
@@ -16,10 +16,14 @@
 
     <!-- Analytics -->
     
-	<!-- removed for github -->
+      <!-- Global site tag (gtag.js) - Google Analytics -->
 
     <!-- End Analytics -->
 
+    <!-- Google Adsense -->
+    
+     <!-- End Ads-->
+     
     {% block scripts %}
     {% endblock %}
     
@@ -91,30 +95,13 @@
 
     <footer class="footer fixed-bottom">
       <div class="çontainer">
-        <div class="row">
-            <div class="alert alert-warning alert-dismissible fade show mx-auto" role="alert">
-              <p><strong>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-                AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-                IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-                DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-                FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-                DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-                SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-                CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-                OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-                OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</strong></p>
-              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-        </div>
         <div class="row bg-dark px-2 py-2">
-          <div class="col-sm">
+          <div class="col">
             <div class="text-warning text-left">
-              <p>BSD-3 License</p>
+              <a href="/termsandconditions">Terms & Conditions</a><br><a href="/privacy-policy">Privacy Policy</a>
             </div>
           </div>
-          <div class="col-md-auto text-center text-warning">
+          <div class="col text-center text-warning">
             <div class="çontainer">
               <div class="">
                 A work in progress.
@@ -124,7 +111,7 @@
               </div>
             </div>
           </div>
-          <div class="col-6">
+          <div class="col">
             <p class="text-warning text-right">&copy; 2022 </p>
           </div>
         </div>
