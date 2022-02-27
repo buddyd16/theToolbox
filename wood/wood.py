@@ -7,4 +7,4 @@ wood_bp = Blueprint('wood_bp', __name__,
 @wood_bp.route('/nds_stud_wall')
 def wood_wall_web():
 
-    return render_template('wood/nds_stud_wall.html')
+    return render_template('wood/nds_stud_wall.html', title='wood wall')
