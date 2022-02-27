@@ -8,7 +8,7 @@ general_bp = Blueprint('general_bp', __name__,
 
 @general_bp.route('/interpolate', methods=['GET','POST'])
 def web_interpolate():
-    return render_template('general/interpolate.html')
+    return render_template('general/interpolate.html', title='interpolation')
 
 @general_bp.route('/sectionprops', methods=['GET','POST'])
 def web_section_props():
@@ -33,4 +33,4 @@ def web_section_props():
         centroid = '{x:0,y:0}'
         shape= None
         
-    return render_template('general/sectionprops.html', vertices=vertices, result=results,warning=warnings, centroid = centroid, shape=shape)
+    return render_template('general/sectionprops.html', vertices=vertices, result=results,warning=warnings, centroid = centroid, shape=shape, title='section properties')
