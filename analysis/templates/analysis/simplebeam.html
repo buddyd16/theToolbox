@@ -190,6 +190,10 @@
                             <input type="radio" id="designCombo_IBC_LRFD" class="designCombo form-check-input" name="designCombo" value="IBC_LRFD" {{ "checked" if inputs["combos"] == 1}}>
                             <label class="form-check-label" for="designCombo_IBC_LRFD"><h6>IBC 2018 - LRFD (Section 1605.2)</h6></label>
                         </div>
+                        <div class="form-check">
+                            <input type="radio" id="designCombo_USER" class="designCombo form-check-input" name="designCombo" value="USER" {{ "checked" if inputs["combos"] == 2}}>
+                            <label class="form-check-label" for="designCombo_USER"><h6>Only Consider User Defined Combinations</h6></label>
+                        </div>
                         <div>
                             <table id="combofs" class="table table-sm table-dark w-auto">
                                 <tr class="combof1Row">
@@ -238,10 +242,99 @@
                                 </tr>
                             </table>
                         </div>
+
                     </div>
 
                     <div class="container-sm py-3">
-                        <h5> Service Combinations (SLS):</h5>
+                        <h5> User Ultimate Combinations (ULS):</h5>
+                        <table id="ulscomboTable" class="table table-sm table-dark w-auto">
+                            <thead>
+                                <tr>
+                                <th> Combo</br>ID </th>
+                                <th class="text-center"> D </th>
+                                <th class="text-center"> F </th>
+                                <th class="text-center"> L </th>
+                                <th class="text-center"> H </th>
+                                <th class="text-center"> L<sub>r</sub> </th>
+                                <th class="text-center"> S </th>
+                                <th class="text-center"> R </th>
+                                <th class="text-center"> Wx </th>
+                                <th class="text-center"> Wy </th>
+                                <th class="text-center"> Ex </th>
+                                <th class="text-center"> Ey </th>
+                                <th class="text-center"> Pattern </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for uls in inputs["uls"] %}
+                                {% if loop.index0 == 0 %}
+                                <tr class="ulsCombo">
+                                <td class="ulscombouid">{{"U"~ loop.index}}</td>
+                                <td><input id="Dufactor" name="Dufactor" class="Dufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[0]}}"></td>
+                                <td><input id="Fufactor" name="Fufactor" class="Fufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[1]}}"></td>
+                                <td><input id="Lufactor" name="Lufactor" class="Lufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[2]}}"></td>
+                                <td><input id="Hufactor" name="Hufactor" class="Hufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[3]}}"></td>
+                                <td><input id="Lrufactor" name="Lrufactor" class="Lrufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[4]}}"></td>
+                                <td><input id="Sufactor" name="Sufactor" class="Sufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[5]}}"></td>
+                                <td><input id="Rufactor" name="Rufactor" class="Rufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[6]}}"></td>
+                                <td><input id="Wxufactor" name="Wxufactor" class="Wxufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[7]}}"></td>
+                                <td><input id="Wyufactor" name="Wyufactor" class="Wyufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[8]}}"></td>
+                                <td><input id="Exufactor" name="Exufactor" class="Exufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[9]}}"></td>
+                                <td><input id="Eyufactor" name="Eyufactor" class="Eyufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[10]}}"></td>
+                                <td>
+                                    <select id="ulspattern" class="ulspattern input-sm" name="ulspattern" style="width:59px">
+                                        <option value="1" {{ "selected=""selected""" if uls[11] == 1}}> y </option>
+                                        <option value="0" {{ "selected=""selected""" if uls[11] != 1}}> n </option>
+                                    </select>
+                                </td>
+                                <!-- Button to Add a Combo -->
+                                <td>    
+                                <button type="button" class="addULSComboFirst btn btn-secondary btn-success btn-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                </svg>
+                                </button>
+                                </td>
+                                
+                                </tr>
+                                {% else %}
+                                <tr class="ulsCombo">
+                                    <td class="ulscombouid">{{"U"~ loop.index}}</td>
+                                    <td><input id="Dufactor2" name="Dufactor" class="Dufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[0]}}"></td>
+                                    <td><input id="Fufactor2" name="Fufactor" class="Fufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[1]}}"></td>
+                                    <td><input id="Lufactor2" name="Lufactor" class="Lufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[2]}}"></td>
+                                    <td><input id="Hufactor2" name="Hufactor" class="Hufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[3]}}"></td>
+                                    <td><input id="Lrufactor2" name="Lrufactor" class="Lrufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[4]}}"></td>
+                                    <td><input id="Sufactor2" name="Sufactor" class="Sufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[5]}}"></td>
+                                    <td><input id="Rufactor2" name="Rufactor" class="Rufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[6]}}"></td>
+                                    <td><input id="Wxufactor2" name="Wxufactor" class="Wxufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[7]}}"></td>
+                                    <td><input id="Wyufactor2" name="Wyufactor" class="Wyufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[8]}}"></td>
+                                    <td><input id="Exufactor2" name="Exufactor" class="Exufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[9]}}"></td>
+                                    <td><input id="Eyufactor2" name="Eyufactor" class="Eyufactor input-sm" style="width:59px" type="number" step="any" value="{{uls[10]}}"></td>
+                                    <td>
+                                        <select id="ulspattern" class="ulspattern input-sm" name="ulspattern" style="width:59px">
+                                            <option value="1" {{ "selected=""selected""" if uls[11] == 1}}> y </option>
+                                            <option value="0" {{ "selected=""selected""" if uls[11] != 1}}> n </option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="addULSCombo btn btn-secondary btn-success btn-sm"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"></path></svg></button>
+                                        <a href="#" class="removeULSCombo badge badge-danger" style="margin-left: 5px">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"></path>
+                                            </svg>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="container-sm py-3">
+                        <h5> User Service Combinations (SLS):</h5>
+                        <p>Note: There are no automated service combinations, please provide at least one.</p>
                         <table id="servicecomboTable" class="table table-sm table-dark w-auto">
                             <thead>
                                 <tr>
@@ -257,6 +350,7 @@
                                 <th class="text-center"> Wy </th>
                                 <th class="text-center"> Ex </th>
                                 <th class="text-center"> Ey </th>
+                                <th class="text-center"> Pattern </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -264,18 +358,23 @@
                                 {% if loop.index0 == 0 %}
                                 <tr class="serviceCombo">
                                 <td class="servicecombouid">{{"S"~ loop.index}}</td>
-                                <td><input id="Dsfactor" name="Dsfactor" class="Dsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[0]}}"></td>
-                                <td><input id="Fsfactor" name="Fsfactor" class="Fsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[1]}}"></td>
-                                <td><input id="Lsfactor" name="Lsfactor" class="Lsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[2]}}"></td>
-                                <td><input id="Hsfactor" name="Hsfactor" class="Hsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[3]}}"></td>
-                                <td><input id="Lrsfactor" name="Lrsfactor" class="Lrsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[4]}}"></td>
-                                <td><input id="Ssfactor" name="Ssfactor" class="Ssfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[5]}}"></td>
-                                <td><input id="Rsfactor" name="Rsfactor" class="Rsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[6]}}"></td>
-                                <td><input id="Wxsfactor" name="Wxsfactor" class="Wxsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[7]}}"></td>
-                                <td><input id="Wysfactor" name="Wysfactor" class="Wysfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[8]}}"></td>
-                                <td><input id="Exsfactor" name="Exsfactor" class="Exsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[9]}}"></td>
-                                <td><input id="Eysfactor" name="Eysfactor" class="Eysfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[10]}}"></td>
-                                
+                                <td><input id="Dsfactor" name="Dsfactor" class="Dsfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[0]}}"></td>
+                                <td><input id="Fsfactor" name="Fsfactor" class="Fsfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[1]}}"></td>
+                                <td><input id="Lsfactor" name="Lsfactor" class="Lsfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[2]}}"></td>
+                                <td><input id="Hsfactor" name="Hsfactor" class="Hsfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[3]}}"></td>
+                                <td><input id="Lrsfactor" name="Lrsfactor" class="Lrsfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[4]}}"></td>
+                                <td><input id="Ssfactor" name="Ssfactor" class="Ssfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[5]}}"></td>
+                                <td><input id="Rsfactor" name="Rsfactor" class="Rsfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[6]}}"></td>
+                                <td><input id="Wxsfactor" name="Wxsfactor" class="Wxsfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[7]}}"></td>
+                                <td><input id="Wysfactor" name="Wysfactor" class="Wysfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[8]}}"></td>
+                                <td><input id="Exsfactor" name="Exsfactor" class="Exsfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[9]}}"></td>
+                                <td><input id="Eysfactor" name="Eysfactor" class="Eysfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[10]}}"></td>
+                                <td>
+                                    <select id="slspattern" class="slspattern input-sm" name="slspattern" style="width:59px">
+                                        <option value="1" {{ "selected=""selected""" if sls[11] == 1}}> y </option>
+                                        <option value="0" {{ "selected=""selected""" if sls[11] != 1}}> n </option>
+                                    </select>
+                                </td>
                                 <!-- Button to Add a Combo -->
                                 <td>    
                                 <button type="button" class="addServiceComboFirst btn btn-secondary btn-success btn-sm">
@@ -289,17 +388,23 @@
                                 {% else %}
                                 <tr class="serviceCombo">
                                     <td class="servicecombouid">{{"S"~ loop.index}}</td>
-                                    <td><input id="Dsfactor2" name="Dsfactor" class="Dsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[0]}}"></td>
-                                    <td><input id="Fsfactor2" name="Fsfactor" class="Fsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[1]}}"></td>
-                                    <td><input id="Lsfactor2" name="Lsfactor" class="Lsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[2]}}"></td>
-                                    <td><input id="Hsfactor2" name="Hsfactor" class="Hsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[3]}}"></td>
-                                    <td><input id="Lrsfactor2" name="Lrsfactor" class="Lrsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[4]}}"></td>
-                                    <td><input id="Ssfactor2" name="Ssfactor" class="Ssfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[5]}}"></td>
-                                    <td><input id="Rsfactor2" name="Rsfactor" class="Rsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[6]}}"></td>
-                                    <td><input id="Wxsfactor2" name="Wxsfactor" class="Wxsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[7]}}"></td>
-                                    <td><input id="Wysfactor2" name="Wysfactor" class="Wysfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[8]}}"></td>
-                                    <td><input id="Exsfactor2" name="Exsfactor" class="Exsfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[9]}}"></td>
-                                    <td><input id="Eysfactor2" name="Eysfactor" class="Eysfactor input-sm" style="width:65px" type="number" step="any" value="{{sls[10]}}"></td>
+                                    <td><input id="Dsfactor2" name="Dsfactor" class="Dsfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[0]}}"></td>
+                                    <td><input id="Fsfactor2" name="Fsfactor" class="Fsfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[1]}}"></td>
+                                    <td><input id="Lsfactor2" name="Lsfactor" class="Lsfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[2]}}"></td>
+                                    <td><input id="Hsfactor2" name="Hsfactor" class="Hsfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[3]}}"></td>
+                                    <td><input id="Lrsfactor2" name="Lrsfactor" class="Lrsfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[4]}}"></td>
+                                    <td><input id="Ssfactor2" name="Ssfactor" class="Ssfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[5]}}"></td>
+                                    <td><input id="Rsfactor2" name="Rsfactor" class="Rsfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[6]}}"></td>
+                                    <td><input id="Wxsfactor2" name="Wxsfactor" class="Wxsfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[7]}}"></td>
+                                    <td><input id="Wysfactor2" name="Wysfactor" class="Wysfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[8]}}"></td>
+                                    <td><input id="Exsfactor2" name="Exsfactor" class="Exsfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[9]}}"></td>
+                                    <td><input id="Eysfactor2" name="Eysfactor" class="Eysfactor input-sm" style="width:59px" type="number" step="any" value="{{sls[10]}}"></td>
+                                    <td>
+                                        <select id="slspattern" class="slspattern input-sm" name="slspattern" style="width:59px">
+                                            <option value="1" {{ "selected=""selected""" if sls[11] == 1}}> y </option>
+                                            <option value="0" {{ "selected=""selected""" if sls[11] != 1}}> n </option>
+                                        </select>
+                                    </td>
                                     <td>
                                         <button type="button" class="addServiceCombo btn btn-secondary btn-success btn-sm"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"></path></svg></button>
                                         <a href="#" class="removeServiceCombo badge badge-danger" style="margin-left: 5px">
@@ -601,6 +706,123 @@
                     <div class="container-sm py-3">
                         <div id="VuEnvelopePlot" class="w-100 plot"></div>
                     </div>
+                    <div class="container-sm py-3">
+                        <h5>Detailed Main Span Results:</h5>
+                        <div class="accordion" id="mainULS">
+                            {% for combo in results['mainbeam'].reactions_uls %}
+                            <div class="card">
+                                <div class="card-header" id="uls{{combo}}_header">
+                                  <h5 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#uls{{combo}}" aria-expanded="false" aria-controls="uls{{combo}}">
+                                      ULS Load Combination: {{combo}} -- {{results['mainbeam'].appliedcombos[combo]['comboformula']}}
+                                    </button>
+                                  </h5>
+                                </div>
+                            
+                                <div id="uls{{combo}}" class="collapse" aria-labelledby="uls{{combo}}_header" data-parent="#mainULS">
+                                    <div class="card-body">
+                                            {% for pattern in results['mainbeam'].reactions_uls[combo] %}
+                                            <div class="card">
+                                                <div class="card-header" id="uls{{combo}}{{pattern}}_header">
+                                                    <h5>
+                                                        <strong>Pattern: {{pattern}}</strong> 
+                                                        <br> R<sub>L</sub>: {{"%.3f"|format(results['mainbeam'].reactions_uls[combo][pattern]['rl']|float)}} kips 
+                                                        <br> R<sub>R</sub>: {{"%.3f"|format(results['mainbeam'].reactions_uls[combo][pattern]['rr']|float)}} kips 
+                                                        <br><u>Redundant Reactions:</u>
+                                                        {% for reaction in results['mainbeam'].reactions_uls[combo][pattern]['redundants'] %}
+                                                        {% if results['mainbeam'].endCondSum > 0 and loop.index0 == 0 %}
+                                                        <br>{% if results['mainbeam'].endCondition[0]==1 %}M<sub>L</sub> : {% else %} M<sub>R</sub> : {% endif %}
+                                                        {{"%.3f"|format(reaction|float)}} ft-kips
+                                                        {% elif results['mainbeam'].endCondSum == 2 and loop.index0 == 1 %}
+                                                        <br>M<sub>R</sub> : {{"%.3f"|format(reaction|float)}} ft-kips
+                                                        {% else %}
+                                                        <br>{{"%.3f"|format(reaction|float)}} kips at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} ft (local)
+                                                        {% endif %}
+                                                        {% endfor %}
+                                                    </h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <h5>Shear Function  (kips):</h5>
+                                                    {% for function in results['mainbeam'].v_functions_uls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {% for coef in piecef %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {{"%.4f"|format(coef|float)}}
+                                                    {% else %}
+                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    {% else %}
+                                                          for {{function[1][0]}} < x <{{function[1][1]}}
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>Moment Function (ft-kips):</h5>
+                                                    {% for function in results['mainbeam'].m_functions_uls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {% for coef in piecef %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {{"%.4f"|format(coef|float)}}
+                                                    {% else %}
+                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    {% else %}
+                                                          for {{function[1][0]}} < x <{{function[1][1]}}
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>E*I*Slope Function (rad):</h5>
+                                                    {% for function in results['mainbeam'].eis_functions_uls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {% for coef in piecef %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {{"%.4f"|format(coef|float)}}
+                                                    {% else %}
+                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    {% else %}
+                                                          for {{function[1][0]}} < x <{{function[1][1]}}
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>E*I*Deflection Function (ft):</h5>
+                                                    {% for function in results['mainbeam'].eid_functions_uls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {% for coef in piecef %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {{"%.4f"|format(coef|float)}}
+                                                    {% else %}
+                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    {% else %}
+                                                          for {{function[1][0]}} < x <{{function[1][1]}}
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
                 <!-- SLS DATA -->
                 <div class="tab-pane container fade" id="slsResults">
@@ -616,12 +838,243 @@
                     <div class="container-sm py-3">
                         <div id="SsEnvelopePlot" class="w-100 plot"></div>
                     </div>
+
+                    <div class="container-sm py-3">
+                        <h5>Detailed Main Span Results:</h5>
+                        <div class="accordion" id="mainSLS">
+                            {% for combo in results['mainbeam'].reactions_sls %}
+                            <div class="card">
+                                <div class="card-header" id="sls{{combo}}_header">
+                                  <h5 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#sls{{combo}}" aria-expanded="false" aria-controls="sls{{combo}}">
+                                      SLS Load Combination: {{combo}} -- {{results['mainbeam'].appliedcombos[combo]['comboformula']}}
+                                    </button>
+                                  </h5>
+                                </div>
+                            
+                                <div id="sls{{combo}}" class="collapse" aria-labelledby="sls{{combo}}_header" data-parent="#mainSLS">
+                                    <div class="card-body">
+                                            {% for pattern in results['mainbeam'].reactions_sls[combo] %}
+                                            <div class="card">
+                                                <div class="card-header" id="sls{{combo}}{{pattern}}_header">
+                                                    <h5>
+                                                        <strong>Pattern: {{pattern}}</strong> 
+                                                        <br> R<sub>L</sub>: {{"%.3f"|format(results['mainbeam'].reactions_sls[combo][pattern]['rl']|float)}} kips 
+                                                        <br> R<sub>R</sub>: {{"%.3f"|format(results['mainbeam'].reactions_sls[combo][pattern]['rr']|float)}} kips 
+                                                        <br><u>Redundant Reactions:</u>
+                                                        {% for reaction in results['mainbeam'].reactions_sls[combo][pattern]['redundants'] %}
+                                                        {% if results['mainbeam'].endCondSum > 0 and loop.index0 == 0 %}
+                                                        <br>{% if results['mainbeam'].endCondition[0]==1 %}M<sub>L</sub> : {% else %} M<sub>R</sub> : {% endif %}
+                                                        {{"%.3f"|format(reaction|float)}} ft-kips
+                                                        {% elif results['mainbeam'].endCondSum == 2 and loop.index0 == 1 %}
+                                                        <br>M<sub>R</sub> : {{"%.3f"|format(reaction|float)}} ft-kips
+                                                        {% else %}
+                                                        <br>{{"%.3f"|format(reaction|float)}} kips at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} ft (local)
+                                                        {% endif %}
+                                                        {% endfor %}
+                                                    </h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <h5>Shear Function (kips):</h5>
+                                                    {% for function in results['mainbeam'].v_functions_sls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {% for coef in piecef %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {{"%.4f"|format(coef|float)}}
+                                                    {% else %}
+                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    {% else %}
+                                                          for {{function[1][0]}} < x <{{function[1][1]}}
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>Moment Function (ft-kips):</h5>
+                                                    {% for function in results['mainbeam'].m_functions_sls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {% for coef in piecef %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {{"%.4f"|format(coef|float)}}
+                                                    {% else %}
+                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    {% else %}
+                                                          for {{function[1][0]}} < x <{{function[1][1]}}
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>E*I*Slope Function (rad):</h5>
+                                                    {% for function in results['mainbeam'].eis_functions_sls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {% for coef in piecef %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {{"%.4f"|format(coef|float)}}
+                                                    {% else %}
+                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    {% else %}
+                                                          for {{function[1][0]}} < x <{{function[1][1]}}
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>E*I*Deflection Function (ft):</h5>
+                                                    {% for function in results['mainbeam'].eid_functions_sls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {% for coef in piecef %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {{"%.4f"|format(coef|float)}}
+                                                    {% else %}
+                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    {% else %}
+                                                          for {{function[1][0]}} < x <{{function[1][1]}}
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
                 <!-- Basic DATA -->
                 <div class="tab-pane container fade" id="basicResults">
+                    <h5>Detailed Main Span Results:</h5>
                     <div class="container-sm py-3">
-                        <table id="basicTable" class="table table-sm table-dark w-auto">
-                        </table>
+                        <div class="accordion" id="mainBASIC">
+                            {% for combo in results['mainbeam'].reactions_basic %}
+                            <div class="card">
+                                <div class="card-header" id="basic{{combo}}_header">
+                                  <h5 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#basic{{combo}}" aria-expanded="false" aria-controls="basic{{combo}}">
+                                      Basic Load Combination: {{combo}}  -- {{results['mainbeam'].appliedcombos[combo]['comboformula']}}
+                                    </button>
+                                  </h5>
+                                </div>
+                            
+                                <div id="basic{{combo}}" class="collapse" aria-labelledby="basic{{combo}}_header" data-parent="#mainBASIC">
+                                    <div class="card-body">
+                                            {% for pattern in results['mainbeam'].reactions_basic[combo] %}
+                                            <div class="card">
+                                                <div class="card-header" id="basic{{combo}}{{pattern}}_header">
+                                                    <h5>
+                                                        <strong>Pattern: {{pattern}}</strong> 
+                                                        <br> R<sub>L</sub>: {{"%.3f"|format(results['mainbeam'].reactions_basic[combo][pattern]['rl']|float)}} kips 
+                                                        <br> R<sub>R</sub>: {{"%.3f"|format(results['mainbeam'].reactions_basic[combo][pattern]['rr']|float)}} kips 
+                                                        <br><u>Redundant Reactions:</u>
+                                                        {% for reaction in results['mainbeam'].reactions_basic[combo][pattern]['redundants'] %}
+                                                        {% if results['mainbeam'].endCondSum > 0 and loop.index0 == 0 %}
+                                                        <br>{% if results['mainbeam'].endCondition[0]==1 %}M<sub>L</sub> : {% else %} M<sub>R</sub> : {% endif %}
+                                                        {{"%.3f"|format(reaction|float)}} ft-kips
+                                                        {% elif results['mainbeam'].endCondSum == 2 and loop.index0 == 1 %}
+                                                        <br>M<sub>R</sub> : {{"%.3f"|format(reaction|float)}} ft-kips
+                                                        {% else %}
+                                                        <br>{{"%.3f"|format(reaction|float)}} kips at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} ft (local)
+                                                        {% endif %}
+                                                        {% endfor %}
+                                                    </h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <h5>Shear Function (kips):</h5>
+                                                    {% for function in results['mainbeam'].v_functions_basic[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {% for coef in piecef %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {{"%.4f"|format(coef|float)}}
+                                                    {% else %}
+                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    {% else %}
+                                                          for {{function[1][0]}} < x <{{function[1][1]}}
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>Moment Function (ft-kips):</h5>
+                                                    {% for function in results['mainbeam'].m_functions_basic[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {% for coef in piecef %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {{"%.4f"|format(coef|float)}}
+                                                    {% else %}
+                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    {% else %}
+                                                          for {{function[1][0]}} < x <{{function[1][1]}}
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>E*I*Slope Function (rad):</h5>
+                                                    {% for function in results['mainbeam'].eis_functions_basic[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {% for coef in piecef %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {{"%.4f"|format(coef|float)}}
+                                                    {% else %}
+                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    {% else %}
+                                                          for {{function[1][0]}} < x <{{function[1][1]}}
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>E*I*Deflection Function (ft):</h5>
+                                                    {% for function in results['mainbeam'].eid_functions_basic[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {% for coef in piecef %}
+                                                    {% if loop.index0 == 0 %}
+                                                    {{"%.4f"|format(coef|float)}}
+                                                    {% else %}
+                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    {% else %}
+                                                          for {{function[1][0]}} < x <{{function[1][1]}}
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
                 {% endif %}
