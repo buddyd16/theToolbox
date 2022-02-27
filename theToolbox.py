@@ -13,6 +13,11 @@ from masonry.masonry import masonry_bp
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
 
+# from werkzeug.debug import DebuggedApplication
+# app.wsgi_app = DebuggedApplication(app.wsgi_app, True)
+
+# app.debug = True
+
 # Register Blueprints
 app.register_blueprint(wood_bp, url_prefix='/wood')
 app.register_blueprint(concrete_bp, url_prefix='/concrete')
@@ -26,11 +31,19 @@ app.register_blueprint(masonry_bp, url_prefix='/masonry')
 @app.route('/')
 @app.route('/home')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', title=None)
+
+@app.route('/termsandconditions')
+def terms():
+    return render_template('termsandconditions.html', title='terms and conditions')
+
+@app.route('/privacy-policy')
+def privacy():
+    return render_template('privacypolicy.html', title='privacy policy')
 
 @app.route('/under_construction')
 def not_ready():
-    return render_template('under_construction.html')
+    return render_template('under_construction.html', title='under construction')
 
 @app.route('/test', methods=['GET', 'POST'])
 def test():
@@ -41,7 +54,7 @@ def test():
     else:
         data = None
 
-    return render_template('test.html', result=data)
+    return render_template('test.html', result=data, title='TEST')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0')
