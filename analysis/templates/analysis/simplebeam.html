@@ -1134,12 +1134,28 @@
 
     let x_main = {{results['mainbeam'].chartstations|safe}};
 
+    let ann_mu_max = Math.max(...mu_max_main);
+    let ann_mu_min = Math.min(...mu_min_main);
+    let ann_ds_max = Math.max(...ds_max_main);
+    let ann_ds_min = Math.min(...ds_min_main);
+
+    let mu_max_index = _.indexOf(mu_max_main,ann_mu_max);
+    let mu_min_index = _.indexOf(mu_min_main,ann_mu_min);
+    let ds_max_index = _.indexOf(ds_max_main,ann_ds_max);
+    let ds_min_index = _.indexOf(ds_min_main,ann_ds_min);
+
     var mu_max = {
         x: x_main,
         y: mu_max_main,
         mode: plot_type,
         name: 'Mu,max (main)',
-        marker: {size: marker_size}
+        marker: {
+            size: marker_size,
+            color: 'rgb(128,0,0)'
+        },
+        line: {
+            color: 'rgbd(128,0,0)'
+        }
     };
 
     var mu_min = {
@@ -1147,39 +1163,13 @@
         y: mu_min_main,
         mode: plot_type,
         name: 'Mu,min (main)',
-        marker: {size: marker_size}
-    };
-
-    var vu_max = {
-        x: x_main,
-        y: vu_max_main,
-        mode: plot_type,
-        name: 'Vu,max (main)',
-        marker: {size: marker_size}
-    };
-
-    var vu_min = {
-        x: x_main,
-        y: vu_min_main,
-        mode: plot_type,
-        name: 'Vu,min (main)',
-        marker: {size: marker_size}
-    };
-
-    var vs_max = {
-        x: x_main,
-        y: vs_max_main,
-        mode: plot_type,
-        name: 'Vs,max (main)',
-        marker: {size: marker_size}
-    };
-
-    var vs_min = {
-        x: x_main,
-        y: vs_min_main,
-        mode: plot_type,
-        name: 'Vs,min (main)',
-        marker: {size: marker_size}
+        marker: {
+            size: marker_size,
+            color: 'rgb(255,0,0)'
+        },
+        line: {
+            color: 'rgbd(255,0,0)'
+        }
     };
 
     var ms_max = {
@@ -1187,7 +1177,13 @@
         y: ms_max_main,
         mode: plot_type,
         name: 'Ms,max (main)',
-        marker: {size: marker_size}
+        marker: {
+            size: marker_size,
+            color: 'rgb(128,0,0)'
+        },
+        line: {
+            color: 'rgbd(128,0,0)'
+        }
     };
 
     var ms_min = {
@@ -1195,7 +1191,69 @@
         y: ms_min_main,
         mode: plot_type,
         name: 'Ms,min (main)',
-        marker: {size: marker_size}
+        marker: {
+            size: marker_size,
+            color: 'rgb(255,0,0)'
+        },
+        line: {
+            color: 'rgbd(255,0,0)'
+        }
+    };
+
+    var vu_max = {
+        x: x_main,
+        y: vu_max_main,
+        mode: plot_type,
+        name: 'Vu,max (main)',
+        marker: {
+            size: marker_size,
+            color: 'rgb(0,128,0)'
+        },
+        line: {
+            color: 'rgbd(0,128,0)'
+        }
+    };
+
+    var vu_min = {
+        x: x_main,
+        y: vu_min_main,
+        mode: plot_type,
+        name: 'Vu,min (main)',
+        marker: {
+            size: marker_size,
+            color: 'rgb(0,255,0)'
+        },
+        line: {
+            color: 'rgbd(0,255,0)'
+        }
+    };
+
+    var vs_max = {
+        x: x_main,
+        y: vs_max_main,
+        mode: plot_type,
+        name: 'Vs,max (main)',
+        marker: {
+            size: marker_size,
+            color: 'rgb(0,128,0)'
+        },
+        line: {
+            color: 'rgbd(0,128,0)'
+        }
+    };
+
+    var vs_min = {
+        x: x_main,
+        y: vs_min_main,
+        mode: plot_type,
+        name: 'Vs,min (main)',
+        marker: {
+            size: marker_size,
+            color: 'rgb(0,255,0)'
+        },
+        line: {
+            color: 'rgbd(0,255,0)'
+        }
     };
 
     var ss_max = {
@@ -1203,7 +1261,13 @@
         y: ss_max_main,
         mode: plot_type,
         name: 'Ss,max (main)',
-        marker: {size: marker_size}
+        marker: {
+            size: marker_size,
+            color: 'rgb(102,0,102)'
+        },
+        line: {
+            color: 'rgbd(102,0,102)'
+        }
     };
 
     var ss_min = {
@@ -1211,7 +1275,13 @@
         y: ss_min_main,
         mode: plot_type,
         name: 'Ss,min (main)',
-        marker: {size: marker_size}
+        marker: {
+            size: marker_size,
+            color: 'rgb(204,0,204)'
+        },
+        line: {
+            color: 'rgbd(204,0,204)'
+        }
     };
 
     var ds_max = {
@@ -1219,7 +1289,13 @@
         y: ds_max_main,
         mode: plot_type,
         name: 'Ds,max (main)',
-        marker: {size: marker_size}
+        marker: {
+            size: marker_size,
+            color: 'rgb(25,25,102)'
+        },
+        line: {
+            color: 'rgbd(25,25,102)'
+        }
     };
 
     var ds_min = {
@@ -1227,7 +1303,13 @@
         y: ds_min_main,
         mode: plot_type,
         name: 'Ds,min (main)',
-        marker: {size: marker_size}
+        marker: {
+            size: marker_size,
+            color: 'rgb(50,50,205)'
+        },
+        line: {
+            color: 'rgbd(50,50,205)'
+        }
     };
 
     {% if results['cantleft'] != None %}
@@ -1268,7 +1350,13 @@
         y: mu_max_left,
         mode: plot_type,
         name: 'Mu,max (left)',
-        marker: {size: marker_size},
+        marker: {
+            size: marker_size,
+            color: 'rgb(153, 31, 0)'
+        },
+        line: {
+            color: 'rgbd(153, 31, 0)'
+        },
         showlegend: inlegend
     };
 
@@ -1277,43 +1365,13 @@
         y: mu_min_left,
         mode: plot_type,
         name: 'Mu,min (left)',
-        marker: {size: marker_size},
-        showlegend: inlegend
-    };
-
-    var left_vu_max = {
-        x: x_left,
-        y: vu_max_left,
-        mode: plot_type,
-        name: 'Vu,max (left)',
-        marker: {size: marker_size},
-        showlegend: inlegend
-    };
-
-    var left_vu_min = {
-        x: x_left,
-        y: vu_min_left,
-        mode: plot_type,
-        name: 'Vu,min (left)',
-        marker: {size: marker_size},
-        showlegend: inlegend
-    };
-
-    var left_vs_max = {
-        x: x_left,
-        y: vs_max_left,
-        mode: plot_type,
-        name: 'Vs,max (left)',
-        marker: {size: marker_size},
-        showlegend: inlegend
-    };
-
-    var left_vs_min = {
-        x: x_left,
-        y: vs_min_left,
-        mode: plot_type,
-        name: 'Vs,min (left)',
-        marker: {size: marker_size},
+        marker: {
+            size: marker_size,
+            color: 'rgb(255, 51, 0)'
+        },
+        line: {
+            color: 'rgbd(255, 51, 0)'
+        },
         showlegend: inlegend
     };
 
@@ -1322,7 +1380,13 @@
         y: ms_max_left,
         mode: plot_type,
         name: 'Ms,max (left)',
-        marker: {size: marker_size},
+        marker: {
+            size: marker_size,
+            color: 'rgb(153, 31, 0)'
+        },
+        line: {
+            color: 'rgbd(153, 31, 0)'
+        },
         showlegend: inlegend
     };
 
@@ -1331,7 +1395,73 @@
         y: ms_min_left,
         mode: plot_type,
         name: 'Ms,min (left)',
-        marker: {size: marker_size},
+        marker: {
+            size: marker_size,
+            color: 'rgb(255, 51, 0)'
+        },
+        line: {
+            color: 'rgbd(255, 51, 0)'
+        },
+        showlegend: inlegend
+    };
+
+    var left_vu_max = {
+        x: x_left,
+        y: vu_max_left,
+        mode: plot_type,
+        name: 'Vu,max (left)',
+        marker: {
+            size: marker_size,
+            color: 'rgb(55,128,0)'
+        },
+        line: {
+            color: 'rgbd(55,128,0)'
+        },
+        showlegend: inlegend
+    };
+
+    var left_vu_min = {
+        x: x_left,
+        y: vu_min_left,
+        mode: plot_type,
+        name: 'Vu,min (left)',
+        marker: {
+            size: marker_size,
+            color: 'rgb(55,255,0)'
+        },
+        line: {
+            color: 'rgbd(55,255,0)'
+        },
+        showlegend: inlegend
+    };
+
+    var left_vs_max = {
+        x: x_left,
+        y: vs_max_left,
+        mode: plot_type,
+        name: 'Vs,max (left)',
+        marker: {
+            size: marker_size,
+            color: 'rgb(55,128,0)'
+        },
+        line: {
+            color: 'rgbd(55,128,0)'
+        },
+        showlegend: inlegend
+    };
+
+    var left_vs_min = {
+        x: x_left,
+        y: vs_min_left,
+        mode: plot_type,
+        name: 'Vs,min (left)',
+        marker: {
+            size: marker_size,
+            color: 'rgb(55,255,0)'
+        },
+        line: {
+            color: 'rgbd(55,255,0)'
+        },
         showlegend: inlegend
     };
 
@@ -1340,7 +1470,13 @@
         y: ss_max_left,
         mode: plot_type,
         name: 'Ss,max (left)',
-        marker: {size: marker_size},
+        marker: {
+            size: marker_size,
+            color: 'rgb(102,80,102)'
+        },
+        line: {
+            color: 'rgbd(102,80,102)'
+        },
         showlegend: inlegend
     };
 
@@ -1349,7 +1485,13 @@
         y: ss_min_left,
         mode: plot_type,
         name: 'Ss,min (left)',
-        marker: {size: marker_size},
+        marker: {
+            size: marker_size,
+            color: 'rgb(204,80,204)'
+        },
+        line: {
+            color: 'rgbd(204,80,204)'
+        },
         showlegend: inlegend
     };
 
@@ -1358,7 +1500,13 @@
         y: ds_max_left,
         mode: plot_type,
         name: 'Ds,max (left)',
-        marker: {size: marker_size},
+        marker: {
+            size: marker_size,
+            color: 'rgb(0,115,153)'
+        },
+        line: {
+            color: 'rgbd(0,115,153)'
+        },
         showlegend: inlegend
     };
 
@@ -1367,7 +1515,13 @@
         y: ds_min_left,
         mode: plot_type,
         name: 'Ds,min (left)',
-        marker: {size: marker_size},
+        marker: {
+            size: marker_size,
+            color: 'rgb(0,172,230)'
+        },
+        line: {
+            color: 'rgbd(0,172,230)'
+        },
         showlegend: inlegend
     };
 
@@ -1409,7 +1563,13 @@
         y: mu_max_right,
         mode: plot_type,
         name: 'Mu,max (right)',
-        marker: {size: marker_size},
+        marker: {
+            size: marker_size,
+            color: 'rgb(153, 0, 31)'
+        },
+        line: {
+            color: 'rgbd(153, 0, 31)'
+        },
         showlegend: inlegend_right
     };
 
@@ -1418,43 +1578,13 @@
         y: mu_min_right,
         mode: plot_type,
         name: 'Mu,min (right)',
-        marker: {size: marker_size},
-        showlegend: inlegend_right
-    };
-
-    var right_vu_max = {
-        x: x_right,
-        y: vu_max_right,
-        mode: plot_type,
-        name: 'Vu,max (right)',
-        marker: {size: marker_size},
-        showlegend: inlegend_right
-    };
-
-    var right_vu_min = {
-        x: x_right,
-        y: vu_min_right,
-        mode: plot_type,
-        name: 'Vu,min (right)',
-        marker: {size: marker_size},
-        showlegend: inlegend_right
-    };
-
-    var right_vs_max = {
-        x: x_right,
-        y: vs_max_right,
-        mode: plot_type,
-        name: 'Vs,max (right)',
-        marker: {size: marker_size},
-        showlegend: inlegend_right
-    };
-
-    var right_vs_min = {
-        x: x_right,
-        y: vs_min_right,
-        mode: plot_type,
-        name: 'Vs,min (right)',
-        marker: {size: marker_size},
+        marker: {
+            size: marker_size,
+            color: 'rgb(255, 0, 51)'
+        },
+        line: {
+            color: 'rgbd(255, 0, 51)'
+        },
         showlegend: inlegend_right
     };
 
@@ -1463,7 +1593,13 @@
         y: ms_max_right,
         mode: plot_type,
         name: 'Ms,max (right)',
-        marker: {size: marker_size},
+        marker: {
+            size: marker_size,
+            color: 'rgb(153, 0, 31)'
+        },
+        line: {
+            color: 'rgbd(153, 0, 31)'
+        },
         showlegend: inlegend_right
     };
 
@@ -1472,7 +1608,73 @@
         y: ms_min_right,
         mode: plot_type,
         name: 'Ms,min (right)',
-        marker: {size: marker_size},
+        marker: {
+            size: marker_size,
+            color: 'rgb(255, 0, 51)'
+        },
+        line: {
+            color: 'rgbd(255, 0, 51)'
+        },
+        showlegend: inlegend_right
+    };
+
+    var right_vu_max = {
+        x: x_right,
+        y: vu_max_right,
+        mode: plot_type,
+        name: 'Vu,max (right)',
+        marker: {
+            size: marker_size,
+            color: 'rgb(0,128,55)'
+        },
+        line: {
+            color: 'rgbd(0,128,55)'
+        },
+        showlegend: inlegend_right
+    };
+
+    var right_vu_min = {
+        x: x_right,
+        y: vu_min_right,
+        mode: plot_type,
+        name: 'Vu,min (right)',
+        marker: {
+            size: marker_size,
+            color: 'rgb(0,255,55)'
+        },
+        line: {
+            color: 'rgbd(0,255,55)'
+        },
+        showlegend: inlegend_right
+    };
+
+    var right_vs_max = {
+        x: x_right,
+        y: vs_max_right,
+        mode: plot_type,
+        name: 'Vs,max (right)',
+        marker: {
+            size: marker_size,
+            color: 'rgb(0,128,55)'
+        },
+        line: {
+            color: 'rgbd(0,128,55)'
+        },
+        showlegend: inlegend_right
+    };
+
+    var right_vs_min = {
+        x: x_right,
+        y: vs_min_right,
+        mode: plot_type,
+        name: 'Vs,min (right)',
+        marker: {
+            size: marker_size,
+            color: 'rgb(0,255,55)'
+        },
+        line: {
+            color: 'rgbd(0,255,55)'
+        },
         showlegend: inlegend_right
     };
 
@@ -1481,7 +1683,13 @@
         y: ss_max_right,
         mode: plot_type,
         name: 'Ss,max (right)',
-        marker: {size: marker_size},
+        marker: {
+            size: marker_size,
+            color: 'rgb(102,40,102)'
+        },
+        line: {
+            color: 'rgbd(102,40,102)'
+        },
         showlegend: inlegend_right
     };
 
@@ -1490,7 +1698,13 @@
         y: ss_min_right,
         mode: plot_type,
         name: 'Ss,min (right)',
-        marker: {size: marker_size},
+        marker: {
+            size: marker_size,
+            color: 'rgb(204,40,204)'
+        },
+        line: {
+            color: 'rgbd(204,40,204)'
+        },
         showlegend: inlegend_right
     };
 
@@ -1499,7 +1713,13 @@
         y: ds_max_right,
         mode: plot_type,
         name: 'Ds,max (right)',
-        marker: {size: marker_size},
+        marker: {
+            size: marker_size,
+            color: 'rgb(0,0,128)'
+        },
+        line: {
+            color: 'rgbd(0,0,128)'
+        },
         showlegend: inlegend_right
     };
 
@@ -1508,7 +1728,13 @@
         y: ds_min_right,
         mode: plot_type,
         name: 'Ds,min (right)',
-        marker: {size: marker_size},
+        marker: {
+            size: marker_size,
+            color: 'rgb(0,0,255)'
+        },
+        line: {
+            color: 'rgbd(0,0,255)'
+        },
         showlegend: inlegend_right
     };
 
@@ -1526,6 +1752,56 @@
         title: "ULS Moment Envelope (ft-kip)",
         width: w,
         height: h,
+        annotations:[
+            {
+                x: x_main[mu_max_index],
+                y: ann_mu_max,
+                xref: 'x',
+                yref: 'y',
+                text: ann_mu_max.toFixed(3).toString()+" ft-kips @ "+ x_main[mu_max_index].toFixed(3).toString()+" ft",
+                showarrow: true,
+                font: {
+                    size: 12,
+                    color: '#ffffff'
+                },
+                align: 'center',
+                arrowhead: 1,
+                arrowsize: 1,
+                arrowwidth: 1,
+                arrowcolor: '#000000',
+                ax: 0,
+                ay: -40,
+                bordercolor: '#000000',
+                borderwidth: 1,
+                borderpad: 4,
+                bgcolor: '#800000',
+                opacity: 0.8
+            },
+            {
+                x: x_main[mu_min_index],
+                y: ann_mu_min,
+                xref: 'x',
+                yref: 'y',
+                text: ann_mu_min.toFixed(3).toString()+" ft-kips @ "+ x_main[mu_min_index].toFixed(3).toString()+" ft",
+                showarrow: true,
+                font: {
+                    size: 12,
+                    color: '#ffffff'
+                },
+                align: 'center',
+                arrowhead: 1,
+                arrowsize: 1,
+                arrowwidth: 1,
+                arrowcolor: '#000000',
+                ax: 0,
+                ay: 40,
+                bordercolor: '#000000',
+                borderwidth: 1,
+                borderpad: 4,
+                bgcolor: '#ff0000',
+                opacity: 0.8
+            },
+        ]
     };
 
     var vu_layout = {
@@ -1556,6 +1832,56 @@
         title: "SLS Deflection Envelope (in)",
         width: w,
         height: h,
+        annotations:[
+            {
+                x: x_main[ds_max_index],
+                y: ann_ds_max,
+                xref: 'x',
+                yref: 'y',
+                text: ann_ds_max.toFixed(4).toString()+" in @ "+ x_main[ds_max_index].toFixed(3).toString() +" ft",
+                showarrow: true,
+                font: {
+                    size: 12,
+                    color: '#ffffff'
+                },
+                align: 'center',
+                arrowhead: 1,
+                arrowsize: 1,
+                arrowwidth: 1,
+                arrowcolor: '#000000',
+                ax: 0,
+                ay: -40,
+                bordercolor: '#000000',
+                borderwidth: 1,
+                borderpad: 4,
+                bgcolor: '#191966',
+                opacity: 0.8
+            },
+            {
+                x: x_main[ds_min_index],
+                y: ann_ds_min,
+                xref: 'x',
+                yref: 'y',
+                text: ann_ds_min.toFixed(4).toString()+" in @ "+ x_main[ds_min_index].toFixed(3).toString() +" ft",
+                showarrow: true,
+                font: {
+                    size: 12,
+                    color: '#ffffff'
+                },
+                align: 'center',
+                arrowhead: 1,
+                arrowsize: 1,
+                arrowwidth: 1,
+                arrowcolor: '#000000',
+                ax: 0,
+                ay: 40,
+                bordercolor: '#000000',
+                borderwidth: 1,
+                borderpad: 4,
+                bgcolor: '#3232cd',
+                opacity: 0.8
+            },
+        ]
     };
 
     var config = {responsive: true}
