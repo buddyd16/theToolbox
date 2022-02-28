@@ -102,7 +102,7 @@ def poly_eval(c_list,x):
     return res
 
 
-def eval_piece_function(piece_function,x):
+def eval_piece_function(piece_function, x):
     '''
     Given a peicewise function and an x evaluate the results
     '''

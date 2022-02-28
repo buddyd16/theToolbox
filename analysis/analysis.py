@@ -87,7 +87,7 @@ def web_simplebeam():
                 pat = False
             else:
                 pat = True
-            print(pat)
+            # print(pat)
             ulsCombos.append([float(j),
                               float(uls_F[i]),
                               float(uls_L[i]),
@@ -123,7 +123,7 @@ def web_simplebeam():
                 pat = False
             else:
                 pat = True
-            print(pat)
+            # print(pat)
             slsCombos.append([float(j),
                               float(sls_F[i]),
                               float(sls_L[i]),

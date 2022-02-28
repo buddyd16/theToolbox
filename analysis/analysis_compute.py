@@ -553,8 +553,8 @@ def SimpleBeam(inputs, log=True):
             a = load[3]
             b = load[4]
 
-            print("globalspans:")
-            print(globalSpans)
+            # print("globalspans:")
+            # print(globalSpans)
 
             # Since the load is applied over some finite length
             # step through each span and solve the parametric eqn
