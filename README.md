@@ -16,14 +16,14 @@ Tools Roadmap
     - [x] Beam Class to pull it all together and store data as attributes to make access easier on the web side
     - [x] Data pre-processor to churn through all the form data and organize it to fit the calculation models
     - [x] Computation model
-    - [ ] function in the beam class to envelope reactions for web display
+    - [x] function in the beam class to envelope reactions for web display
   - [ ] HTML Template
     - [x] Generalized Input to accept a list of inputs for repopulation of inputs after a POST method
     - [x] Layout for ULS Results
     - [x] Layout for SLS Results
     - [x] Layout for Basic Results 
     - [x] Javascript to plot the applied loads on the geometry canvas
-    - [ ] determine a layout and data to show on the general results tab
+    - [ ] determine a better layout and data to show on the general results tab
 - [ ] Retaining wall inclusive of allowing numerous user defined loads in addition to the typical soil and surcharge loads seen in these tools, don't know about anyone else but brick veneer, wind concentrated, and wind distributed loads are a common occurance that no software packages seem to address.
 - [ ] Wood Stud Walls
 - [ ] Strap Beam
