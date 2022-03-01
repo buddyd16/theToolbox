@@ -14,20 +14,36 @@
   font-size: 12px;
 }
 
+#loading {
+    position: fixed;
+    display: block;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    text-align: center;
+    opacity: 0.7;
+    background-color: #fff;
+    z-index: 99;
+  }
+
 {% endblock style %}
 
 {% block content %}
 
 <div class="container">
+    <div id="loading">
+        <strong>"Calculating please wait..."</strong>
+    </div>
     <!-- Main Beam Chart/Canvas-->
+    <form method=post action="" onsubmit="ShowLoading()">
+    <div class="row">
+        <input class="btn btn-dark btn-lg my-1" type=submit value="Analyze Beam">
+    </div>
+
     <div class="row">
         <canvas id="bmCanvas" width="1000" height="400" style="border:2px solid #000000;"></canvas>
         
-    </div>
-    
-    <form method=post action="">
-    <div class="row">
-        <input type=submit value=Compute>
     </div>
     <!-- Inputs -->
     <div class="row">
@@ -247,6 +263,7 @@
 
                     <div class="container-sm py-3">
                         <h5> User Ultimate Combinations (ULS):</h5>
+                        <p>Note: Set all factors to 0 to ignore user defined ULS Combos.</p>
                         <table id="ulscomboTable" class="table table-sm table-dark w-auto">
                             <thead>
                                 <tr>
@@ -688,6 +705,50 @@
                 <!-- General DATA -->
                 <div class="tab-pane container fade" id="genResults">
                     <div class="container-sm py-3">
+                        <h4>Main Span:</h4>
+                        <strong><u>Ultimate Reactions Envelope:</u></strong>
+                        <br> R<sub>L,min</sub>: {{"%.3f"|format(results['mainbeam'].reaction_uls_report['rlmin'][0]|float)}} kips from Combination:{{results['mainbeam'].reaction_uls_report['rlmin'][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['rlmin'][1][1]}}
+                        <br> R<sub>L,max</sub>: {{"%.3f"|format(results['mainbeam'].reaction_uls_report['rlmax'][0]|float)}} kips from Combination:{{results['mainbeam'].reaction_uls_report['rlmax'][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['rlmax'][1][1]}}
+                        <br> R<sub>R,min</sub>: {{"%.3f"|format(results['mainbeam'].reaction_uls_report['rrmin'][0]|float)}} kips from Combination:{{results['mainbeam'].reaction_uls_report['rrmin'][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['rrmin'][1][1]}}
+                        <br> R<sub>R,max</sub>: {{"%.3f"|format(results['mainbeam'].reaction_uls_report['rrmax'][0]|float)}} kips from Combination:{{results['mainbeam'].reaction_uls_report['rrmax'][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['rrmax'][1][1]}}
+                        <br><u>Redundant Reactions:</u>
+                        {% for reaction in results['mainbeam'].reaction_uls_report['redundants_max'] %}
+                        {% if results['mainbeam'].endCondSum > 0 and loop.index0 == 0 %}
+                        <br>{% if results['mainbeam'].endCondition[0]==1 %}M<sub>L,max</sub> : {% else %} M<sub>R,max</sub> : {% endif %}
+                        {{"%.3f"|format(reaction[0]|float)}} ft-kips from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
+                        <br>{% if results['mainbeam'].endCondition[0]==1 %}M<sub>L,min</sub> : {% else %} M<sub>R,min</sub> : {% endif %}
+                        {{"%.3f"|format(results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][0]|float)}} ft-kips from Combination:{{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][1]}}
+                        {% elif results['mainbeam'].endCondSum == 2 and loop.index0 == 1 %}
+                        <br>M<sub>R,max</sub> : {{"%.3f"|format(reaction[0]|float)}} ft-kips from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
+                        <br>M<sub>R,min</sub> : {{"%.3f"|format(results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][0]|float)}} ft-kips from Combination:{{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][1]}}
+                        {% else %}
+                        <br>R<sub>{{loop.index}},max</sub> : {{"%.3f"|format(reaction[0]|float)}} kips at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} ft (local) from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
+                        <br>R<sub>{{loop.index}},min</sub> : {{"%.3f"|format(results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][0]|float)}} kips at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} ft (local) from Combination:{{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][1]}}
+                        {% endif %}
+                        {% endfor %}
+
+                        <br><br><strong><u>Service Reactions Envelope:</u></strong>
+                        <br> R<sub>L,min</sub>: {{"%.3f"|format(results['mainbeam'].reaction_sls_report['rlmin'][0]|float)}} kips from Combination:{{results['mainbeam'].reaction_sls_report['rlmin'][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['rlmin'][1][1]}}
+                        <br> R<sub>L,max</sub>: {{"%.3f"|format(results['mainbeam'].reaction_sls_report['rlmax'][0]|float)}} kips from Combination:{{results['mainbeam'].reaction_sls_report['rlmax'][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['rlmax'][1][1]}}
+                        <br> R<sub>R,min</sub>: {{"%.3f"|format(results['mainbeam'].reaction_sls_report['rrmin'][0]|float)}} kips from Combination:{{results['mainbeam'].reaction_sls_report['rrmin'][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['rrmin'][1][1]}}
+                        <br> R<sub>R,max</sub>: {{"%.3f"|format(results['mainbeam'].reaction_sls_report['rrmax'][0]|float)}} kips from Combination:{{results['mainbeam'].reaction_sls_report['rrmax'][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['rrmax'][1][1]}}
+                        <br><u>Redundant Reactions:</u>
+                        {% for reaction in results['mainbeam'].reaction_sls_report['redundants_max'] %}
+                        {% if results['mainbeam'].endCondSum > 0 and loop.index0 == 0 %}
+                        <br>{% if results['mainbeam'].endCondition[0]==1 %}M<sub>L,max</sub> : {% else %} M<sub>R,max</sub> : {% endif %}
+                        {{"%.3f"|format(reaction[0]|float)}} ft-kips from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
+                        <br>{% if results['mainbeam'].endCondition[0]==1 %}M<sub>L,min</sub> : {% else %} M<sub>R,min</sub> : {% endif %}
+                        {{"%.3f"|format(results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][0]|float)}} ft-kips from Combination:{{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][1]}}
+                        {% elif results['mainbeam'].endCondSum == 2 and loop.index0 == 1 %}
+                        <br>M<sub>R,max</sub> : {{"%.3f"|format(reaction[0]|float)}} ft-kips from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
+                        <br>M<sub>R,min</sub> : {{"%.3f"|format(results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][0]|float)}} ft-kips from Combination:{{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][1]}}
+                        {% else %}
+                        <br>R<sub>{{loop.index}},max</sub> : {{"%.3f"|format(reaction[0]|float)}} kips at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} ft (local) from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
+                        <br>R<sub>{{loop.index}},min</sub> : {{"%.3f"|format(results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][0]|float)}} kips at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} ft (local) from Combination:{{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][1]}}
+                        {% endif %}
+                        {% endfor %}
+                        <br><br>
+
                         <h4>Calculation Log:</h4>
                         <table class="table table-sm w-auto">
                             {% for item in results['log'] %}
@@ -1136,11 +1197,15 @@
 
     let ann_mu_max = Math.max(...mu_max_main);
     let ann_mu_min = Math.min(...mu_min_main);
+    let ann_vu_max = Math.max(...vu_max_main);
+    let ann_vu_min = Math.min(...vu_min_main);
     let ann_ds_max = Math.max(...ds_max_main);
     let ann_ds_min = Math.min(...ds_min_main);
 
     let mu_max_index = _.indexOf(mu_max_main,ann_mu_max);
     let mu_min_index = _.indexOf(mu_min_main,ann_mu_min);
+    let vu_max_index = _.indexOf(vu_max_main,ann_vu_max);
+    let vu_min_index = _.indexOf(vu_min_main,ann_vu_min);
     let ds_max_index = _.indexOf(ds_max_main,ann_ds_max);
     let ds_min_index = _.indexOf(ds_min_main,ann_ds_min);
 
@@ -1758,10 +1823,10 @@
                 y: ann_mu_max,
                 xref: 'x',
                 yref: 'y',
-                text: ann_mu_max.toFixed(3).toString()+" ft-kips @ "+ x_main[mu_max_index].toFixed(3).toString()+" ft",
+                text: "<b>"+ ann_mu_max.toFixed(3).toString()+" ft-kips @ "+ x_main[mu_max_index].toFixed(3).toString()+" ft </b>",
                 showarrow: true,
                 font: {
-                    size: 12,
+                    size: 14,
                     color: '#ffffff'
                 },
                 align: 'center',
@@ -1782,11 +1847,11 @@
                 y: ann_mu_min,
                 xref: 'x',
                 yref: 'y',
-                text: ann_mu_min.toFixed(3).toString()+" ft-kips @ "+ x_main[mu_min_index].toFixed(3).toString()+" ft",
+                text: "<b>"+ ann_mu_min.toFixed(3).toString()+" ft-kips @ "+ x_main[mu_min_index].toFixed(3).toString()+" ft</b>",
                 showarrow: true,
                 font: {
-                    size: 12,
-                    color: '#ffffff'
+                    size: 14,
+                    color: '#000000'
                 },
                 align: 'center',
                 arrowhead: 1,
@@ -1808,6 +1873,56 @@
         title: "ULS Shear Envelope (kip)",
         width: w,
         height: h,
+        annotations:[
+            {
+                x: x_main[vu_max_index],
+                y: ann_vu_max,
+                xref: 'x',
+                yref: 'y',
+                text: "<b>"+ ann_vu_max.toFixed(3).toString()+" ft-kips @ "+ x_main[vu_max_index].toFixed(3).toString()+" ft</b>",
+                showarrow: true,
+                font: {
+                    size: 14,
+                    color: '#ffffff'
+                },
+                align: 'center',
+                arrowhead: 1,
+                arrowsize: 1,
+                arrowwidth: 1,
+                arrowcolor: '#000000',
+                ax: 0,
+                ay: -40,
+                bordercolor: '#000000',
+                borderwidth: 1,
+                borderpad: 4,
+                bgcolor: '#008000',
+                opacity: 0.8
+            },
+            {
+                x: x_main[vu_min_index],
+                y: ann_vu_min,
+                xref: 'x',
+                yref: 'y',
+                text: "<b>"+ann_vu_min.toFixed(3).toString()+" ft-kips @ "+ x_main[vu_min_index].toFixed(3).toString()+" ft</b>",
+                showarrow: true,
+                font: {
+                    size: 14,
+                    color: '#000000'
+                },
+                align: 'center',
+                arrowhead: 1,
+                arrowsize: 1,
+                arrowwidth: 1,
+                arrowcolor: '#000000',
+                ax: 0,
+                ay: 40,
+                bordercolor: '#000000',
+                borderwidth: 1,
+                borderpad: 4,
+                bgcolor: '#00ff00',
+                opacity: 0.8
+            },
+        ]
     };
 
     var vs_layout = {
@@ -1838,10 +1953,10 @@
                 y: ann_ds_max,
                 xref: 'x',
                 yref: 'y',
-                text: ann_ds_max.toFixed(4).toString()+" in @ "+ x_main[ds_max_index].toFixed(3).toString() +" ft",
+                text: "<b>"+ann_ds_max.toFixed(4).toString()+" in @ "+ x_main[ds_max_index].toFixed(3).toString() +" ft</b>",
                 showarrow: true,
                 font: {
-                    size: 12,
+                    size: 14,
                     color: '#ffffff'
                 },
                 align: 'center',
@@ -1862,10 +1977,10 @@
                 y: ann_ds_min,
                 xref: 'x',
                 yref: 'y',
-                text: ann_ds_min.toFixed(4).toString()+" in @ "+ x_main[ds_min_index].toFixed(3).toString() +" ft",
+                text: "<b>"+ann_ds_min.toFixed(4).toString()+" in @ "+ x_main[ds_min_index].toFixed(3).toString() +" ft</b>",
                 showarrow: true,
                 font: {
-                    size: 12,
+                    size: 14,
                     color: '#ffffff'
                 },
                 align: 'center',
@@ -1899,6 +2014,19 @@
     Plotly.newPlot("SsEnvelopePlot", ss_envelope, ss_layout, config);
 
 </script>
+
 {% endif %}
+
+<script>
+    $(window).on('load', function () {
+      $('#loading').hide();
+    });
+  </script>
+
+<script>
+    function ShowLoading(){
+        $('#loading').show();
+    };
+</script>
 
 {% endblock content %}
