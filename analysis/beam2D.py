@@ -66,6 +66,8 @@ class Beam2D():
         self.reactions_basic = {}   # Dictionary to hold Basic reactions
         self.reactions_uls = {}     # Dictionary to hold ULS reactions
         self.reactions_sls = {}     # Dictionary to hold Service Reactions
+        self.reaction_uls_report = {}
+        self.reaction_sls_report = {}
         self.v_functions_uls = {}
         self.m_functions_uls = {}
         self.eis_functions_uls = {}
@@ -479,11 +481,61 @@ class Beam2D():
         if self.analyzed:
             
             i = 0
-            # print(self.reactions_uls)
+            
+            for key, value in self.reactions_uls.items():
+                
+                for pattern, reaction in value.items():
 
+                    if i == 0:
+                        self.reaction_uls_report['rlmax'] = [reaction['rl'],[key,pattern]]
+                        self.reaction_uls_report['rrmax'] = [reaction['rr'],[key,pattern]]
+                        self.reaction_uls_report['rlmin'] = [reaction['rl'],[key,pattern]]
+                        self.reaction_uls_report['rrmin'] = [reaction['rr'],[key,pattern]]
+
+                        self.reaction_uls_report['redundants_max'] = []
+                        self.reaction_uls_report['redundants_min'] = []
+
+                        for j,redundant in enumerate(reaction['redundants']):
+
+                            self.reaction_uls_report['redundants_max'].append([redundant,[key,pattern]])
+                            self.reaction_uls_report['redundants_min'].append([redundant,[key,pattern]])
+
+                        i+=1
+
+                    else:
+                        rlmax = max(self.reaction_uls_report['rlmax'][0],reaction['rl'])
+                        rrmax = max(self.reaction_uls_report['rrmax'][0],reaction['rr'])
+                        rlmin = min(self.reaction_uls_report['rlmin'][0],reaction['rl'])
+                        rrmin = min(self.reaction_uls_report['rrmin'][0],reaction['rr'])
+
+                        if rlmax == reaction['rl']:
+                            self.reaction_uls_report['rlmax'] = [reaction['rl'],[key,pattern]]
+                        
+                        if rrmax == reaction['rr']:
+                            self.reaction_uls_report['rrmax'] = [reaction['rr'],[key,pattern]]
+
+                        if rlmin == reaction['rl']:
+                            self.reaction_uls_report['rlmin'] = [reaction['rl'],[key,pattern]]
+                        
+                        if rrmin ==  reaction['rr']:
+                            self.reaction_uls_report['rrmin'] = [reaction['rr'],[key,pattern]]
+
+                        for j,redundant in enumerate(reaction['redundants']):
+
+                            rimax = max(self.reaction_uls_report['redundants_max'][j][0],redundant)
+                            rimin = min(self.reaction_uls_report['redundants_min'][j][0],redundant)
+
+                            if rimax == redundant:
+                                self.reaction_uls_report['redundants_max'][j] = [redundant,[key,pattern]]
+                            
+                            if rimin == redundant:
+                                self.reaction_uls_report['redundants_min'][j] = [redundant,[key,pattern]]
+
+
+            i = 0
             for key, value in self.v_functions_uls.items():
                 
-                for patern, piece_function in value.items():
+                for pattern, piece_function in value.items():
                     
                     vtemp = [bmtools.eval_piece_function(piece_function, j) for j in self.printstations]
                     
@@ -500,7 +552,7 @@ class Beam2D():
             i = 0
             for key, value in self.m_functions_uls.items():
                 
-                for patern, piece_function in value.items():
+                for pattern, piece_function in value.items():
                     
                     mtemp = [bmtools.eval_piece_function(piece_function, j) for j in self.printstations]
                     
@@ -525,9 +577,60 @@ class Beam2D():
         if self.analyzed:
             
             i = 0
+            
+            for key, value in self.reactions_sls.items():
+                
+                for pattern, reaction in value.items():
+
+                    if i == 0:
+                        self.reaction_sls_report['rlmax'] = [reaction['rl'],[key,pattern]]
+                        self.reaction_sls_report['rrmax'] = [reaction['rr'],[key,pattern]]
+                        self.reaction_sls_report['rlmin'] = [reaction['rl'],[key,pattern]]
+                        self.reaction_sls_report['rrmin'] = [reaction['rr'],[key,pattern]]
+
+                        self.reaction_sls_report['redundants_max'] = []
+                        self.reaction_sls_report['redundants_min'] = []
+
+                        for j,redundant in enumerate(reaction['redundants']):
+
+                            self.reaction_sls_report['redundants_max'].append([redundant,[key,pattern]])
+                            self.reaction_sls_report['redundants_min'].append([redundant,[key,pattern]])
+
+                        i+=1
+
+                    else:
+                        rlmax = max(self.reaction_sls_report['rlmax'][0],reaction['rl'])
+                        rrmax = max(self.reaction_sls_report['rrmax'][0],reaction['rr'])
+                        rlmin = min(self.reaction_sls_report['rlmin'][0],reaction['rl'])
+                        rrmin = min(self.reaction_sls_report['rrmin'][0],reaction['rr'])
+
+                        if rlmax == reaction['rl']:
+                            self.reaction_sls_report['rlmax'] = [reaction['rl'],[key,pattern]]
+                        
+                        if rrmax == reaction['rr']:
+                            self.reaction_sls_report['rrmax'] = [reaction['rr'],[key,pattern]]
+
+                        if rlmin == reaction['rl']:
+                            self.reaction_sls_report['rlmin'] = [reaction['rl'],[key,pattern]]
+                        
+                        if rrmin ==  reaction['rr']:
+                            self.reaction_sls_report['rrmin'] = [reaction['rr'],[key,pattern]]
+
+                        for j,redundant in enumerate(reaction['redundants']):
+
+                            rimax = max(self.reaction_sls_report['redundants_max'][j][0],redundant)
+                            rimin = min(self.reaction_sls_report['redundants_min'][j][0],redundant)
+
+                            if rimax == redundant:
+                                self.reaction_sls_report['redundants_max'][j] = [redundant,[key,pattern]]
+                            
+                            if rimin == redundant:
+                                self.reaction_sls_report['redundants_min'][j] = [redundant,[key,pattern]]
+
+            i = 0
             for key, value in self.v_functions_sls.items():
                 
-                for patern, piece_function in value.items():
+                for pattern, piece_function in value.items():
                     
                     vtemp = [bmtools.eval_piece_function(piece_function, j) for j in self.printstations]
                     
@@ -544,7 +647,7 @@ class Beam2D():
             i = 0
             for key, value in self.m_functions_sls.items():
                 
-                for patern, piece_function in value.items():
+                for pattern, piece_function in value.items():
                     
                     mtemp = [bmtools.eval_piece_function(piece_function, j) for j in self.printstations]
                     
@@ -561,7 +664,7 @@ class Beam2D():
             i = 0
             for key, value in self.eis_functions_sls.items():
                 
-                for patern, piece_function in value.items():
+                for pattern, piece_function in value.items():
                     
                     eistemp = [bmtools.eval_piece_function(piece_function, j) for j in self.printstations]
                     
@@ -578,7 +681,7 @@ class Beam2D():
             i = 0
             for key, value in self.eid_functions_sls.items():
                 
-                for patern, piece_function in value.items():
+                for pattern, piece_function in value.items():
                     
                     eidtemp = [bmtools.eval_piece_function(piece_function, j) for j in self.printstations]
                     

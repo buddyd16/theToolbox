@@ -151,10 +151,12 @@ def SimpleBeam(inputs, log=True):
                     applied_loads[k] = True
 
     if log:
-        computation_log.append("Raw Load Input :")
+        computation_log.append("----- Raw Load Input -----")
 
         for load in Loads:
             computation_log.append(f"{load}")
+
+        computation_log.append("----- End Raw Load Input -----")
 
     ###########################################################################
     # End Loads Pre-Process
@@ -246,7 +248,7 @@ def SimpleBeam(inputs, log=True):
             basic_combos.append(combo)
     
     if log:
-        computation_log.append("Load Combination Processing :")
+        computation_log.append("----- Load Combination Processing -----")
         computation_log.append('Applied Load Type Key:')
         for k,v in applied_loads.items():
             computation_log.append(f'{k} : {v}')
@@ -276,6 +278,8 @@ def SimpleBeam(inputs, log=True):
         computation_log.append('Applied SLS Combinations:')
         for combo in sls_combos:
             computation_log.append(combo.FormulaString())
+        
+        computation_log.append("----- End Load Combination Processing -----")
 
     ###########################################################################
     # End of the Load Combination Processing
@@ -381,7 +385,7 @@ def SimpleBeam(inputs, log=True):
                 "R": inputs['offPat'][3], }
 
     if log:
-        computation_log.append('Geometry:')
+        computation_log.append("----- Geometry -----")
         computation_log.append(f'E: {E_ksi} ksi converted to E: {E_ksf} ksf')
         computation_log.append(f'Ixx: {I_in4} in4 converted to Ixx: {I_ft4} ft4')
         computation_log.append('Nodes:')
@@ -411,7 +415,8 @@ def SimpleBeam(inputs, log=True):
         computation_log.append('Off Pattern Factors:')
         for k,v in off_patt.items():
             computation_log.append(f'{k}: {v}')
-
+        
+        computation_log.append("----- End Geometry -----")
 
     ###########################################################################
     # End Geometry
@@ -420,6 +425,9 @@ def SimpleBeam(inputs, log=True):
     ###########################################################################
     # Process the Loads to their analytical class
     ###########################################################################
+
+    if log:
+        computation_log.append("----- Convert Loads to Analytical Equivalent -----")
 
     # Get the main beam span set inlcuding interior supports
     mainSpans = mainBeam.spans()
@@ -448,7 +456,6 @@ def SimpleBeam(inputs, log=True):
     cantRightLoads = []
 
     if log:
-        computation_log.append("Process Loads to Analytical:")
         computation_log.append("global Spans:")
         for i,j in enumerate(globalSpans):
             computation_log.append(f"{j} ft -- ID: {spanIDs[i]}")
@@ -940,6 +947,8 @@ def SimpleBeam(inputs, log=True):
                     # if we don't meet any of the previous criteria maybe the
                     # load data is bad, so just skip it
                     pass
+    if log:
+        computation_log.append("----- End Convert Loads to Analytical Equivalent -----")
 
     ###########################################################################
     # End Process the Loads to their analytical class
