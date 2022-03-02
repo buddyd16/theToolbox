@@ -342,4 +342,79 @@ def IBC2018_ASD(lateral_reversal=True, sls=False):
 
     return combos
 
+def BCBC2018_T4132A(lateral_reversal=True, gravityoverturn = False):
+    
+    combos = [LoadCombo("T4132-A_C1",{"D":1.4,"H":1.5},["D","H"],False,'ULS'),
+                LoadCombo("T4132-A_C2_D",{"D":1.25,"H":1.5,"L":1.5,"Lr":1.5,"F":1.25},["L","Lr","F"],True,'ULS'),
+                LoadCombo("T4132-A_C2_DS",{"D":1.25,"H":1.5,"L":1.5,"Lr":1.5,"F":1.25,"S":1.0},["S"],True,'ULS'),
+                LoadCombo("T4132-A_C2_DWx",{"D":1.25,"H":1.5,"L":1.5,"Lr":1.5,"F":1.25,"Wx":0.4},["Wx"],True,'ULS'),
+                LoadCombo("T4132-A_C2_9DWx",{"D":0.9,"H":1.5,"L":1.5,"Lr":1.5,"F":1.25,"Wx":0.4},["Wx"],True,'ULS'),
+                LoadCombo("T4132-A_C2_DWy",{"D":1.25,"H":1.5,"L":1.5,"Lr":1.5,"F":1.25,"Wy":0.4},["Wy"],True,'ULS'),
+                LoadCombo("T4132-A_C2_9DWy",{"D":0.9,"H":1.5,"L":1.5,"Lr":1.5,"F":1.25,"Wy":0.4},["Wy"],True,'ULS'),
+                LoadCombo("T4132-A_C3_D",{"D":1.25,"H":1.5,"S":1.5},["S"],True,'ULS'),
+                LoadCombo("T4132-A_C3_DL",{"D":1.25,"H":1.5,"L":1.0,"Lr":1.5,"F":1.0,"S":1.5},["L","F","Lr","S"],True,'ULS'),
+                LoadCombo("T4132-A_C3_DWx",{"D":1.25,"H":1.5,"S":1.5,"Wx":0.4},["Wx"],True,'ULS'),
+                LoadCombo("T4132-A_C3_9DWx",{"D":0.9,"H":1.5,"S":1.5,"Wx":0.4},["Wx"],True,'ULS'),
+                LoadCombo("T4132-A_C3_DWy",{"D":1.25,"H":1.5,"S":1.5,"Wy":0.4},["Wy"],True,'ULS'),
+                LoadCombo("T4132-A_C3_9DWy",{"D":0.9,"H":1.5,"S":1.5,"Wy":0.4},["Wy"],True,'ULS'),
+                LoadCombo("T4132-A_C4_DWx",{"D":1.25,"H":1.5,"Wx":1.4},["Wx"],False,'ULS'),
+                LoadCombo("T4132-A_C4_9DWx",{"D":0.9,"H":1.5,"Wx":1.4},["Wx"],False,'ULS'),
+                LoadCombo("T4132-A_C4_DWy",{"D":1.25,"H":1.5,"Wy":1.4},["Wy"],False,'ULS'),
+                LoadCombo("T4132-A_C4_9DWy",{"D":0.9,"H":1.5,"Wy":1.4},["Wy"],False,'ULS'),
+                LoadCombo("T4132-A_C4_DWxL",{"D":1.25,"H":1.5,"Wx":1.4,"L":0.5,"F":0.5,"Lr":1.0},["Wx"],True,'ULS'),
+                LoadCombo("T4132-A_C4_9DWxL",{"D":0.9,"H":1.5,"Wx":1.4,"L":0.5,"F":0.5,"Lr":1.0},["Wx"],True,'ULS'),
+                LoadCombo("T4132-A_C4_DWyL",{"D":1.25,"H":1.5,"Wy":1.4,"L":0.5,"F":0.5,"Lr":1.0},["Wy"],True,'ULS'),
+                LoadCombo("T4132-A_C4_9DWyL",{"D":0.9,"H":1.5,"Wy":1.4,"L":0.5,"F":0.5,"Lr":1.0},["Wy"],True,'ULS'),
+                LoadCombo("T4132-A_C4_DWxS",{"D":1.25,"H":1.5,"Wx":1.4,"S":0.5},["Wx"],True,'ULS'),
+                LoadCombo("T4132-A_C4_9DWxS",{"D":0.9,"H":1.5,"Wx":1.4,"S":0.5},["Wx"],True,'ULS'),
+                LoadCombo("T4132-A_C4_DWyS",{"D":1.25,"H":1.5,"Wy":1.4,"S":0.5},["Wy"],True,'ULS'),
+                LoadCombo("T4132-A_C4_9DWyS",{"D":0.9,"H":1.5,"Wy":1.4,"S":0.5},["Wy"],True,'ULS'),
+                LoadCombo("T4132-A_C5_DEx",{"D":1.0,"H":1.5,"Ex":1.0},["Ex"],False,'ULS'),
+                LoadCombo("T4132-A_C5_DEy",{"D":1.0,"H":1.5,"Ey":1.0},["Ey"],False,'ULS'),
+                LoadCombo("T4132-A_C5_DExLS",{"D":1.0,"H":1.5,"Ex":1.0,"L":0.5,"F":0.5,"Lr":1.0,"S":0.25},["Ex"],True,'ULS'),
+                LoadCombo("T4132-A_C5_DEyLS",{"D":1.0,"H":1.5,"Ey":1.0,"L":0.5,"F":0.5,"Lr":1.0,"S":0.25},["Ey"],True,'ULS'),
+                ]
+                
+    
+    if gravityoverturn:
+        
+        overturn = [LoadCombo("T4132-A_C2_9D",{"D":0.9,"H":1.5,"L":1.5,"Lr":1.5,"F":1.25},["L","Lr","F"],True,'ULS'),
+                    LoadCombo("T4132-A_C2_9DS",{"D":0.9,"H":1.5,"L":1.5,"Lr":1.5,"F":1.25,"S":1.0},["S"],True,'ULS'),
+                    LoadCombo("T4132-A_C3_9D",{"D":0.9,"H":1.5,"S":1.5},["S"],True,'ULS'),
+                    LoadCombo("T4132-A_C3_9DL",{"D":0.9,"H":1.5,"L":1.0,"Lr":1.5,"F":1.0,"S":1.5},["L","F","Lr"],True,'ULS'),
+                    ]
+                    
+        combos.extend(overturn)
+        
+    if lateral_reversal:
+    
+        reversals = [LoadCombo("T4132-A_C2_DWxn",{"D":1.25,"H":1.5,"L":1.5,"Lr":1.5,"F":1.25,"Wx":-0.4},["Wx"],True,'ULS'),
+                    LoadCombo("T4132-A_C2_9DWxn",{"D":0.9,"H":1.5,"L":1.5,"Lr":1.5,"F":1.25,"Wx":-0.4},["Wx"],True,'ULS'),
+                    LoadCombo("T4132-A_C2_DWyn",{"D":1.25,"H":1.5,"L":1.5,"Lr":1.5,"F":1.25,"Wy":-0.4},["Wy"],True,'ULS'),
+                    LoadCombo("T4132-A_C2_9DWyn",{"D":0.9,"H":1.5,"L":1.5,"Lr":1.5,"F":1.25,"Wy":-0.4},["Wy"],True,'ULS'),
+                    LoadCombo("T4132-A_C3_DWxn",{"D":1.25,"H":1.5,"S":1.5,"Wx":-0.4},["Wx"],True,'ULS'),
+                    LoadCombo("T4132-A_C3_9DWxn",{"D":0.9,"H":1.5,"S":1.5,"Wx":-0.4},["Wx"],True,'ULS'),
+                    LoadCombo("T4132-A_C3_DWyn",{"D":1.25,"H":1.5,"S":1.5,"Wy":-0.4},["Wy"],True,'ULS'),
+                    LoadCombo("T4132-A_C3_9DWyn",{"D":0.9,"H":1.5,"S":1.5,"Wy":-0.4},["Wy"],True,'ULS'),
+                    LoadCombo("T4132-A_C4_DWxn",{"D":1.25,"H":1.5,"Wx":-1.4},["Wx"],False,'ULS'),
+                    LoadCombo("T4132-A_C4_9DWxn",{"D":0.9,"H":1.5,"Wx":-1.4},["Wx"],False,'ULS'),
+                    LoadCombo("T4132-A_C4_DWyn",{"D":1.25,"H":1.5,"Wy":-1.4},["Wy"],False,'ULS'),
+                    LoadCombo("T4132-A_C4_9DWyn",{"D":0.9,"H":1.5,"Wy":-1.4},["Wy"],False,'ULS'),
+                    LoadCombo("T4132-A_C4_DWxnL",{"D":1.25,"H":1.5,"Wx":-1.4,"L":0.5,"F":0.5,"Lr":1.0},["Wx"],True,'ULS'),
+                    LoadCombo("T4132-A_C4_9DWxnL",{"D":0.9,"H":1.5,"Wx":-1.4,"L":0.5,"F":0.5,"Lr":1.0},["Wx"],True,'ULS'),
+                    LoadCombo("T4132-A_C4_DWynL",{"D":1.25,"H":1.5,"Wy":-1.4,"L":0.5,"F":0.5,"Lr":1.0},["Wy"],True,'ULS'),
+                    LoadCombo("T4132-A_C4_9DWynL",{"D":0.9,"H":1.5,"Wy":-1.4,"L":0.5,"F":0.5,"Lr":1.0},["Wy"],True,'ULS'),
+                    LoadCombo("T4132-A_C4_DWxnS",{"D":1.25,"H":1.5,"Wx":-1.4,"S":0.5},["Wx"],True,'ULS'),
+                    LoadCombo("T4132-A_C4_9DWxnS",{"D":0.9,"H":1.5,"Wx":-1.4,"S":0.5},["Wx"],True,'ULS'),
+                    LoadCombo("T4132-A_C4_DWynS",{"D":1.25,"H":1.5,"Wy":-1.4,"S":0.5},["Wy"],True,'ULS'),
+                    LoadCombo("T4132-A_C4_9DWynS",{"D":0.9,"H":1.5,"Wy":-1.4,"S":0.5},["Wy"],True,'ULS'),
+                    LoadCombo("T4132-A_C5_DExn",{"D":1.0,"H":1.5,"Ex":-1.0},["Ex"],False,'ULS'),
+                    LoadCombo("T4132-A_C5_DEyn",{"D":1.0,"H":1.5,"Ey":-1.0},["Ey"],False,'ULS'),
+                    LoadCombo("T4132-A_C5_DExnLS",{"D":1.0,"H":1.5,"Ex":-1.0,"L":0.5,"F":0.5,"Lr":1.0,"S":0.25},["Ex"],True,'ULS'),
+                    LoadCombo("T4132-A_C5_DEynLS",{"D":1.0,"H":1.5,"Ey":-1.0,"L":0.5,"F":0.5,"Lr":1.0,"S":0.25},["Ey"],True,'ULS'),
+                    ]
+                    
+        combos.extend(reversals)
 
+    return combos
+    

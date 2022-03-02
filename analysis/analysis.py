@@ -52,8 +52,13 @@ def web_simplebeam():
         # Get ULS Load Combo Selection
         if request.form.get('designCombo') == 'IBC_ASD':
             ULScombos = 0
-        elif request.form.get('designCombo') == 'USER':
+            
+        elif request.form.get('designCombo') == 'BCBC_2018':
             ULScombos = 2
+            
+        elif request.form.get('designCombo') == 'USER':
+            ULScombos = 3
+            
         else:
             ULScombos = 1
 

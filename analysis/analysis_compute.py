@@ -181,6 +181,10 @@ def SimpleBeam(inputs, log=True):
     
     elif inputs['combos'] == 1:
         uls_combos_bulk = LC.IBC2018_ULS(IBC_f1, IBC_f2, lateralReverse)
+    
+    elif inputs['combos'] == 2:
+        uls_combos_bulk = LC.BCBC2018_T4132A(lateralReverse,True)
+        
     else:
         uls_combos_bulk = []
 
