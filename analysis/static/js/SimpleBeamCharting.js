@@ -34,12 +34,43 @@ function UpdateChart(){
     ctx.lineTo(beam_j,beam_y);
     ctx.stroke();
 
+    // Dimension the beam span
+    let span_tick_top = beam_y + 35;
+    let span_tick_bottom = span_tick_top + 20;
+    let span_dim = span_tick_bottom - 10;
+    let span_dim_text = total_span_ft.toFixed(3).toString()+" ft";
+    let span_mid = ((beam_j-beam_i)/2) + x_margin;
+    let span_text_y = span_dim + 18;
+
+    ctx.beginPath();
+    ctx.lineWidth=1;
+    ctx.moveTo(beam_i, span_tick_top);
+    ctx.lineTo(beam_i, span_tick_bottom);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.lineWidth=1;
+    ctx.moveTo(beam_j, span_tick_top);
+    ctx.lineTo(beam_j, span_tick_bottom);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.lineWidth=1;
+    ctx.moveTo(beam_i, span_dim);
+    ctx.lineTo(beam_j, span_dim);
+    ctx.stroke();
+
+    // label the line
+    ctx.font = 'bold 18px serif';
+    ctx.textAlign = "center";
+    ctx.fillText(span_dim_text, span_mid, span_text_y);
+
     //Draw Left Support
     if ($('#fixedLeft').is(":checked"))
     {
         var supp_left_fix_x = beam_i;
-        var supp_left_fix_base = beam_y - 40;
-        var supp_left_fix_top = beam_y + 40;
+        var supp_left_fix_base = beam_y - 33;
+        var supp_left_fix_top = beam_y + 33;
 
         ctx.beginPath();
         ctx.lineWidth=6;
@@ -64,8 +95,8 @@ function UpdateChart(){
     if ($('#fixedRight').is(":checked"))
     {
         var supp_right_fix_x = beam_j;
-        var supp_right_fix_base = beam_y - 40;
-        var supp_right_fix_top = beam_y + 40;
+        var supp_right_fix_base = beam_y - 33;
+        var supp_right_fix_top = beam_y + 33;
 
         ctx.beginPath();
         ctx.lineWidth=6;
@@ -261,6 +292,7 @@ function UpdateChart(){
 
         // label the line
         ctx.font = '12px serif';
+        ctx.textAlign = "left";
         ctx.fillText(label, x1+2, y-2, 12);
 
         // rest to solid lines for later
