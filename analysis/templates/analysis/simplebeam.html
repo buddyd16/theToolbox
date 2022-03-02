@@ -207,7 +207,11 @@
                             <label class="form-check-label" for="designCombo_IBC_LRFD"><h6>IBC 2018 - LRFD (Section 1605.2)</h6></label>
                         </div>
                         <div class="form-check">
-                            <input type="radio" id="designCombo_USER" class="designCombo form-check-input" name="designCombo" value="USER" {{ "checked" if inputs["combos"] == 2}}>
+                            <input type="radio" id="designCombo_BCBC2018" class="designCombo form-check-input" name="designCombo" value="BCBC_2018" {{ "checked" if inputs["combos"] == 2}}>
+                            <label class="form-check-label" for="designCombo_BCBC2018"><h6>BCBC 2018 - Table 4.1.3.2-A</h6></label>
+                        </div>
+                        <div class="form-check">
+                            <input type="radio" id="designCombo_USER" class="designCombo form-check-input" name="designCombo" value="USER" {{ "checked" if inputs["combos"] == 3}}>
                             <label class="form-check-label" for="designCombo_USER"><h6>Only Consider User Defined Combinations</h6></label>
                         </div>
                         <div>
@@ -1148,17 +1152,17 @@
                             <dt class="col-sm-3">D</dt>
                             <dd class="col-sm-9">Dead Load</dd>
                             <dt class="col-sm-3">F</dt>
-                            <dd class="col-sm-9">Load due to fluids with well-defined pressures and maximum heights.</dd>
+                            <dd class="col-sm-9">Load due to fluids with well-defined pressures and maximum heights. For BCBC 2018 F represents live load due to fluids in tanks.[Sentence 4.1.3.2(6)]</dd>
                             <dt class="col-sm-3">L</dt>
                             <dd class="col-sm-9">Live Loads</dd>
                             <dt class="col-sm-3">H</dt>
                             <dd class="col-sm-9">Load due to lateral earth pressures, ground water pressure or pressure of bulk materials.</dd>
                             <dt class="col-sm-3">L<sub>r</sub></dt>
-                            <dd class="col-sm-9">Roof live load</dd>
+                            <dd class="col-sm-9">Roof live load. For BCBC 2018 Lr represents Live loads due to storage areas, equipment areas, or service rooms. [Sentence 4.1.3.2(7)]</dd>
                             <dt class="col-sm-3">S</dt>
                             <dd class="col-sm-9">Snow load</dd>
                             <dt class="col-sm-3">R</dt>
-                            <dd class="col-sm-9">Rain load</dd>
+                            <dd class="col-sm-9">Rain load. BCBC 2018 rain loads are not considered for the automatically generated combinations.</dd>
                             <dt class="col-sm-3">Wx</dt>
                             <dd class="col-sm-9">Wind Load in the X or 1 direction.</dd>
                             <dt class="col-sm-3">Wy</dt>
