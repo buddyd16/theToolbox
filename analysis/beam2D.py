@@ -221,9 +221,10 @@ class Beam2D():
 
         if stations[0] < 0:
             stations[0] = 0
-
+        
         if stations[-1] > self.span:
             stations[-1] = self.span
+        
 
         # Remove duplicate locations
 
@@ -467,6 +468,13 @@ class Beam2D():
                 self.rootstations = [round(i,4) for i in self.rootstations]
                 
                 self.rootstations = sorted(set(self.rootstations))
+                print(self.rootstations)
+                # because we rounded the roots there is a chance that the last value ends up
+                # off of the beam, catch that here and reset the last station to the beam span.
+                
+                if self.rootstations != []:
+                    if self.rootstations[-1] > self.span:
+                        self.rootstations[-1] = self.span
                 
                 self.printstations.extend(self.calcstations)
                 self.printstations.extend(self.rootstations)

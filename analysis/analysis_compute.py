@@ -323,7 +323,7 @@ def SimpleBeam(inputs, log=True):
     endFixity = [inputs['fl'], inputs['fr']]
 
     overhangRight_ft = inputs['OverR']
-
+    
     # Total number of spans inclusive of cantilevers and interiors
     num_spans = len(interiorSupports_ft)+1
     if overhangLeft_ft != 0:
@@ -385,6 +385,7 @@ def SimpleBeam(inputs, log=True):
                 "R": inputs['offPat'][3], }
 
     if log:
+        
         computation_log.append("----- Geometry -----")
         computation_log.append(f'E: {E_ksi} ksi converted to E: {E_ksf} ksf')
         computation_log.append(f'Ixx: {I_in4} in4 converted to Ixx: {I_ft4} ft4')
@@ -1000,7 +1001,7 @@ def SimpleBeam(inputs, log=True):
         cantLeft.SLS_envelopes()
 
     if cantRight is not None:
-
+        
         # need to correct the SLS and Basic starting slope to account
         # for the joint rotation
         cantRightslopefrommain = mainBeam.slope_to_cant(cantRight,False)

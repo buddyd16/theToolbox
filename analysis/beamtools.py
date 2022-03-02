@@ -106,16 +106,23 @@ def eval_piece_function(piece_function, x):
     '''
     Given a peicewise function and an x evaluate the results
     '''
-
+    # in the context of the beam model a tolerance of 1E-6 will
+    # yield acceptable results as we are evaluating normal polynomials
+    tol = 0.000001
+    
+    # initialize res to avoid an ref before assignment error in
+    # the case where the below reaches pass for all conditions.
+    
+    res = 0
+    
     if piece_function == []:
         res = 0
     else:
         for line in piece_function:
-            if line[1][0] == 0 and x == 0:
-                res = poly_eval(line[0], x)
-            if line[1][0] < x <= line[1][1]:
+            if (line[1][0]-tol) < x <= (line[1][1]+tol):
                 res = poly_eval(line[0], x)
             else:
+                # x is not in the current functions range
                 pass
 
     return res
