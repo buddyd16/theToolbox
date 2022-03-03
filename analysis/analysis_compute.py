@@ -26,7 +26,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # These imports are for when flask is live
 
-import enum
 import analysis.geometry2D as g2d
 import analysis.ebloads as ebl
 import analysis.loadcombos as LC
@@ -78,8 +77,12 @@ def SimpleBeam(inputs, log=True):
     for distLoad in inputs['distLoads']:
         # Form input asks for tributary width and pressure
         # Convert this to KLF
-        w1 = distLoad[0]*distLoad[1]*(1/1000)  # 1 klf / 1000 plf
-        w2 = distLoad[2]*distLoad[3]*(1/1000)  # 1 klf / 1000 plf
+        if inputs['units'] == "imperial":
+            w1 = distLoad[0]*distLoad[1]*(1/1000)  # 1 klf / 1000 plf
+            w2 = distLoad[2]*distLoad[3]*(1/1000)  # 1 klf / 1000 plf
+        else:
+            w1 = distLoad[0]*distLoad[1]  # kPa * m = kN/m2 * m = kN/m 
+            w2 = distLoad[2]*distLoad[3]  # kPa * m = kN/m2 * m = kN/m
         a = distLoad[4]
         b = distLoad[5]
         k = distLoad[6]
@@ -298,10 +301,14 @@ def SimpleBeam(inputs, log=True):
     # Use Kips and Feet for Imperial units
     # !!! Need to Convert Deflection Results back to inches !!!
     E_ksi = inputs['E']
-    E_ksf = E_ksi * 144  # 144 in2/ 1 ft2
-
     I_in4 = inputs['I']
-    I_ft4 = I_in4 * (1/math.pow(12, 4))  # 1 ft^4 / 12^4 in^4
+
+    if inputs['units'] == "imperial":
+        E_ksf = E_ksi * 144  # 144 in2/ 1 ft2
+        I_ft4 = I_in4 * (1/math.pow(12, 4))  # 1 ft^4 / 12^4 in^4
+    else:
+        E_ksf = E_ksi * 1000 # MPa = MN/m2 = 1000 * kN/m2
+        I_ft4 = I_in4 * math.pow(1/1000,4) # mm4 * 0.001^4 m4/1 mm4
 
     # No matter what node1 is at (x,y) = (0,0)
     nodes = []
@@ -391,20 +398,39 @@ def SimpleBeam(inputs, log=True):
     if log:
         
         computation_log.append("----- Geometry -----")
-        computation_log.append(f'E: {E_ksi} ksi converted to E: {E_ksf} ksf')
-        computation_log.append(f'Ixx: {I_in4} in4 converted to Ixx: {I_ft4} ft4')
-        computation_log.append('Nodes:')
-        for node in nodes:
-            computation_log.append(f'Node:{node.userid} - Node #:{node.number} - ({node.x:4f},{node.y:4f})')
-        
-        computation_log.append(f"Left Overhang: {overhangLeft_ft} ft")
-        computation_log.append(f"Right Overhang: {overhangRight_ft} ft")
+        if inputs['units']=="imperial":
+            computation_log.append(f'E: {E_ksi} ksi converted to E: {E_ksf} ksf')
+            computation_log.append(f'Ixx: {I_in4} in4 converted to Ixx: {I_ft4} ft4')
 
-        computation_log.append(f"Main span: {mainSpan_ft} ft")
-        computation_log.append("Additional Supports @ :")
-        for support in interiorSupports_ft:
-            computation_log.append(f"local: {support} ft -- global: {support+n1.x} ft")
-        computation_log.append(f'End Fixity: {endFixity}')
+            computation_log.append('Nodes:')
+            for node in nodes:
+                computation_log.append(f'Node:{node.userid} - Node #:{node.number} - ({node.x:4f},{node.y:4f})')
+            
+            computation_log.append(f"Left Overhang: {overhangLeft_ft} ft")
+            computation_log.append(f"Right Overhang: {overhangRight_ft} ft")
+
+            computation_log.append(f"Main span: {mainSpan_ft} ft")
+            computation_log.append("Additional Supports @ :")
+            for support in interiorSupports_ft:
+                computation_log.append(f"local: {support} ft -- global: {support+n1.x} ft")
+            computation_log.append(f'End Fixity: {endFixity}')
+        else:
+            computation_log.append(f'E: {E_ksi} MPa converted to E: {E_ksf} kN/m2')
+            computation_log.append(f'Ixx: {I_in4} mm4 converted to Ixx: {I_ft4} m4')
+
+            computation_log.append('Nodes:')
+            for node in nodes:
+                computation_log.append(f'Node:{node.userid} - Node #:{node.number} - ({node.x:4f},{node.y:4f})')
+            
+            computation_log.append(f"Left Overhang: {overhangLeft_ft} m")
+            computation_log.append(f"Right Overhang: {overhangRight_ft} m")
+
+            computation_log.append(f"Main span: {mainSpan_ft} m")
+            computation_log.append("Additional Supports @ :")
+            for support in interiorSupports_ft:
+                computation_log.append(f"local: {support} m -- global: {support+n1.x} m")
+            computation_log.append(f'End Fixity: {endFixity}')
+
 
         computation_log.append(f'Number of Spans: {num_spans}')
         computation_log.append('Load Patterns:')
@@ -463,7 +489,10 @@ def SimpleBeam(inputs, log=True):
     if log:
         computation_log.append("global Spans:")
         for i,j in enumerate(globalSpans):
-            computation_log.append(f"{j} ft -- ID: {spanIDs[i]}")
+            if inputs['units']=="imperial":
+                computation_log.append(f"{j} ft -- ID: {spanIDs[i]}")
+            else:
+                computation_log.append(f"{j} m -- ID: {spanIDs[i]}")
 
     for load in Loads:
 
@@ -978,6 +1007,14 @@ def SimpleBeam(inputs, log=True):
     ###########################################################################
     # Analyze the beams
     ###########################################################################
+
+    if inputs['units'] == "imperial":
+        delta_conv = 12 # convert ft to in
+        res_units = {"force":"kips","moment":"ft-kips","slope":"rad","delta":"in","length":"ft"}
+    else:
+        delta_conv = 1000 # convert m to mm
+        res_units = {"force":"kN","moment":"kN-m","slope":"rad","delta":"mm","length":"m"}
+
     mainBeam.computation_stations()
 
     mainBeam.flexibility_analyze(uls_combos,patterns,off_patt)
@@ -985,7 +1022,7 @@ def SimpleBeam(inputs, log=True):
     mainBeam.flexibility_analyze(sls_combos,patterns,off_patt)
 
     mainBeam.ULS_envelopes()
-    mainBeam.SLS_envelopes()
+    mainBeam.SLS_envelopes(conv=delta_conv)
 
     if cantLeft is not None:
 
@@ -1002,7 +1039,7 @@ def SimpleBeam(inputs, log=True):
         cantLeft.flexibility_analyze(sls_combos,patterns,off_patt)
 
         cantLeft.ULS_envelopes()
-        cantLeft.SLS_envelopes()
+        cantLeft.SLS_envelopes(conv=delta_conv)
 
     if cantRight is not None:
         
@@ -1019,10 +1056,10 @@ def SimpleBeam(inputs, log=True):
         cantRight.flexibility_analyze(sls_combos,patterns,off_patt)
 
         cantRight.ULS_envelopes()
-        cantRight.SLS_envelopes()
+        cantRight.SLS_envelopes(conv=delta_conv)
 
     ###########################################################################
     # End Analyze the beams
     ###########################################################################
 
-    return {"mainbeam": mainBeam, "cantleft": cantLeft, "cantright": cantRight, "log": computation_log}
+    return {"mainbeam": mainBeam, "cantleft": cantLeft, "cantright": cantRight, "log": computation_log, "resunits":res_units}

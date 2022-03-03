@@ -11,6 +11,11 @@ analysis_bp = Blueprint('analysis_bp', __name__,
 def web_simplebeam():
     if request.method == 'POST':
         
+        # Get Units
+        units = request.form.get("units")
+        
+        print(units)
+        
         # Get Geometry Inputs
         span = float(request.form.get('span'))
         em = float(request.form.get('spanE'))
@@ -207,7 +212,8 @@ def web_simplebeam():
                   "sls": slsCombos,
                   "distLoads": distLoads,
                   "pointLoads": pointLoads,
-                  "pointMoments": momentLoads}
+                  "pointMoments": momentLoads,
+                  "units": units}
 
         # Quanity of non-0 loadings
         # If there are no loads then do nothing
@@ -248,7 +254,8 @@ def web_simplebeam():
                           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]],
                   "distLoads": [[0, 1, 0, 1, 0, 1, "D"]],
                   "pointLoads": [[0, 0, "D"]],
-                  "pointMoments": [[0, 0, "D"]]}
+                  "pointMoments": [[0, 0, "D"]],
+                  "units":"imperial"}
 
         results = None
 
