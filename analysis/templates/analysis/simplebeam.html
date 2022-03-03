@@ -37,13 +37,28 @@
     </div>
     <!-- Main Beam Chart/Canvas-->
     <form method=post action="" onsubmit="ShowLoading()">
-    <div class="row">
-        <input class="btn btn-dark btn-lg my-1" type=submit value="Analyze Beam">
-    </div>
+
 
     <div class="row">
         <canvas id="bmCanvas" width="1000" height="400" style="border:2px solid #000000;"></canvas>
         
+    </div>
+    <div class="container">
+        <div class="row my-2 justify-content-end align-items-center">
+            <div class="col">
+                <input class="btn btn-dark btn-lg my-1" type=submit value="Analyze Beam">
+            </div>
+            <div class="col justify-content-end">
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <label id="imperial_button" class="btn btn-sm {{ " btn-primary active" if inputs["units"] == "imperial" else " btn-secondary"}}">
+                        <input type="radio" name="units" id="imperial" autocomplete="off" value="imperial" {{ "checked" if inputs["units"] == "imperial"}}> Imperial
+                    </label>
+                    <label id="metric_button" class="btn  btn-sm {{ "  btn-primary active" if inputs["units"] == "metric" else " btn-secondary"}}">
+                        <input type="radio" name="units" id="metric" autocomplete="off" value="metric" {{ "checked" if inputs["units"] == "metric"}}> Metric
+                    </label>
+                </div>
+            </div>
+        </div>
     </div>
     <!-- Inputs -->
     <div class="row">
@@ -90,27 +105,27 @@
                             <tr>
                             <td class="text-right">Span:</td>
                             <td><input id="span" name="span" class="span input-sm chartUpdate" style="width:95px" type="number" step="any" min="0.25" value="{{ inputs["span"] }}"></td>
-                            <td>ft</td>
+                            <td class="length_units">{{ "ft" if inputs["units"]=="imperial" else "m"}}</td>
                             </tr>
                             <tr>
                             <td class="text-right">E:</td>
                             <td><input id="spanE" name="spanE" class="spanE input-sm" style="width:95px" type="number" step="any" min="0.1" value="{{ inputs["E"] }}"></td>
-                            <td>ksi</td>
+                            <td id="em_units">{{ "ksi" if inputs["units"]=="imperial" else "Mpa"}}</td>
                             </tr>
                             <tr>
                             <td class="text-right">I:</td>
                             <td><input id="spanI" name="spanI" class="spanI input-sm" style="width:95px" type="number" step="any" min="0.1" value="{{ inputs["I"] }}"></td>
-                            <td>in<sup>4</sup></td>
+                            <td id="ixx_units">{{ "in<sup>4</sup>"|safe if inputs["units"]=="imperial" else "mm<sup>4</sup> (use e or E for powers of 10, i.e. 2.3e10 or 2.3E10)"|safe}}</td>
                             </tr>
                             <tr>
                             <td class="text-right">Overhang Left:</td>
                             <td><input id="overhangLeft" name="overhangLeft" class="overhangLeft input-sm chartUpdate" style="width:95px" type="number" step="any" min="0" value="{{ inputs["OverL"] }}" {{"disabled" if inputs["fl"] == 1}}></td>
-                            <td>ft</td>
+                            <td class="length_units">{{ "ft" if inputs["units"]=="imperial" else "m"}}</td>
                             </tr>
                             <tr>
                             <td class="text-right">Overhang Right:</td>
                             <td><input id="overhangRight" name="overhangRight" class="overhangRight input-sm chartUpdate" style="width:95px" type="number" step="any" min="0" value="{{ inputs["OverR"] }}" {{"disabled" if inputs["fr"] == 1}}></td>
-                            <td>ft</td>
+                            <td class="length_units">{{ "ft" if inputs["units"]=="imperial" else "m"}}</td>
                             </tr>
                             <tr>
                             <td class="text-right">Fixed Left:</td>
@@ -135,7 +150,7 @@
                                 <tr class="interiorsupportRow">
                                     <td class="interiorsupportuid">{{"R" ~loop.index}}</td>
                                     <td><input id="interiorSupport" name="interiorSupport" class="interiorSupport input-sm" style="width:65px" type="number" step="any" min="0" value="{{support}}"></td>
-                                    <td>ft</td>
+                                    <td class="length_units">{{ "ft" if inputs["units"]=="imperial" else "m"}}</td>
 
                                     <!-- Button to Add a Support -->
                                     <td>    
@@ -150,7 +165,7 @@
                                 <tr class="interiorsupportRow">
                                     <td class="interiorsupportuid">{{"R" ~loop.index}}</td>
                                     <td><input id="interiorSupport2" name="interiorSupport" class="interiorSupport input-sm" style="width:65px" type="number" step="any" min="0" value="{{support}}"></td>
-                                    <td>ft</td>
+                                    <td class="length_units">{{ "ft" if inputs["units"]=="imperial" else "m"}}</td>
                                     <td>
                                         <button type="button" class="addSupport btn btn-secondary btn-success btn-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
@@ -248,7 +263,7 @@
                                         {% endif %}
                                     </td>
                                 </tr>
-                                <tr class="combof2Row">
+                                <tr class="combo_lateral_reverse_row">
                                     <td>Auto Reverse Lateral Loads :</td>
                                     <td>
                                         <select id="latReverse" class="latReverse input-sm" name="latReverse" style="width:95px">
@@ -447,15 +462,26 @@
                     <h5> Distributed Loads:</h5>
                     <table id="distloadTable" class="table table-sm table-dark w-auto">
                         <thead>
-                            <tr>
-                            <th> Load</br>ID </th>
-                            <th class="text-center"> w<sub>1</sub> (psf) </th>
-                            <th class="text-center"> trib<sub>1</sub> (ft) </th>
-                            <th class="text-center"> w<sub>2</sub> (psf) </th>
-                            <th class="text-center"> trib<sub>2</sub> (ft) </th>
-                            <th class="text-center"> a (ft) </th>
-                            <th class="text-center"> b (ft) </th>
-                            <th class="text-center"> Load Type</th>
+                            <tr id="dist_load_header_row">
+                                <th> Load</br>ID </th>
+                                {% if inputs["units"]=="imperial" %}
+                                
+                                <th class="text-center"> w<sub>1</sub> (psf) </th>
+                                <th class="text-center"> trib<sub>1</sub> (ft) </th>
+                                <th class="text-center"> w<sub>2</sub> (psf) </th>
+                                <th class="text-center"> trib<sub>2</sub> (ft) </th>
+                                <th class="text-center"> a (ft) </th>
+                                <th class="text-center"> b (ft) </th>
+                                
+                                {% else %}
+                                <th class="text-center"> w<sub>1</sub> (kPa) </th>
+                                <th class="text-center"> trib<sub>1</sub> (m) </th>
+                                <th class="text-center"> w<sub>2</sub> (kPa) </th>
+                                <th class="text-center"> trib<sub>2</sub> (m) </th>
+                                <th class="text-center"> a (m) </th>
+                                <th class="text-center"> b (m) </th>
+                                {% endif %}
+                                <th class="text-center"> Load Type</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -545,10 +571,15 @@
                                 <h5> Point Loads:</h5>
                                 <table id="pointloadTable" class="table table-sm table-dark w-auto">
                                     <thead>
-                                        <tr>
+                                        <tr id="point_load_header_row">
                                         <th> Load</br>ID </th>
+                                        {% if inputs["units"]=="imperial" %}
                                         <th class="text-center"> P (kips) </th>
                                         <th class="text-center"> a (ft) </th>
+                                        {% else %}
+                                        <th class="text-center"> P (kN) </th>
+                                        <th class="text-center"> a (m) </th>
+                                        {% endif %}
                                         <th class="text-center"> Load Type</th>
                                         </tr>
                                     </thead>
@@ -625,10 +656,15 @@
                                 <h5> Point Moments:</h5>
                                 <table id="pointmomentTable" class="table table-sm table-dark w-auto">
                                     <thead>
-                                        <tr>
+                                        <tr id="point_moment_header_row">
                                         <th> Load</br>ID </th>
+                                        {% if inputs["units"]=="imperial" %}
                                         <th class="text-center"> M (ft-kips) </th>
                                         <th class="text-center"> a (ft) </th>
+                                        {% else %}
+                                        <th class="text-center"> M (kN-m) </th>
+                                        <th class="text-center"> a (m) </th>
+                                        {% endif %}
                                         <th class="text-center"> Load Type</th>
                                         </tr>
                                     </thead>
@@ -711,44 +747,44 @@
                     <div class="container-sm py-3">
                         <h4>Main Span:</h4>
                         <strong><u>Ultimate Reactions Envelope:</u></strong>
-                        <br> R<sub>L,min</sub>: {{"%.3f"|format(results['mainbeam'].reaction_uls_report['rlmin'][0]|float)}} kips from Combination:{{results['mainbeam'].reaction_uls_report['rlmin'][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['rlmin'][1][1]}}
-                        <br> R<sub>L,max</sub>: {{"%.3f"|format(results['mainbeam'].reaction_uls_report['rlmax'][0]|float)}} kips from Combination:{{results['mainbeam'].reaction_uls_report['rlmax'][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['rlmax'][1][1]}}
-                        <br> R<sub>R,min</sub>: {{"%.3f"|format(results['mainbeam'].reaction_uls_report['rrmin'][0]|float)}} kips from Combination:{{results['mainbeam'].reaction_uls_report['rrmin'][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['rrmin'][1][1]}}
-                        <br> R<sub>R,max</sub>: {{"%.3f"|format(results['mainbeam'].reaction_uls_report['rrmax'][0]|float)}} kips from Combination:{{results['mainbeam'].reaction_uls_report['rrmax'][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['rrmax'][1][1]}}
+                        <br> R<sub>L,min</sub>: {{"%.3f"|format(results['mainbeam'].reaction_uls_report['rlmin'][0]|float)}} {{results["resunits"]["force"]}} from Combination: {{results['mainbeam'].reaction_uls_report['rlmin'][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['rlmin'][1][1]}}
+                        <br> R<sub>L,max</sub>: {{"%.3f"|format(results['mainbeam'].reaction_uls_report['rlmax'][0]|float)}} {{results["resunits"]["force"]}} from Combination: {{results['mainbeam'].reaction_uls_report['rlmax'][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['rlmax'][1][1]}}
+                        <br> R<sub>R,min</sub>: {{"%.3f"|format(results['mainbeam'].reaction_uls_report['rrmin'][0]|float)}} {{results["resunits"]["force"]}} from Combination: {{results['mainbeam'].reaction_uls_report['rrmin'][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['rrmin'][1][1]}}
+                        <br> R<sub>R,max</sub>: {{"%.3f"|format(results['mainbeam'].reaction_uls_report['rrmax'][0]|float)}} {{results["resunits"]["force"]}} from Combination: {{results['mainbeam'].reaction_uls_report['rrmax'][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['rrmax'][1][1]}}
                         <br><u>Redundant Reactions:</u>
                         {% for reaction in results['mainbeam'].reaction_uls_report['redundants_max'] %}
                         {% if results['mainbeam'].endCondSum > 0 and loop.index0 == 0 %}
                         <br>{% if results['mainbeam'].endCondition[0]==1 %}M<sub>L,max</sub> : {% else %} M<sub>R,max</sub> : {% endif %}
-                        {{"%.3f"|format(reaction[0]|float)}} ft-kips from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
+                        {{"%.3f"|format(reaction[0]|float)}} {{results["resunits"]["moment"]}} from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
                         <br>{% if results['mainbeam'].endCondition[0]==1 %}M<sub>L,min</sub> : {% else %} M<sub>R,min</sub> : {% endif %}
-                        {{"%.3f"|format(results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][0]|float)}} ft-kips from Combination:{{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][1]}}
+                        {{"%.3f"|format(results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][0]|float)}} {{results["resunits"]["moment"]}} from Combination:{{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][1]}}
                         {% elif results['mainbeam'].endCondSum == 2 and loop.index0 == 1 %}
-                        <br>M<sub>R,max</sub> : {{"%.3f"|format(reaction[0]|float)}} ft-kips from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
-                        <br>M<sub>R,min</sub> : {{"%.3f"|format(results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][0]|float)}} ft-kips from Combination:{{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][1]}}
+                        <br>M<sub>R,max</sub> : {{"%.3f"|format(reaction[0]|float)}} {{results["resunits"]["moment"]}} from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
+                        <br>M<sub>R,min</sub> : {{"%.3f"|format(results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][0]|float)}} {{results["resunits"]["moment"]}} from Combination:{{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][1]}}
                         {% else %}
-                        <br>R<sub>{{loop.index}},max</sub> : {{"%.3f"|format(reaction[0]|float)}} kips at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} ft (local) from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
-                        <br>R<sub>{{loop.index}},min</sub> : {{"%.3f"|format(results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][0]|float)}} kips at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} ft (local) from Combination:{{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][1]}}
+                        <br>R<sub>{{loop.index}},max</sub> : {{"%.3f"|format(reaction[0]|float)}} {{results["resunits"]["force"]}} at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} {{results["resunits"]["length"]}} (local) from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
+                        <br>R<sub>{{loop.index}},min</sub> : {{"%.3f"|format(results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][0]|float)}} {{results["resunits"]["force"]}} at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} {{results["resunits"]["length"]}} (local) from Combination:{{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][1]}}
                         {% endif %}
                         {% endfor %}
 
                         <br><br><strong><u>Service Reactions Envelope:</u></strong>
-                        <br> R<sub>L,min</sub>: {{"%.3f"|format(results['mainbeam'].reaction_sls_report['rlmin'][0]|float)}} kips from Combination:{{results['mainbeam'].reaction_sls_report['rlmin'][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['rlmin'][1][1]}}
-                        <br> R<sub>L,max</sub>: {{"%.3f"|format(results['mainbeam'].reaction_sls_report['rlmax'][0]|float)}} kips from Combination:{{results['mainbeam'].reaction_sls_report['rlmax'][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['rlmax'][1][1]}}
-                        <br> R<sub>R,min</sub>: {{"%.3f"|format(results['mainbeam'].reaction_sls_report['rrmin'][0]|float)}} kips from Combination:{{results['mainbeam'].reaction_sls_report['rrmin'][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['rrmin'][1][1]}}
-                        <br> R<sub>R,max</sub>: {{"%.3f"|format(results['mainbeam'].reaction_sls_report['rrmax'][0]|float)}} kips from Combination:{{results['mainbeam'].reaction_sls_report['rrmax'][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['rrmax'][1][1]}}
+                        <br> R<sub>L,min</sub>: {{"%.3f"|format(results['mainbeam'].reaction_sls_report['rlmin'][0]|float)}} {{results["resunits"]["force"]}} from Combination: {{results['mainbeam'].reaction_sls_report['rlmin'][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['rlmin'][1][1]}}
+                        <br> R<sub>L,max</sub>: {{"%.3f"|format(results['mainbeam'].reaction_sls_report['rlmax'][0]|float)}} {{results["resunits"]["force"]}} from Combination: {{results['mainbeam'].reaction_sls_report['rlmax'][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['rlmax'][1][1]}}
+                        <br> R<sub>R,min</sub>: {{"%.3f"|format(results['mainbeam'].reaction_sls_report['rrmin'][0]|float)}} {{results["resunits"]["force"]}} from Combination: {{results['mainbeam'].reaction_sls_report['rrmin'][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['rrmin'][1][1]}}
+                        <br> R<sub>R,max</sub>: {{"%.3f"|format(results['mainbeam'].reaction_sls_report['rrmax'][0]|float)}} {{results["resunits"]["force"]}} from Combination: {{results['mainbeam'].reaction_sls_report['rrmax'][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['rrmax'][1][1]}}
                         <br><u>Redundant Reactions:</u>
                         {% for reaction in results['mainbeam'].reaction_sls_report['redundants_max'] %}
                         {% if results['mainbeam'].endCondSum > 0 and loop.index0 == 0 %}
                         <br>{% if results['mainbeam'].endCondition[0]==1 %}M<sub>L,max</sub> : {% else %} M<sub>R,max</sub> : {% endif %}
-                        {{"%.3f"|format(reaction[0]|float)}} ft-kips from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
+                        {{"%.3f"|format(reaction[0]|float)}} {{results["resunits"]["moment"]}} from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
                         <br>{% if results['mainbeam'].endCondition[0]==1 %}M<sub>L,min</sub> : {% else %} M<sub>R,min</sub> : {% endif %}
-                        {{"%.3f"|format(results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][0]|float)}} ft-kips from Combination:{{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][1]}}
+                        {{"%.3f"|format(results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][0]|float)}} {{results["resunits"]["moment"]}} from Combination:{{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][1]}}
                         {% elif results['mainbeam'].endCondSum == 2 and loop.index0 == 1 %}
-                        <br>M<sub>R,max</sub> : {{"%.3f"|format(reaction[0]|float)}} ft-kips from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
-                        <br>M<sub>R,min</sub> : {{"%.3f"|format(results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][0]|float)}} ft-kips from Combination:{{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][1]}}
+                        <br>M<sub>R,max</sub> : {{"%.3f"|format(reaction[0]|float)}} {{results["resunits"]["moment"]}} from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
+                        <br>M<sub>R,min</sub> : {{"%.3f"|format(results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][0]|float)}} {{results["resunits"]["moment"]}} from Combination:{{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][1]}}
                         {% else %}
-                        <br>R<sub>{{loop.index}},max</sub> : {{"%.3f"|format(reaction[0]|float)}} kips at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} ft (local) from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
-                        <br>R<sub>{{loop.index}},min</sub> : {{"%.3f"|format(results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][0]|float)}} kips at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} ft (local) from Combination:{{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][1]}}
+                        <br>R<sub>{{loop.index}},max</sub> : {{"%.3f"|format(reaction[0]|float)}} {{results["resunits"]["force"]}} at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} {{results["resunits"]["length"]}} (local) from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
+                        <br>R<sub>{{loop.index}},min</sub> : {{"%.3f"|format(results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][0]|float)}} {{results["resunits"]["force"]}} at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} {{results["resunits"]["length"]}} (local) from Combination:{{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][1]}}
                         {% endif %}
                         {% endfor %}
                         <br><br>
@@ -791,23 +827,23 @@
                                                 <div class="card-header" id="uls{{combo}}{{pattern}}_header">
                                                     <h5>
                                                         <strong>Pattern: {{pattern}}</strong> 
-                                                        <br> R<sub>L</sub>: {{"%.3f"|format(results['mainbeam'].reactions_uls[combo][pattern]['rl']|float)}} kips 
-                                                        <br> R<sub>R</sub>: {{"%.3f"|format(results['mainbeam'].reactions_uls[combo][pattern]['rr']|float)}} kips 
+                                                        <br> R<sub>L</sub>: {{"%.3f"|format(results['mainbeam'].reactions_uls[combo][pattern]['rl']|float)}} {{results["resunits"]["force"]}} 
+                                                        <br> R<sub>R</sub>: {{"%.3f"|format(results['mainbeam'].reactions_uls[combo][pattern]['rr']|float)}} {{results["resunits"]["force"]}}
                                                         <br><u>Redundant Reactions:</u>
                                                         {% for reaction in results['mainbeam'].reactions_uls[combo][pattern]['redundants'] %}
                                                         {% if results['mainbeam'].endCondSum > 0 and loop.index0 == 0 %}
                                                         <br>{% if results['mainbeam'].endCondition[0]==1 %}M<sub>L</sub> : {% else %} M<sub>R</sub> : {% endif %}
-                                                        {{"%.3f"|format(reaction|float)}} ft-kips
+                                                        {{"%.3f"|format(reaction|float)}} {{results["resunits"]["moment"]}}
                                                         {% elif results['mainbeam'].endCondSum == 2 and loop.index0 == 1 %}
-                                                        <br>M<sub>R</sub> : {{"%.3f"|format(reaction|float)}} ft-kips
+                                                        <br>M<sub>R</sub> : {{"%.3f"|format(reaction|float)}} {{results["resunits"]["moment"]}}
                                                         {% else %}
-                                                        <br>{{"%.3f"|format(reaction|float)}} kips at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} ft (local)
+                                                        <br>{{"%.3f"|format(reaction|float)}} {{results["resunits"]["force"]}} at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} {{results["resunits"]["length"]}} (local)
                                                         {% endif %}
                                                         {% endfor %}
                                                     </h5>
                                                 </div>
                                                 <div class="card-body">
-                                                    <h5>Shear Function  (kips):</h5>
+                                                    <h5>Shear Function  ({{results["resunits"]["force"]}}):</h5>
                                                     {% for function in results['mainbeam'].v_functions_uls[combo][pattern] %}
                                                     <p>
                                                     {% for piecef in function %}
@@ -825,7 +861,7 @@
                                                     {% endfor %}
                                                     </p>
                                                     {% endfor %}
-                                                    <h5>Moment Function (ft-kips):</h5>
+                                                    <h5>Moment Function ({{results["resunits"]["moment"]}}):</h5>
                                                     {% for function in results['mainbeam'].m_functions_uls[combo][pattern] %}
                                                     <p>
                                                     {% for piecef in function %}
@@ -861,7 +897,7 @@
                                                     {% endfor %}
                                                     </p>
                                                     {% endfor %}
-                                                    <h5>E*I*Deflection Function (ft):</h5>
+                                                    <h5>E*I*Deflection Function ({{results["resunits"]["length"]}}):</h5>
                                                     {% for function in results['mainbeam'].eid_functions_uls[combo][pattern] %}
                                                     <p>
                                                     {% for piecef in function %}
@@ -924,23 +960,23 @@
                                                 <div class="card-header" id="sls{{combo}}{{pattern}}_header">
                                                     <h5>
                                                         <strong>Pattern: {{pattern}}</strong> 
-                                                        <br> R<sub>L</sub>: {{"%.3f"|format(results['mainbeam'].reactions_sls[combo][pattern]['rl']|float)}} kips 
-                                                        <br> R<sub>R</sub>: {{"%.3f"|format(results['mainbeam'].reactions_sls[combo][pattern]['rr']|float)}} kips 
+                                                        <br> R<sub>L</sub>: {{"%.3f"|format(results['mainbeam'].reactions_sls[combo][pattern]['rl']|float)}} {{results["resunits"]["force"]}} 
+                                                        <br> R<sub>R</sub>: {{"%.3f"|format(results['mainbeam'].reactions_sls[combo][pattern]['rr']|float)}} {{results["resunits"]["force"]}}
                                                         <br><u>Redundant Reactions:</u>
                                                         {% for reaction in results['mainbeam'].reactions_sls[combo][pattern]['redundants'] %}
                                                         {% if results['mainbeam'].endCondSum > 0 and loop.index0 == 0 %}
                                                         <br>{% if results['mainbeam'].endCondition[0]==1 %}M<sub>L</sub> : {% else %} M<sub>R</sub> : {% endif %}
-                                                        {{"%.3f"|format(reaction|float)}} ft-kips
+                                                        {{"%.3f"|format(reaction|float)}} {{results["resunits"]["moment"]}}
                                                         {% elif results['mainbeam'].endCondSum == 2 and loop.index0 == 1 %}
-                                                        <br>M<sub>R</sub> : {{"%.3f"|format(reaction|float)}} ft-kips
+                                                        <br>M<sub>R</sub> : {{"%.3f"|format(reaction|float)}} {{results["resunits"]["moment"]}}
                                                         {% else %}
-                                                        <br>{{"%.3f"|format(reaction|float)}} kips at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} ft (local)
+                                                        <br>{{"%.3f"|format(reaction|float)}} {{results["resunits"]["force"]}} at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} {{results["resunits"]["length"]}} (local)
                                                         {% endif %}
                                                         {% endfor %}
                                                     </h5>
                                                 </div>
                                                 <div class="card-body">
-                                                    <h5>Shear Function (kips):</h5>
+                                                    <h5>Shear Function ({{results["resunits"]["force"]}}):</h5>
                                                     {% for function in results['mainbeam'].v_functions_sls[combo][pattern] %}
                                                     <p>
                                                     {% for piecef in function %}
@@ -958,7 +994,7 @@
                                                     {% endfor %}
                                                     </p>
                                                     {% endfor %}
-                                                    <h5>Moment Function (ft-kips):</h5>
+                                                    <h5>Moment Function ({{results["resunits"]["moment"]}}):</h5>
                                                     {% for function in results['mainbeam'].m_functions_sls[combo][pattern] %}
                                                     <p>
                                                     {% for piecef in function %}
@@ -994,7 +1030,7 @@
                                                     {% endfor %}
                                                     </p>
                                                     {% endfor %}
-                                                    <h5>E*I*Deflection Function (ft):</h5>
+                                                    <h5>E*I*Deflection Function ({{results["resunits"]["length"]}}):</h5>
                                                     {% for function in results['mainbeam'].eid_functions_sls[combo][pattern] %}
                                                     <p>
                                                     {% for piecef in function %}
@@ -1044,23 +1080,23 @@
                                                 <div class="card-header" id="basic{{combo}}{{pattern}}_header">
                                                     <h5>
                                                         <strong>Pattern: {{pattern}}</strong> 
-                                                        <br> R<sub>L</sub>: {{"%.3f"|format(results['mainbeam'].reactions_basic[combo][pattern]['rl']|float)}} kips 
-                                                        <br> R<sub>R</sub>: {{"%.3f"|format(results['mainbeam'].reactions_basic[combo][pattern]['rr']|float)}} kips 
+                                                        <br> R<sub>L</sub>: {{"%.3f"|format(results['mainbeam'].reactions_basic[combo][pattern]['rl']|float)}} {{results["resunits"]["force"]}} 
+                                                        <br> R<sub>R</sub>: {{"%.3f"|format(results['mainbeam'].reactions_basic[combo][pattern]['rr']|float)}} {{results["resunits"]["force"]}} 
                                                         <br><u>Redundant Reactions:</u>
                                                         {% for reaction in results['mainbeam'].reactions_basic[combo][pattern]['redundants'] %}
                                                         {% if results['mainbeam'].endCondSum > 0 and loop.index0 == 0 %}
                                                         <br>{% if results['mainbeam'].endCondition[0]==1 %}M<sub>L</sub> : {% else %} M<sub>R</sub> : {% endif %}
-                                                        {{"%.3f"|format(reaction|float)}} ft-kips
+                                                        {{"%.3f"|format(reaction|float)}} {{results["resunits"]["moment"]}}
                                                         {% elif results['mainbeam'].endCondSum == 2 and loop.index0 == 1 %}
-                                                        <br>M<sub>R</sub> : {{"%.3f"|format(reaction|float)}} ft-kips
+                                                        <br>M<sub>R</sub> : {{"%.3f"|format(reaction|float)}} {{results["resunits"]["moment"]}}
                                                         {% else %}
-                                                        <br>{{"%.3f"|format(reaction|float)}} kips at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} ft (local)
+                                                        <br>{{"%.3f"|format(reaction|float)}} {{results["resunits"]["force"]}} at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} {{results["resunits"]["length"]}} (local)
                                                         {% endif %}
                                                         {% endfor %}
                                                     </h5>
                                                 </div>
                                                 <div class="card-body">
-                                                    <h5>Shear Function (kips):</h5>
+                                                    <h5>Shear Function ({{results["resunits"]["force"]}}):</h5>
                                                     {% for function in results['mainbeam'].v_functions_basic[combo][pattern] %}
                                                     <p>
                                                     {% for piecef in function %}
@@ -1078,7 +1114,7 @@
                                                     {% endfor %}
                                                     </p>
                                                     {% endfor %}
-                                                    <h5>Moment Function (ft-kips):</h5>
+                                                    <h5>Moment Function ({{results["resunits"]["moment"]}}):</h5>
                                                     {% for function in results['mainbeam'].m_functions_basic[combo][pattern] %}
                                                     <p>
                                                     {% for piecef in function %}
@@ -1114,7 +1150,7 @@
                                                     {% endfor %}
                                                     </p>
                                                     {% endfor %}
-                                                    <h5>E*I*Deflection Function (ft):</h5>
+                                                    <h5>E*I*Deflection Function ({{results["resunits"]["length"]}}):</h5>
                                                     {% for function in results['mainbeam'].eid_functions_basic[combo][pattern] %}
                                                     <p>
                                                     {% for piecef in function %}
@@ -1818,7 +1854,7 @@
     var h = 400;
 
     var mu_layout = {
-        title: "ULS Moment Envelope (ft-kip)",
+        title: "ULS Moment Envelope ({{results["resunits"]["moment"]}})",
         width: w,
         height: h,
         annotations:[
@@ -1827,7 +1863,7 @@
                 y: ann_mu_max,
                 xref: 'x',
                 yref: 'y',
-                text: "<b>"+ ann_mu_max.toFixed(3).toString()+" ft-kips @ "+ x_main[mu_max_index].toFixed(3).toString()+" ft </b>",
+                text: "<b>"+ ann_mu_max.toFixed(3).toString()+" {{results["resunits"]["moment"]}} @ "+ x_main[mu_max_index].toFixed(3).toString()+" {{results["resunits"]["length"]}} </b>",
                 showarrow: true,
                 font: {
                     size: 14,
@@ -1851,7 +1887,7 @@
                 y: ann_mu_min,
                 xref: 'x',
                 yref: 'y',
-                text: "<b>"+ ann_mu_min.toFixed(3).toString()+" ft-kips @ "+ x_main[mu_min_index].toFixed(3).toString()+" ft</b>",
+                text: "<b>"+ ann_mu_min.toFixed(3).toString()+" {{results["resunits"]["moment"]}} @ "+ x_main[mu_min_index].toFixed(3).toString()+" {{results["resunits"]["length"]}}</b>",
                 showarrow: true,
                 font: {
                     size: 14,
@@ -1874,7 +1910,7 @@
     };
 
     var vu_layout = {
-        title: "ULS Shear Envelope (kip)",
+        title: "ULS Shear Envelope ({{results["resunits"]["force"]}})",
         width: w,
         height: h,
         annotations:[
@@ -1883,7 +1919,7 @@
                 y: ann_vu_max,
                 xref: 'x',
                 yref: 'y',
-                text: "<b>"+ ann_vu_max.toFixed(3).toString()+" ft-kips @ "+ x_main[vu_max_index].toFixed(3).toString()+" ft</b>",
+                text: "<b>"+ ann_vu_max.toFixed(3).toString()+" {{results["resunits"]["force"]}} @ "+ x_main[vu_max_index].toFixed(3).toString()+" {{results["resunits"]["length"]}}</b>",
                 showarrow: true,
                 font: {
                     size: 14,
@@ -1907,7 +1943,7 @@
                 y: ann_vu_min,
                 xref: 'x',
                 yref: 'y',
-                text: "<b>"+ann_vu_min.toFixed(3).toString()+" ft-kips @ "+ x_main[vu_min_index].toFixed(3).toString()+" ft</b>",
+                text: "<b>"+ann_vu_min.toFixed(3).toString()+" {{results["resunits"]["force"]}} @ "+ x_main[vu_min_index].toFixed(3).toString()+" {{results["resunits"]["length"]}}</b>",
                 showarrow: true,
                 font: {
                     size: 14,
@@ -1930,13 +1966,13 @@
     };
 
     var vs_layout = {
-        title: "SLS Shear Envelope (kip)",
+        title: "SLS Shear Envelope ({{results["resunits"]["force"]}})",
         width: w,
         height: h,
     };
 
     var ms_layout = {
-        title: "SLS Moment Envelope (ft-kip)",
+        title: "SLS Moment Envelope ({{results["resunits"]["moment"]}})",
         width: w,
         height: h,
     };
@@ -1948,7 +1984,7 @@
     };
 
     var ds_layout = {
-        title: "SLS Deflection Envelope (in)",
+        title: "SLS Deflection Envelope ({{results["resunits"]["delta"]}})",
         width: w,
         height: h,
         annotations:[
@@ -1957,7 +1993,7 @@
                 y: ann_ds_max,
                 xref: 'x',
                 yref: 'y',
-                text: "<b>"+ann_ds_max.toFixed(4).toString()+" in @ "+ x_main[ds_max_index].toFixed(3).toString() +" ft</b>",
+                text: "<b>"+ann_ds_max.toFixed(4).toString()+" {{results["resunits"]["delta"]}} @ "+ x_main[ds_max_index].toFixed(3).toString() +" {{results["resunits"]["length"]}}</b>",
                 showarrow: true,
                 font: {
                     size: 14,
@@ -1981,7 +2017,7 @@
                 y: ann_ds_min,
                 xref: 'x',
                 yref: 'y',
-                text: "<b>"+ann_ds_min.toFixed(4).toString()+" in @ "+ x_main[ds_min_index].toFixed(3).toString() +" ft</b>",
+                text: "<b>"+ann_ds_min.toFixed(4).toString()+" {{results["resunits"]["delta"]}} @ "+ x_main[ds_min_index].toFixed(3).toString() +" {{results["resunits"]["length"]}}</b>",
                 showarrow: true,
                 font: {
                     size: 14,
@@ -2016,7 +2052,7 @@
     Plotly.newPlot("MsEnvelopePlot", ms_envelope, ms_layout, config);
 
     Plotly.newPlot("SsEnvelopePlot", ss_envelope, ss_layout, config);
-
+    
 </script>
 
 {% endif %}
@@ -2025,7 +2061,7 @@
     $(window).on('load', function () {
       $('#loading').hide();
     });
-  </script>
+</script>
 
 <script>
     function ShowLoading(){
