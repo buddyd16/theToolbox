@@ -24,11 +24,102 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 // This function is used for event handlers after the HTML document loads
 function main() {
+    // set the units variable
+    let units = $('input[name="units"]:checked').val();
+    console.log(units)
 
     UpdateChart();
-
+    // Units toggel
+    $('input:radio[name="units"]').change(function() {
+        
+        units = $(this).val();
+        
+        if(units == "imperial"){
+            // remove all btn- classes to avoid duplicates
+            $("#metric_button").removeClass("btn-secondary");
+            $("#metric_button").removeClass("btn-primary");
+            $("#imperial_button").removeClass("btn-primary");
+            $("#imperial_button").removeClass("btn-secondary");
+            
+            $("#imperial_button").addClass("btn-primary");
+            $("#metric_button").addClass("btn-secondary");
+            
+            $("#em_units").html("ksi");
+            $("#ixx_units").html("in<sup>4</sup>");
+            
+            // change all lengths
+            $('.length_units').each(function() {
+                $(this).html("ft")
+            });
+            
+            $("#dist_load_header_row").html("<th> Load</br>ID </th>" +
+                                            "<th class=\"text-center\"> w<sub>1</sub> (psf) </th>" +
+                                            "<th class=\"text-center\"> trib<sub>1</sub> (ft) </th>" +
+                                            "<th class=\"text-center\"> w<sub>2</sub> (psf) </th>" +
+                                            "<th class=\"text-center\"> trib<sub>2</sub> (ft) </th>" +
+                                            "<th class=\"text-center\"> a (ft) </th>" +
+                                            "<th class=\"text-center\"> b (ft) </th>" +
+                                            "<th class=\"text-center\"> Load Type</th>");
+                            
+            $("#point_load_header_row").html("<th> Load</br>ID </th>" + 
+                                            "<th class=\"text-center\"> P (kips) </th>" +
+                                            "<th class=\"text-center\"> a (ft) </th>" +
+                                            "<th class=\"text-center\"> Load Type</th>");
+            
+            $("#point_moment_header_row").html("<th> Load</br>ID </th>" + 
+                                                "<th class=\"text-center\"> M (ft-kips) </th>" +
+                                                "<th class=\"text-center\"> a (ft) </th>" +
+                                                "<th class=\"text-center\"> Load Type</th>");
+            
+        } else {
+            // remove all btn- classes to avoid duplicates
+            $("#metric_button").removeClass("btn-secondary");
+            $("#metric_button").removeClass("btn-primary");
+            $("#imperial_button").removeClass("btn-primary");
+            $("#imperial_button").removeClass("btn-secondary");
+            
+            $("#metric_button").addClass("btn-primary");
+            $("#imperial_button").addClass("btn-secondary");
+            
+            $("#em_units").html("MPa");
+            $("#ixx_units").html("mm<sup>4</sup> (use e or E for powers of 10, i.e. 2.3e10 or 2.3E10)");
+            
+            // change all lengths
+            $('.length_units').each(function() {
+                $(this).html("m")
+            });
+            
+            $("#dist_load_header_row").html("<th> Load</br>ID </th>" +
+                                "<th class=\"text-center\"> w<sub>1</sub> (kPa) </th>" +
+                                "<th class=\"text-center\"> trib<sub>1</sub> (m) </th>" +
+                                "<th class=\"text-center\"> w<sub>2</sub> (kPa) </th>" +
+                                "<th class=\"text-center\"> trib<sub>2</sub> (m) </th>" +
+                                "<th class=\"text-center\"> a (m) </th>" +
+                                "<th class=\"text-center\"> b (m) </th>" +
+                                "<th class=\"text-center\"> Load Type</th>");
+            
+            $("#point_load_header_row").html("<th> Load</br>ID </th>" + 
+                                            "<th class=\"text-center\"> P (kN) </th>" +
+                                            "<th class=\"text-center\"> a (m) </th>" +
+                                            "<th class=\"text-center\"> Load Type</th>");
+                                
+            $("#point_moment_header_row").html("<th> Load</br>ID </th>" + 
+                                            "<th class=\"text-center\"> M (kN-m) </th>" +
+                                            "<th class=\"text-center\"> a (m) </th>" +
+                                            "<th class=\"text-center\"> Load Type</th>");
+        }
+        
+        UpdateChart();
+    });
+    
     // Add row Below the first support that was clicked
     $("tbody").on("click", ".addSupportFirst", function(){
+        
+        let length = "ft";
+        
+        if(units=="metric"){
+            length = "m"
+        }
         
         //get the current parent
         var tableBody = $(this).closest("tbody");
@@ -44,7 +135,7 @@ function main() {
         var $newRow =   '<tr class=\"interiorsupportRow\">' +
                     '<td class=\"interiorsupportuid\">R'+ Number($("#interiorsupportsTable tbody tr").length + 1).toString() + '</td>' +
                     '<td><input id=\"interiorSupport'+ Number($("#interiorsupportsTable tbody tr").length + 1).toString() + '\" name=\"interiorSupport\" class=\"interiorSupport input-sm\" style=\"width:65px\" type=\"number\" step=\"any\" min=\"0\" value=\"0\"></td>' +
-                    '<td>ft</td>' +
+                    '<td class="length_units">'+length+'</td>' +
                     '<td>' +
                     '<button type=\"button\" class=\"addSupport btn btn-secondary btn-success btn-sm\">' +
                     '<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" class=\"bi bi-plus\" viewBox=\"0 0 16 16\">' +

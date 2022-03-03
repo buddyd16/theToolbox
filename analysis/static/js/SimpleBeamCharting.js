@@ -39,6 +39,14 @@ function UpdateChart(){
     let span_tick_bottom = span_tick_top + 20;
     let span_dim = span_tick_bottom - 10;
     let span_dim_text = total_span_ft.toFixed(3).toString()+" ft";
+    
+    let chart_units = $('input[name="units"]:checked').val();
+    console.log(chart_units);
+    
+    if( chart_units == "metric"){
+        span_dim_text = total_span_ft.toFixed(3).toString()+" m";
+    }
+    
     let span_mid = ((beam_j-beam_i)/2) + x_margin;
     let span_text_y = span_dim + 18;
 
