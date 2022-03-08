@@ -1,0 +1,215 @@
+
+{% extends "layout.html"%}
+
+{% block scripts %}
+<script src="{{ url_for('foundations_bp.static', filename='js/polefoundation.js') }}"></script>
+<script src="{{ url_for('static', filename='js/plotly-2.9.0.min.js') }}"></script>
+{% endblock scripts %}
+
+{% block content %}
+<div class="container">
+<h4><strong><u>IBC 2018 - Unconstrained Pole Foundation</u></strong></h4>
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h5>Inputs:</h5>
+            <form method=post action="">
+                <input class="btn btn-dark btn-lg my-1" type=submit value="Calculate">
+                <table class="table table-striped w-auto small" id="inputs">
+                    <tr>
+                        <td class="text-right text-nowrap">q<sub>h,allow</sub></td>
+                        <td><input id="qh_allow" name="qh_allow" class="qh_allow input-sm chart_input" style="width:95px" type="number" step="any" value="{{ inputs["qh"] }}"></td>
+                        <td>psf/ft</td>
+                        <td>Allowable lateral bearing pressure from Table 1806.2 or Geotechnical Engineer.</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right text-nowrap">Allow for 1806.3.4?</td>
+                        <td>
+                            <select id="allow_180634" class="allow_180634 input-sm chart_input" name="allow_180634" style="width:95px">
+                                <option value="0" {{ "selected=""selected""" if inputs["allow_180634"] == 0}}> no </option>
+                                <option value="1" {{ "selected=""selected""" if inputs["allow_180634"] == 1}}> yes </option>
+                            </select>
+                        </td>
+                        <td></td>
+                        <td>If 1/2" lateral displacement at the ground surface can be tolerated and the loading type is short term q<sub>h,allow</sub> can be 2x the tabular value. Confirm applicablility with Geotechnical Engineer is using non-tabular q<sub>h,allow</sub>.</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right text-nowrap">P</td>
+                        <td><input id="p" name="p" class="p input-sm chart_input" style="width:95px" type="number" step="any" value="{{ inputs["p"] }}"></td>
+                        <td>lbs</td>
+                        <td>Applied Lateral Load</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right text-nowrap">H</td>
+                        <td><input id="h" name="h" class="h input-sm chart_input" style="width:95px" type="number" step="any" value="{{ inputs["h"] }}"></td>
+                        <td>ft</td>
+                        <td>Distance from the ground surface to point of application of "P".</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right text-nowrap">Pole Shape</td>
+                        <td>
+                            <select id="pole_shape" class="pole_shape input-sm chart_input" name="pole_shape" style="width:95px">
+                                <option value="round" {{ "selected=""selected""" if inputs["shape"] == "round"}}> Round </option>
+                                <option value="square" {{ "selected=""selected""" if inputs["shape"] == "square"}}> Square </option>
+                            </select>
+                        </td>
+                        <td></td>
+                        <td>Cross-Sectional shape of the embedded foundation.</td>
+                    </tr>
+                    <tr>
+                        <td id="shape_size_label" class="text-right text-nowrap">Diameter/Side Dimension</td>
+                        <td><input id="shape_size" name="shape_size" class="shape_size input-sm chart_input" style="width:95px" type="number" step="any" value="{{ inputs["shape_size"] }}"></td>
+                        <td>in</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right text-nowrap">D<sub>ignore</sub></td>
+                        <td><input id="d_ignore" name="d_ignore" class="d_ignore input-sm chart_input" style="width:95px" type="number" step="any" value="{{ inputs["dignore"] }}"></td>
+                        <td>ft</td>
+                        <td>Depth of soil to be ignored for lateral resistance.</td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+        <div class="col">
+            <canvas id="fndCanvas" width="400" height="800" style="border:2px solid #000000;"></canvas>
+        </div>
+    </div>
+    <div class="row">
+        {% if results != None %}
+        <h5>Results:</h5>
+        <div class="container">
+            <div class="row">
+                <!-- Formula Results -->
+                <table class="table table-striped w-auto small">
+                    <tr>
+                        <td class="text-right text-nowrap">b :</td>
+                        <td>{{"%.4f"|format(results["b"])}}</td>
+                        <td>ft</td>
+                        <td>Diameter or Diagonal dimension of pier.</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right text-nowrap">S<sub>1</sub> :</td>
+                        <td>{{"%.4f"|format(results["s1"])}}</td>
+                        <td>psf</td>
+                        <td>Allowable lateral soil-bearing pressure based on a depth of one-third the depth of embedment, however d not over 12 feet for purpose of computing lateral pressure.</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right text-nowrap">A :</td>
+                        <td>{{"%.4f"|format(results["A"])}}</td>
+                        <td></td>
+                        <td>2.34 P /(S<sub>1</sub>b)</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right text-nowrap">D :</td>
+                        <td>{{"%.4f"|format(results["d"])}}</td>
+                        <td>ft</td>
+                        <td>Embedment Depth from IBC 2018 - Eq. 18-1</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right text-nowrap">D<sub>total</sub> :</td>
+                        <td id="dtotal">{{"%.4f"|format(results["duse"])}}</td>
+                        <td>ft</td>
+                        <td>Total Embedment = D + D<sub>ignore</sub></td>
+                    </tr>
+                </table>
+            </div>
+            <div class=""row">
+            <p>IBC equation 18-1 is a modified form of the Rutledge formula. However IBC does not provide 
+                adequate definition to form shear and moment digrams below the soil surface. This program uses the embedment depth
+                and S<sub>1</sub> values computed per IBC and then solves for the zero point depth as depicted in Pole Building Design
+                by Donald Patterson (dimension A in figure 2). It is important to realize that these shears and moments are generated
+                using approximate methods from approximate inputs so the designer should proceed accordingly.
+            </p>
+            </div>
+            <div class="row">
+                <!-- Plots -->
+                <div class="col">
+                    <div id="vPlot" class="w-100 plot"></div>
+                </div>
+                <div class="col">
+                    <div id="mPlot" class="w-100 plot"></div>
+                </div>
+                <div class="col">
+                    <figure class="figure">
+                    <!-- Rutledge Diagram from Pole Building Design-->
+                    <img style="max-width: 300px;"src="{{ url_for('foundations_bp.static', filename='images/rutledge_pole_fnd.svg') }}">
+                    <figcaption class="figure-caption">Figure 2 - Pole Building Design by Donald Patterson</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+</div>
+
+<script>
+{% if results != None %}
+var marker_size = 4;
+var plot_type = 'lines+markers';
+let v = {{results["v_plot"]}};
+let m = {{results["m_plot"]}};
+let y = {{results["y_stations"]}};
+
+var w = 300;
+var h = 600;
+
+var v_data = {
+        x: v,
+        y: y,
+        mode: plot_type,
+        fill: 'tozerox',
+        name: 'Shear (lbs)',
+        marker: {
+            size: marker_size,
+            color: 'rgb(0,255,0)'
+        },
+        line: {
+            color: 'rgbd(0,255,0)'
+        },
+    };
+
+var m_data = {
+    x: m,
+    y: y,
+    mode: plot_type,
+    fill: 'tozerox',
+    name: 'Moment (ft-lbs)',
+    marker: {
+        size: marker_size,
+        color: 'rgb(255,0,0)'
+    },
+    line: {
+        color: 'rgbd(255,0,0)'
+    },
+};
+
+var v_plot = [v_data];
+var m_plot = [m_data];
+
+var m_layout = {
+        title: "Moment (ft-lbs)<br>{{"%.3f"|format(results["m_max"][0])}} ft-lbs @ {{"%.3f"|format(results["m_max"][1])}} ft",
+        width: w,
+        height: h,
+    };
+
+var v_layout = {
+    title: "Shear (lbs) <br>{{"%.3f"|format(results["v_max"][0])}} lbs @ {{"%.3f"|format(results["v_max"][1])}} ft",
+    width: w,
+    height: h,
+};
+
+var config = {responsive: true}
+
+Plotly.newPlot("vPlot", m_plot, m_layout, config);
+
+Plotly.newPlot("mPlot", v_plot, v_layout, config);
+
+
+{% endif %}
+</script>
+
+{% endblock content %}
