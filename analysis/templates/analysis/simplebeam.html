@@ -45,10 +45,10 @@
     </div>
     <div class="container">
         <div class="row my-2 justify-content-end align-items-center">
-            <div class="col">
+            <div class="col-8">
                 <input class="btn btn-dark btn-lg my-1" type=submit value="Analyze Beam">
             </div>
-            <div class="col justify-content-end">
+            <div class="col-4 justify-content-end">
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
                     <label id="imperial_button" class="btn btn-sm {{ " btn-primary active" if inputs["units"] == "imperial" else " btn-secondary"}}">
                         <input type="radio" name="units" id="imperial" autocomplete="off" value="imperial" {{ "checked" if inputs["units"] == "imperial"}}> Imperial
@@ -745,50 +745,178 @@
                 <!-- General DATA -->
                 <div class="tab-pane container fade" id="genResults">
                     <div class="container-sm py-3">
-                        <h4>Main Span:</h4>
-                        <strong><u>Ultimate Reactions Envelope:</u></strong>
-                        <br> R<sub>L,min</sub>: {{"%.3f"|format(results['mainbeam'].reaction_uls_report['rlmin'][0]|float)}} {{results["resunits"]["force"]}} from Combination: {{results['mainbeam'].reaction_uls_report['rlmin'][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['rlmin'][1][1]}}
-                        <br> R<sub>L,max</sub>: {{"%.3f"|format(results['mainbeam'].reaction_uls_report['rlmax'][0]|float)}} {{results["resunits"]["force"]}} from Combination: {{results['mainbeam'].reaction_uls_report['rlmax'][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['rlmax'][1][1]}}
-                        <br> R<sub>R,min</sub>: {{"%.3f"|format(results['mainbeam'].reaction_uls_report['rrmin'][0]|float)}} {{results["resunits"]["force"]}} from Combination: {{results['mainbeam'].reaction_uls_report['rrmin'][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['rrmin'][1][1]}}
-                        <br> R<sub>R,max</sub>: {{"%.3f"|format(results['mainbeam'].reaction_uls_report['rrmax'][0]|float)}} {{results["resunits"]["force"]}} from Combination: {{results['mainbeam'].reaction_uls_report['rrmax'][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['rrmax'][1][1]}}
-                        <br><u>Redundant Reactions:</u>
-                        {% for reaction in results['mainbeam'].reaction_uls_report['redundants_max'] %}
-                        {% if results['mainbeam'].endCondSum > 0 and loop.index0 == 0 %}
-                        <br>{% if results['mainbeam'].endCondition[0]==1 %}M<sub>L,max</sub> : {% else %} M<sub>R,max</sub> : {% endif %}
-                        {{"%.3f"|format(reaction[0]|float)}} {{results["resunits"]["moment"]}} from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
-                        <br>{% if results['mainbeam'].endCondition[0]==1 %}M<sub>L,min</sub> : {% else %} M<sub>R,min</sub> : {% endif %}
-                        {{"%.3f"|format(results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][0]|float)}} {{results["resunits"]["moment"]}} from Combination:{{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][1]}}
-                        {% elif results['mainbeam'].endCondSum == 2 and loop.index0 == 1 %}
-                        <br>M<sub>R,max</sub> : {{"%.3f"|format(reaction[0]|float)}} {{results["resunits"]["moment"]}} from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
-                        <br>M<sub>R,min</sub> : {{"%.3f"|format(results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][0]|float)}} {{results["resunits"]["moment"]}} from Combination:{{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][1]}}
-                        {% else %}
-                        <br>R<sub>{{loop.index}},max</sub> : {{"%.3f"|format(reaction[0]|float)}} {{results["resunits"]["force"]}} at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} {{results["resunits"]["length"]}} (local) from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
-                        <br>R<sub>{{loop.index}},min</sub> : {{"%.3f"|format(results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][0]|float)}} {{results["resunits"]["force"]}} at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} {{results["resunits"]["length"]}} (local) from Combination:{{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_uls_report['redundants_min'][loop.index0][1][1]}}
-                        {% endif %}
-                        {% endfor %}
+                        <strong><u>Basic Reactions Envelope:</u></strong>
+                        <table class="table table-striped w-auto small">
+                            <tr>
+                                <th scope="col" class="text-center"></th>
+                                {% if results['mainbeam'].endCondition[0]==1 %}<th scope="col" class="text-center">M<sub>L</sub><br>({{results["resunits"]["moment"]}})</th>{% endif %}
+                                <th scope="col" class="text-center">R<sub>L</sub><br>({{results["resunits"]["force"]}})</th>
+                                {% for support in results['mainbeam'].interiorSupports %}
+                                <th scope="col" class="text-center">R<sub>{{loop.index}}</sub><br>({{results["resunits"]["force"]}})</th>
+                                {% endfor %}
+                                <th scope="col" class="text-center">R<sub>R</sub><br>({{results["resunits"]["force"]}})</th>
+                                {% if results['mainbeam'].endCondition[1]==1 %}<th scope="col" class="text-center">M<sub>R</sub><br>({{results["resunits"]["moment"]}})</th>{% endif %}
+                            </tr>
+                            {% for key, value in results['mainbeam'].reaction_basic_report.items() %}
+                            <tr>
+                                <td class="text-center">{{key}}</td>
+                                {% if results['mainbeam'].endCondition[0]==1 %}
+                                <td class="text-center">
+                                    {% if value['mlmax'][0] == value['mlmin'][0] %}{{"%.4f"|format(value['mlmax'][0])}} {% else %} {{"%.4f"|format(value['mlmax'][0])}} / {{"%.4f"|format(value['mlmin'][0])}} {% endif %}
+                                </td>
+                                {% endif %}
+                                <td class="text-center">{% if value['rlmax'][0] == value['rlmin'][0] %}{{"%.4f"|format(value['rlmax'][0])}} {% else %} {{"%.4f"|format(value['rlmax'][0])}} / {{"%.4f"|format(value['rlmin'][0])}} {% endif %}</td>
+                                {% for redundant in value["redundants_max"] %}
+                                <td class="text-center">{% if redundant[0] == value["redundants_min"][loop.index0][0] %}{{"%.4f"|format(redundant[0])}} {% else %} {{"%.4f"|format(redundant[0])}} / {{"%.4f"|format(value["redundants_min"][loop.index0][0])}} {% endif %}</td>
+                                {% endfor %}
+                                <td class="text-center">{% if value['rrmax'][0] == value['rrmin'][0] %}{{"%.4f"|format(value['rrmax'][0])}} {% else %} {{"%.4f"|format(value['rrmax'][0])}} / {{"%.4f"|format(value['rrmin'][0])}} {% endif %}</td>
+                                {% if results['mainbeam'].endCondition[1]==1 %}
+                                <td class="text-center">
+                                    {% if value['mrmax'][0] == value['mrmin'][0] %}{{"%.4f"|format(value['mrmax'][0])}} {% else %} {{"%.4f"|format(value['mrmax'][0])}} / {{"%.4f"|format(value['mrmin'][0])}} {% endif %}
+                                </td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </table>
+
+                        <br><br><strong><u>Ultimate Reactions Envelope:</u></strong>
+                        <table class="table table-striped w-auto small">
+                            <tr>
+                                <th scope="col" class="text-center"></th>
+                                {% if results['mainbeam'].endCondition[0]==1 %}<th scope="col" class="text-center">M<sub>L</sub><br>({{results["resunits"]["moment"]}})</th>{% endif %}
+                                <th scope="col" class="text-center">R<sub>L</sub><br>({{results["resunits"]["force"]}})</th>
+                                {% for support in results['mainbeam'].interiorSupports %}
+                                <th scope="col" class="text-center">R<sub>{{loop.index}}</sub><br>({{results["resunits"]["force"]}})</th>
+                                {% endfor %}
+                                <th scope="col" class="text-center">R<sub>R</sub><br>({{results["resunits"]["force"]}})</th>
+                                {% if results['mainbeam'].endCondition[1]==1 %}<th scope="col" class="text-center">M<sub>R</sub><br>({{results["resunits"]["moment"]}})</th>{% endif %}
+                            </tr>
+                            <tr>
+                                <td>Max / Min</td>
+                                {% if results['mainbeam'].endCondition[0]==1 %}
+                                <td class="text-center">
+                                    {% if results['mainbeam'].reaction_uls_report['mlmax'][0] == results['mainbeam'].reaction_uls_report['mlmin'][0] %}{{"%.4f"|format(results['mainbeam'].reaction_uls_report['mlmax'][0])}} {% else %} {{"%.4f"|format(results['mainbeam'].reaction_uls_report['mlmax'][0])}} / {{"%.4f"|format(results['mainbeam'].reaction_uls_report['mlmin'][0])}} {% endif %}
+                                </td>
+                                {% endif %}
+                                <td class="text-center">{% if results['mainbeam'].reaction_uls_report['rlmax'][0] == results['mainbeam'].reaction_uls_report['rlmin'][0] %}{{"%.4f"|format(results['mainbeam'].reaction_uls_report['rlmax'][0])}} {% else %} {{"%.4f"|format(results['mainbeam'].reaction_uls_report['rlmax'][0])}} / {{"%.4f"|format(results['mainbeam'].reaction_uls_report['rlmin'][0])}} {% endif %}</td>
+                                {% for redundant in results['mainbeam'].reaction_uls_report["redundants_max"] %}
+                                <td class="text-center">{% if redundant[0] == results['mainbeam'].reaction_uls_report["redundants_min"][loop.index0][0] %}{{"%.4f"|format(redundant[0])}} {% else %} {{"%.4f"|format(redundant[0])}} / {{"%.4f"|format(results['mainbeam'].reaction_uls_report["redundants_min"][loop.index0][0])}} {% endif %}</td>
+                                {% endfor %}
+                                <td class="text-center">{% if results['mainbeam'].reaction_uls_report['rrmax'][0] == results['mainbeam'].reaction_uls_report['rrmin'][0] %}{{"%.4f"|format(results['mainbeam'].reaction_uls_report['rrmax'][0])}} {% else %} {{"%.4f"|format(results['mainbeam'].reaction_uls_report['rrmax'][0])}} / {{"%.4f"|format(results['mainbeam'].reaction_uls_report['rrmin'][0])}} {% endif %}</td>
+                                {% if results['mainbeam'].endCondition[1]==1 %}
+                                <td class="text-center">
+                                    {% if results['mainbeam'].reaction_uls_report['mrmax'][0] == results['mainbeam'].reaction_uls_report['mrmin'][0] %}{{"%.4f"|format(results['mainbeam'].reaction_uls_report['mrmax'][0])}} {% else %} {{"%.4f"|format(results['mainbeam'].reaction_uls_report['mrmax'][0])}} / {{"%.4f"|format(results['mainbeam'].reaction_uls_report['mrmin'][0])}} {% endif %}
+                                </td>
+                                {% endif %}
+                            </tr>
+                            <tr>
+                                <td>Combination</td>
+                                {% if results['mainbeam'].endCondition[0]==1 %}
+                                <td class="text-center">
+                                    {% if results['mainbeam'].reaction_uls_report['mlmax'][0] == results['mainbeam'].reaction_uls_report['mlmin'][0] %}{{results['mainbeam'].reaction_uls_report['mlmax'][1][0]}} {% else %} {{results['mainbeam'].reaction_uls_report['mlmax'][1][0]}} / {{results['mainbeam'].reaction_uls_report['mlmin'][1][0]}} {% endif %}
+                                </td>
+                                {% endif %}
+                                <td class="text-center">{% if results['mainbeam'].reaction_uls_report['rlmax'][0] == results['mainbeam'].reaction_uls_report['rlmin'][0] %}{{results['mainbeam'].reaction_uls_report['rlmax'][1][0]}} {% else %} {{results['mainbeam'].reaction_uls_report['rlmax'][1][0]}} / {{results['mainbeam'].reaction_uls_report['rlmin'][1][0]}} {% endif %}</td>
+                                {% for redundant in results['mainbeam'].reaction_uls_report["redundants_max"] %}
+                                <td class="text-center">{% if redundant[0] == results['mainbeam'].reaction_uls_report["redundants_min"][loop.index0][0] %}{{redundant[1][0]}} {% else %} {{redundant[1][0]}} / {{results['mainbeam'].reaction_uls_report["redundants_min"][loop.index0][1][0]}} {% endif %}</td>
+                                {% endfor %}
+                                <td class="text-center">{% if results['mainbeam'].reaction_uls_report['rrmax'][0] == results['mainbeam'].reaction_uls_report['rrmin'][0] %}{{results['mainbeam'].reaction_uls_report['rrmax'][1][0]}} {% else %} {{results['mainbeam'].reaction_uls_report['rrmax'][1][0]}} / {{results['mainbeam'].reaction_uls_report['rrmin'][1][0]}} {% endif %}</td>
+                                {% if results['mainbeam'].endCondition[1]==1 %}
+                                <td class="text-center">
+                                    {% if results['mainbeam'].reaction_uls_report['mrmax'][0] == results['mainbeam'].reaction_uls_report['mrmin'][0] %}{{results['mainbeam'].reaction_uls_report['mrmax'][1][0]}} {% else %} {{results['mainbeam'].reaction_uls_report['mrmax'][1][0]}} / {{results['mainbeam'].reaction_uls_report['mrmin'][1][0]}} {% endif %}
+                                </td>
+                                {% endif %}
+                            </tr>
+                            <tr>
+                                <td>Pattern</td>
+                                {% if results['mainbeam'].endCondition[0]==1 %}
+                                <td class="text-center text-nowrap">
+                                    {% if results['mainbeam'].reaction_uls_report['mlmax'][0] == results['mainbeam'].reaction_uls_report['mlmin'][0] %}{{results['mainbeam'].reaction_uls_report['mlmax'][1][1]}} {% else %} {{results['mainbeam'].reaction_uls_report['mlmax'][1][1]}} /<br> {{results['mainbeam'].reaction_uls_report['mlmin'][1][1]}} {% endif %}
+                                </td>
+                                {% endif %}
+                                <td class="text-center text-nowrap">{% if results['mainbeam'].reaction_uls_report['rlmax'][0] == results['mainbeam'].reaction_uls_report['rlmin'][0] %}{{results['mainbeam'].reaction_uls_report['rlmax'][1][1]}} {% else %} {{results['mainbeam'].reaction_uls_report['rlmax'][1][1]}} /<br> {{results['mainbeam'].reaction_uls_report['rlmin'][1][1]}} {% endif %}</td>
+                                {% for redundant in results['mainbeam'].reaction_uls_report["redundants_max"] %}
+                                <td class="text-center text-nowrap">{% if redundant[0] == results['mainbeam'].reaction_uls_report["redundants_min"][loop.index0][0] %}{{redundant[1][1]}} {% else %} {{redundant[1][1]}} /<br> {{results['mainbeam'].reaction_uls_report["redundants_min"][loop.index0][1][1]}} {% endif %}</td>
+                                {% endfor %}
+                                <td class="text-center text-nowrap">{% if results['mainbeam'].reaction_uls_report['rrmax'][0] == results['mainbeam'].reaction_uls_report['rrmin'][0] %}{{results['mainbeam'].reaction_uls_report['rrmax'][1][1]}} {% else %} {{results['mainbeam'].reaction_uls_report['rrmax'][1][1]}} /<br> {{results['mainbeam'].reaction_uls_report['rrmin'][1][1]}} {% endif %}</td>
+                                {% if results['mainbeam'].endCondition[1]==1 %}
+                                <td class="text-center text-nowrap">
+                                    {% if results['mainbeam'].reaction_uls_report['mrmax'][0] == results['mainbeam'].reaction_uls_report['mrmin'][0] %}{{results['mainbeam'].reaction_uls_report['mrmax'][1][1]}} {% else %} {{results['mainbeam'].reaction_uls_report['mrmax'][1][1]}} /<br> {{results['mainbeam'].reaction_uls_report['mrmin'][1][1]}} {% endif %}
+                                </td>
+                                {% endif %}
+                            </tr>
+
+                        </table>
 
                         <br><br><strong><u>Service Reactions Envelope:</u></strong>
-                        <br> R<sub>L,min</sub>: {{"%.3f"|format(results['mainbeam'].reaction_sls_report['rlmin'][0]|float)}} {{results["resunits"]["force"]}} from Combination: {{results['mainbeam'].reaction_sls_report['rlmin'][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['rlmin'][1][1]}}
-                        <br> R<sub>L,max</sub>: {{"%.3f"|format(results['mainbeam'].reaction_sls_report['rlmax'][0]|float)}} {{results["resunits"]["force"]}} from Combination: {{results['mainbeam'].reaction_sls_report['rlmax'][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['rlmax'][1][1]}}
-                        <br> R<sub>R,min</sub>: {{"%.3f"|format(results['mainbeam'].reaction_sls_report['rrmin'][0]|float)}} {{results["resunits"]["force"]}} from Combination: {{results['mainbeam'].reaction_sls_report['rrmin'][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['rrmin'][1][1]}}
-                        <br> R<sub>R,max</sub>: {{"%.3f"|format(results['mainbeam'].reaction_sls_report['rrmax'][0]|float)}} {{results["resunits"]["force"]}} from Combination: {{results['mainbeam'].reaction_sls_report['rrmax'][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['rrmax'][1][1]}}
-                        <br><u>Redundant Reactions:</u>
-                        {% for reaction in results['mainbeam'].reaction_sls_report['redundants_max'] %}
-                        {% if results['mainbeam'].endCondSum > 0 and loop.index0 == 0 %}
-                        <br>{% if results['mainbeam'].endCondition[0]==1 %}M<sub>L,max</sub> : {% else %} M<sub>R,max</sub> : {% endif %}
-                        {{"%.3f"|format(reaction[0]|float)}} {{results["resunits"]["moment"]}} from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
-                        <br>{% if results['mainbeam'].endCondition[0]==1 %}M<sub>L,min</sub> : {% else %} M<sub>R,min</sub> : {% endif %}
-                        {{"%.3f"|format(results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][0]|float)}} {{results["resunits"]["moment"]}} from Combination:{{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][1]}}
-                        {% elif results['mainbeam'].endCondSum == 2 and loop.index0 == 1 %}
-                        <br>M<sub>R,max</sub> : {{"%.3f"|format(reaction[0]|float)}} {{results["resunits"]["moment"]}} from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
-                        <br>M<sub>R,min</sub> : {{"%.3f"|format(results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][0]|float)}} {{results["resunits"]["moment"]}} from Combination:{{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][1]}}
-                        {% else %}
-                        <br>R<sub>{{loop.index}},max</sub> : {{"%.3f"|format(reaction[0]|float)}} {{results["resunits"]["force"]}} at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} {{results["resunits"]["length"]}} (local) from Combination:{{reaction[1][0]}} and Pattern: {{reaction[1][1]}}
-                        <br>R<sub>{{loop.index}},min</sub> : {{"%.3f"|format(results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][0]|float)}} {{results["resunits"]["force"]}} at {{results['mainbeam'].interiorSupports[loop.index0-results['mainbeam'].endCondSum]}} {{results["resunits"]["length"]}} (local) from Combination:{{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][0]}} and Pattern: {{results['mainbeam'].reaction_sls_report['redundants_min'][loop.index0][1][1]}}
-                        {% endif %}
-                        {% endfor %}
+                        <table class="table table-striped w-auto small">
+                            <tr>
+                                <th scope="col" class="text-center"></th>
+                                {% if results['mainbeam'].endCondition[0]==1 %}<th scope="col" class="text-center">M<sub>L</sub><br>({{results["resunits"]["moment"]}})</th>{% endif %}
+                                <th scope="col" class="text-center">R<sub>L</sub><br>({{results["resunits"]["force"]}})</th>
+                                {% for support in results['mainbeam'].interiorSupports %}
+                                <th scope="col" class="text-center">R<sub>{{loop.index}}</sub><br>({{results["resunits"]["force"]}})</th>
+                                {% endfor %}
+                                <th scope="col" class="text-center">R<sub>R</sub><br>({{results["resunits"]["force"]}})</th>
+                                {% if results['mainbeam'].endCondition[1]==1 %}<th scope="col" class="text-center">M<sub>R</sub><br>({{results["resunits"]["moment"]}})</th>{% endif %}
+                            </tr>
+                            <tr>
+                                <td>Max / Min</td>
+                                {% if results['mainbeam'].endCondition[0]==1 %}
+                                <td class="text-center">
+                                    {% if results['mainbeam'].reaction_sls_report['mlmax'][0] == results['mainbeam'].reaction_sls_report['mlmin'][0] %}{{"%.4f"|format(results['mainbeam'].reaction_sls_report['mlmax'][0])}} {% else %} {{"%.4f"|format(results['mainbeam'].reaction_sls_report['mlmax'][0])}} / {{"%.4f"|format(results['mainbeam'].reaction_sls_report['mlmin'][0])}} {% endif %} 
+                                </td>
+                                {% endif %}
+                                <td class="text-center">{% if results['mainbeam'].reaction_sls_report['rlmax'][0] == results['mainbeam'].reaction_sls_report['rlmin'][0] %}{{"%.4f"|format(results['mainbeam'].reaction_sls_report['rlmax'][0])}} {% else %} {{"%.4f"|format(results['mainbeam'].reaction_sls_report['rlmax'][0])}} / {{"%.4f"|format(results['mainbeam'].reaction_sls_report['rlmin'][0])}} {% endif %}</td>
+                                {% for redundant in results['mainbeam'].reaction_sls_report["redundants_max"] %}
+                                <td class="text-center">{% if redundant[0] == results['mainbeam'].reaction_sls_report["redundants_min"][loop.index0][0] %}{{"%.4f"|format(redundant[0])}} {% else %} {{"%.4f"|format(redundant[0])}} / {{"%.4f"|format(results['mainbeam'].reaction_sls_report["redundants_min"][loop.index0][0])}} {% endif %}</td>
+                                {% endfor %}
+                                <td class="text-center">{% if results['mainbeam'].reaction_sls_report['rrmax'][0] == results['mainbeam'].reaction_sls_report['rrmin'][0] %}{{"%.4f"|format(results['mainbeam'].reaction_sls_report['rrmax'][0])}} {% else %} {{"%.4f"|format(results['mainbeam'].reaction_sls_report['rrmax'][0])}} / {{"%.4f"|format(results['mainbeam'].reaction_sls_report['rrmin'][0])}} {% endif %}</td>
+                                {% if results['mainbeam'].endCondition[1]==1 %}
+                                <td class="text-center">
+                                    {% if results['mainbeam'].reaction_sls_report['mrmax'][0] == results['mainbeam'].reaction_sls_report['mrmin'][0] %}{{"%.4f"|format(results['mainbeam'].reaction_sls_report['mrmax'][0])}} {% else %} {{"%.4f"|format(results['mainbeam'].reaction_sls_report['mrmax'][0])}} / {{"%.4f"|format(results['mainbeam'].reaction_sls_report['mrmin'][0])}} {% endif %}
+                                </td>
+                                {% endif %}
+                            </tr>
+                            <tr>
+                                <td>Combination</td>
+                                {% if results['mainbeam'].endCondition[0]==1 %}
+                                <td class="text-center">
+                                    {% if results['mainbeam'].reaction_sls_report['mlmax'][0] == results['mainbeam'].reaction_sls_report['mlmin'][0] %}{{results['mainbeam'].reaction_sls_report['mlmax'][1][0]}} {% else %} {{results['mainbeam'].reaction_sls_report['mlmax'][1][0]}} / {{results['mainbeam'].reaction_sls_report['mlmin'][1][0]}} {% endif %}
+                                </td>
+                                {% endif %}
+                                <td class="text-center">{% if results['mainbeam'].reaction_sls_report['rlmax'][0] == results['mainbeam'].reaction_sls_report['rlmin'][0] %}{{results['mainbeam'].reaction_sls_report['rlmax'][1][0]}} {% else %} {{results['mainbeam'].reaction_sls_report['rlmax'][1][0]}} / {{results['mainbeam'].reaction_sls_report['rlmin'][1][0]}} {% endif %}</td>
+                                {% for redundant in results['mainbeam'].reaction_sls_report["redundants_max"] %}
+                                <td class="text-center">{% if redundant[0] == results['mainbeam'].reaction_sls_report["redundants_min"][loop.index0][0] %}{{redundant[1][0]}} {% else %} {{redundant[1][0]}} / {{results['mainbeam'].reaction_sls_report["redundants_min"][loop.index0][1][0]}} {% endif %}</td>
+                                {% endfor %}
+                                <td class="text-center">{% if results['mainbeam'].reaction_sls_report['rrmax'][0] == results['mainbeam'].reaction_sls_report['rrmin'][0] %}{{results['mainbeam'].reaction_sls_report['rrmax'][1][0]}} {% else %} {{results['mainbeam'].reaction_sls_report['rrmax'][1][0]}} / {{results['mainbeam'].reaction_sls_report['rrmin'][1][0]}} {% endif %}</td>
+                                {% if results['mainbeam'].endCondition[1]==1 %}
+                                <td class="text-center">
+                                    {% if results['mainbeam'].reaction_sls_report['mrmax'][0] == results['mainbeam'].reaction_sls_report['mrmin'][0] %}{{results['mainbeam'].reaction_sls_report['mrmax'][1][0]}} {% else %} {{results['mainbeam'].reaction_sls_report['mrmax'][1][0]}} / {{results['mainbeam'].reaction_sls_report['mrmin'][1][0]}} {% endif %}
+                                </td>
+                                {% endif %}
+                            </tr>
+                            <tr>
+                                <td>Pattern</td>
+                                {% if results['mainbeam'].endCondition[0]==1 %}
+                                <td class="text-center text-nowrap">
+                                    {% if results['mainbeam'].reaction_sls_report['mlmax'][0] == results['mainbeam'].reaction_sls_report['mlmin'][0] %}{{results['mainbeam'].reaction_sls_report['mlmax'][1][1]}} {% else %} {{results['mainbeam'].reaction_sls_report['mlmax'][1][1]}} /<br> {{results['mainbeam'].reaction_sls_report['mlmin'][1][1]}} {% endif %}
+                                </td>
+                                {% endif %}
+                                <td class="text-center text-nowrap">{% if results['mainbeam'].reaction_sls_report['rlmax'][0] == results['mainbeam'].reaction_sls_report['rlmin'][0] %}{{results['mainbeam'].reaction_sls_report['rlmax'][1][1]}} {% else %} {{results['mainbeam'].reaction_sls_report['rlmax'][1][1]}} /<br> {{results['mainbeam'].reaction_sls_report['rlmin'][1][1]}} {% endif %}</td>
+                                {% for redundant in results['mainbeam'].reaction_sls_report["redundants_max"] %}
+                                <td class="text-center text-nowrap">{% if redundant[0] == results['mainbeam'].reaction_sls_report["redundants_min"][loop.index0][0] %}{{redundant[1][1]}} {% else %} {{redundant[1][1]}} /<br> {{results['mainbeam'].reaction_sls_report["redundants_min"][loop.index0][1][1]}} {% endif %}</td>
+                                {% endfor %}
+                                <td class="text-center text-nowrap">{% if results['mainbeam'].reaction_sls_report['rrmax'][0] == results['mainbeam'].reaction_sls_report['rrmin'][0] %}{{results['mainbeam'].reaction_sls_report['rrmax'][1][1]}} {% else %} {{results['mainbeam'].reaction_sls_report['rrmax'][1][1]}} /<br> {{results['mainbeam'].reaction_sls_report['rrmin'][1][1]}} {% endif %}</td>
+                                {% if results['mainbeam'].endCondition[1]==1 %}
+                                <td class="text-center text-nowrap">
+                                    {% if results['mainbeam'].reaction_sls_report['mrmax'][0] == results['mainbeam'].reaction_sls_report['mrmin'][0] %}{{results['mainbeam'].reaction_sls_report['mrmax'][1][1]}} {% else %} {{results['mainbeam'].reaction_sls_report['mrmax'][1][1]}} /<br> {{results['mainbeam'].reaction_sls_report['mrmin'][1][1]}} {% endif %}
+                                </td>
+                                {% endif %}
+                            </tr>
+                        </table>
+                        
                         <br><br>
-
                         <h4>Calculation Log:</h4>
                         <table class="table table-sm w-auto">
                             {% for item in results['log'] %}
