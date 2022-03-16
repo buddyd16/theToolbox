@@ -66,6 +66,7 @@ class Beam2D():
         self.reactions_basic = {}   # Dictionary to hold Basic reactions
         self.reactions_uls = {}     # Dictionary to hold ULS reactions
         self.reactions_sls = {}     # Dictionary to hold Service Reactions
+        self.reaction_basic_report = {}
         self.reaction_uls_report = {}
         self.reaction_sls_report = {}
         self.v_functions_uls = {}
@@ -468,7 +469,7 @@ class Beam2D():
                 self.rootstations = [round(i,4) for i in self.rootstations]
                 
                 self.rootstations = sorted(set(self.rootstations))
-                print(self.rootstations)
+                # print(self.rootstations)
                 # because we rounded the roots there is a chance that the last value ends up
                 # off of the beam, catch that here and reset the last station to the beam span.
                 
@@ -505,8 +506,18 @@ class Beam2D():
 
                         for j,redundant in enumerate(reaction['redundants']):
 
-                            self.reaction_uls_report['redundants_max'].append([redundant,[key,pattern]])
-                            self.reaction_uls_report['redundants_min'].append([redundant,[key,pattern]])
+                            if (self.endCondition[0] == 1 and j==0):
+                                self.reaction_uls_report['mlmax']=[redundant,[key,pattern]]
+                                self.reaction_uls_report['mlmin']=[redundant,[key,pattern]]
+                            elif (self.endCondition[1] == 1 and self.endCondSum == 1 and j==0):
+                                self.reaction_uls_report['mrmax']=[redundant,[key,pattern]]
+                                self.reaction_uls_report['mrmin']=[redundant,[key,pattern]]
+                            elif (self.endCondition[1] == 1 and self.endCondSum == 2 and j==1):
+                                self.reaction_uls_report['mrmax']=[redundant,[key,pattern]]
+                                self.reaction_uls_report['mrmin']=[redundant,[key,pattern]]
+                            else:
+                                self.reaction_uls_report['redundants_max'].append([redundant,[key,pattern]])
+                                self.reaction_uls_report['redundants_min'].append([redundant,[key,pattern]])
 
                         i+=1
 
@@ -530,14 +541,48 @@ class Beam2D():
 
                         for j,redundant in enumerate(reaction['redundants']):
 
-                            rimax = max(self.reaction_uls_report['redundants_max'][j][0],redundant)
-                            rimin = min(self.reaction_uls_report['redundants_min'][j][0],redundant)
+                            if (self.endCondition[0] == 1 and j==0):
+                                rimax = max(self.reaction_uls_report['mlmax'][0],redundant)
+                                rimin = min(self.reaction_uls_report['mlmin'][0],redundant)
 
-                            if rimax == redundant:
-                                self.reaction_uls_report['redundants_max'][j] = [redundant,[key,pattern]]
+                                if rimax == redundant:
+                                    self.reaction_uls_report['mlmax'] = [redundant,[key,pattern]]
+                                
+                                if rimin == redundant:
+                                    self.reaction_uls_report['mlmin'] = [redundant,[key,pattern]]
                             
-                            if rimin == redundant:
-                                self.reaction_uls_report['redundants_min'][j] = [redundant,[key,pattern]]
+                            elif (self.endCondition[1] == 1 and self.endCondSum == 1 and j==0):
+                                rimax = max(self.reaction_uls_report['mrmax'][0],redundant)
+                                rimin = min(self.reaction_uls_report['mrmin'][0],redundant)
+
+                                if rimax == redundant:
+                                    self.reaction_uls_report['mrmax'] = [redundant,[key,pattern]]
+                                
+                                if rimin == redundant:
+                                    self.reaction_uls_report['mrmin'] = [redundant,[key,pattern]]
+
+                            elif (self.endCondition[1] == 1 and self.endCondSum == 2 and j==1):
+
+                                rimax = max(self.reaction_uls_report['mrmax'][0],redundant)
+                                rimin = min(self.reaction_uls_report['mrmin'][0],redundant)
+
+                                if rimax == redundant:
+                                    self.reaction_uls_report['mrmax'] = [redundant,[key,pattern]]
+                                
+                                if rimin == redundant:
+                                    self.reaction_uls_report['mrmin'] = [redundant,[key,pattern]]
+
+                            else:
+                                interior_index = j - self.endCondSum
+
+                                rimax = max(self.reaction_uls_report['redundants_max'][interior_index][0],redundant)
+                                rimin = min(self.reaction_uls_report['redundants_min'][interior_index][0],redundant)
+
+                                if rimax == redundant:
+                                    self.reaction_uls_report['redundants_max'][interior_index] = [redundant,[key,pattern]]
+                                
+                                if rimin == redundant:
+                                    self.reaction_uls_report['redundants_min'][interior_index] = [redundant,[key,pattern]]
 
 
             i = 0
@@ -601,8 +646,18 @@ class Beam2D():
 
                         for j,redundant in enumerate(reaction['redundants']):
 
-                            self.reaction_sls_report['redundants_max'].append([redundant,[key,pattern]])
-                            self.reaction_sls_report['redundants_min'].append([redundant,[key,pattern]])
+                            if (self.endCondition[0] == 1 and j==0):
+                                self.reaction_sls_report['mlmax']=[redundant,[key,pattern]]
+                                self.reaction_sls_report['mlmin']=[redundant,[key,pattern]]
+                            elif (self.endCondition[1] == 1 and self.endCondSum == 1 and j==0):
+                                self.reaction_sls_report['mrmax']=[redundant,[key,pattern]]
+                                self.reaction_sls_report['mrmin']=[redundant,[key,pattern]]
+                            elif (self.endCondition[1] == 1 and self.endCondSum == 2 and j==1):
+                                self.reaction_sls_report['mrmax']=[redundant,[key,pattern]]
+                                self.reaction_sls_report['mrmin']=[redundant,[key,pattern]]
+                            else:
+                                self.reaction_sls_report['redundants_max'].append([redundant,[key,pattern]])
+                                self.reaction_sls_report['redundants_min'].append([redundant,[key,pattern]])
 
                         i+=1
 
@@ -626,14 +681,48 @@ class Beam2D():
 
                         for j,redundant in enumerate(reaction['redundants']):
 
-                            rimax = max(self.reaction_sls_report['redundants_max'][j][0],redundant)
-                            rimin = min(self.reaction_sls_report['redundants_min'][j][0],redundant)
+                            if (self.endCondition[0] == 1 and j==0):
+                                rimax = max(self.reaction_sls_report['mlmax'][0],redundant)
+                                rimin = min(self.reaction_sls_report['mlmin'][0],redundant)
 
-                            if rimax == redundant:
-                                self.reaction_sls_report['redundants_max'][j] = [redundant,[key,pattern]]
+                                if rimax == redundant:
+                                    self.reaction_sls_report['mlmax'] = [redundant,[key,pattern]]
+                                
+                                if rimin == redundant:
+                                    self.reaction_sls_report['mlmin'] = [redundant,[key,pattern]]
                             
-                            if rimin == redundant:
-                                self.reaction_sls_report['redundants_min'][j] = [redundant,[key,pattern]]
+                            elif (self.endCondition[1] == 1 and self.endCondSum == 1 and j==0):
+                                rimax = max(self.reaction_sls_report['mrmax'][0],redundant)
+                                rimin = min(self.reaction_sls_report['mrmin'][0],redundant)
+
+                                if rimax == redundant:
+                                    self.reaction_sls_report['mrmax'] = [redundant,[key,pattern]]
+                                
+                                if rimin == redundant:
+                                    self.reaction_sls_report['mrmin'] = [redundant,[key,pattern]]
+
+                            elif (self.endCondition[1] == 1 and self.endCondSum == 2 and j==1):
+
+                                rimax = max(self.reaction_sls_report['mrmax'][0],redundant)
+                                rimin = min(self.reaction_sls_report['mrmin'][0],redundant)
+
+                                if rimax == redundant:
+                                    self.reaction_sls_report['mrmax'] = [redundant,[key,pattern]]
+                                
+                                if rimin == redundant:
+                                    self.reaction_sls_report['mrmin'] = [redundant,[key,pattern]]
+
+                            else:
+                                interior_index = j - self.endCondSum
+
+                                rimax = max(self.reaction_sls_report['redundants_max'][interior_index][0],redundant)
+                                rimin = min(self.reaction_sls_report['redundants_min'][interior_index][0],redundant)
+
+                                if rimax == redundant:
+                                    self.reaction_sls_report['redundants_max'][interior_index] = [redundant,[key,pattern]]
+                                
+                                if rimin == redundant:
+                                    self.reaction_sls_report['redundants_min'][interior_index] = [redundant,[key,pattern]]
 
             i = 0
             for key, value in self.v_functions_sls.items():
@@ -703,6 +792,115 @@ class Beam2D():
                         self.Ds_max = [max(k,(conv*j)/(self.Em*self.Ixx)) for k,j in zip(self.Ds_max,eidtemp)]
                         self.Ds_min = [min(k,(conv*j)/(self.Em*self.Ixx)) for k,j in zip(self.Ds_min,eidtemp)]
     
+    def basic_reaction_envelope(self):
+        '''
+        Function to return end reaction envelopes for each of the basic load
+        types.
+        '''
+
+        if self.analyzed:
+            
+            
+            for key, value in self.reactions_basic.items():
+                
+                self.reaction_basic_report[key] = {}
+
+                i = 0
+
+                for pattern, reaction in value.items():
+
+                    if i == 0:
+                        self.reaction_basic_report[key]['rlmax'] = [reaction['rl'],[key,pattern]]
+                        self.reaction_basic_report[key]['rrmax'] = [reaction['rr'],[key,pattern]]
+                        self.reaction_basic_report[key]['rlmin'] = [reaction['rl'],[key,pattern]]
+                        self.reaction_basic_report[key]['rrmin'] = [reaction['rr'],[key,pattern]]
+
+                        self.reaction_basic_report[key]['redundants_max'] = []
+                        self.reaction_basic_report[key]['redundants_min'] = []
+
+                        for j,redundant in enumerate(reaction['redundants']):
+
+                            if (self.endCondition[0] == 1 and j==0):
+                                self.reaction_basic_report[key]['mlmax']=[redundant,[key,pattern]]
+                                self.reaction_basic_report[key]['mlmin']=[redundant,[key,pattern]]
+                            elif (self.endCondition[1] == 1 and self.endCondSum == 1 and j==0):
+                                self.reaction_basic_report[key]['mrmax']=[redundant,[key,pattern]]
+                                self.reaction_basic_report[key]['mrmin']=[redundant,[key,pattern]]
+                            elif (self.endCondition[1] == 1 and self.endCondSum == 2 and j==1):
+                                self.reaction_basic_report[key]['mrmax']=[redundant,[key,pattern]]
+                                self.reaction_basic_report[key]['mrmin']=[redundant,[key,pattern]]
+                            else:
+                                self.reaction_basic_report[key]['redundants_max'].append([redundant,[key,pattern]])
+                                self.reaction_basic_report[key]['redundants_min'].append([redundant,[key,pattern]])
+
+                        i+=1
+
+                    else:
+                        rlmax = max(self.reaction_basic_report[key]['rlmax'][0],reaction['rl'])
+                        rrmax = max(self.reaction_basic_report[key]['rrmax'][0],reaction['rr'])
+                        rlmin = min(self.reaction_basic_report[key]['rlmin'][0],reaction['rl'])
+                        rrmin = min(self.reaction_basic_report[key]['rrmin'][0],reaction['rr'])
+
+                        if rlmax == reaction['rl']:
+                            self.reaction_basic_report[key]['rlmax'] = [reaction['rl'],[key,pattern]]
+                        
+                        if rrmax == reaction['rr']:
+                            self.reaction_basic_report[key]['rrmax'] = [reaction['rr'],[key,pattern]]
+
+                        if rlmin == reaction['rl']:
+                            self.reaction_basic_report[key]['rlmin'] = [reaction['rl'],[key,pattern]]
+                        
+                        if rrmin ==  reaction['rr']:
+                            self.reaction_basic_report[key]['rrmin'] = [reaction['rr'],[key,pattern]]
+
+                        for j,redundant in enumerate(reaction['redundants']):
+                            
+                            if (self.endCondition[0] == 1 and j==0):
+                                rimax = max(self.reaction_basic_report[key]['mlmax'][0],redundant)
+                                rimin = min(self.reaction_basic_report[key]['mlmin'][0],redundant)
+
+                                if rimax == redundant:
+                                    self.reaction_basic_report[key]['mlmax'] = [redundant,[key,pattern]]
+                                
+                                if rimin == redundant:
+                                    self.reaction_basic_report[key]['mlmin'] = [redundant,[key,pattern]]
+                            
+                            elif (self.endCondition[1] == 1 and self.endCondSum == 1 and j==0):
+                                rimax = max(self.reaction_basic_report[key]['mrmax'][0],redundant)
+                                rimin = min(self.reaction_basic_report[key]['mrmin'][0],redundant)
+
+                                if rimax == redundant:
+                                    self.reaction_basic_report[key]['mrmax'] = [redundant,[key,pattern]]
+                                
+                                if rimin == redundant:
+                                    self.reaction_basic_report[key]['mrmin'] = [redundant,[key,pattern]]
+
+                            elif (self.endCondition[1] == 1 and self.endCondSum == 2 and j==1):
+
+                                rimax = max(self.reaction_basic_report[key]['mrmax'][0],redundant)
+                                rimin = min(self.reaction_basic_report[key]['mrmin'][0],redundant)
+
+                                if rimax == redundant:
+                                    self.reaction_basic_report[key]['mrmax'] = [redundant,[key,pattern]]
+                                
+                                if rimin == redundant:
+                                    self.reaction_basic_report[key]['mrmin'] = [redundant,[key,pattern]]
+
+                            else:
+                                interior_index = j - self.endCondSum
+
+                                rimax = max(self.reaction_basic_report[key]['redundants_max'][interior_index][0],redundant)
+                                rimin = min(self.reaction_basic_report[key]['redundants_min'][interior_index][0],redundant)
+
+                                if rimax == redundant:
+                                    self.reaction_basic_report[key]['redundants_max'][interior_index] = [redundant,[key,pattern]]
+                                
+                                if rimin == redundant:
+                                    self.reaction_basic_report[key]['redundants_min'][interior_index] = [redundant,[key,pattern]]
+        
+        
+
+
     def slope_to_cant(self,other_beam,left=True):
 
         output_loads = []

@@ -1023,6 +1023,7 @@ def SimpleBeam(inputs, log=True):
 
     mainBeam.ULS_envelopes()
     mainBeam.SLS_envelopes(conv=delta_conv)
+    mainBeam.basic_reaction_envelope()
 
     if cantLeft is not None:
 
