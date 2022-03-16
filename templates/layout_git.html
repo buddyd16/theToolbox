@@ -9,6 +9,10 @@
     <link rel="stylesheet" type="text/css" media="print" href="{{ url_for('static', filename='css/Print.css') }}"/>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" />
     
+    <!-- Cookie Consent Style -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
+    <!-- Cookie Consent Style -->
+
     <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js"></script>
     <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
@@ -17,6 +21,8 @@
     <!-- Analytics -->
     
       <!-- Global site tag (gtag.js) - Google Analytics -->
+
+      </script>
 
     <!-- End Analytics -->
 
@@ -29,6 +35,16 @@
     
     <style>
       .alert   {font-size: 9px; width:50%;}
+
+      body {
+              /* Margin bottom by footer height */
+              margin-bottom: 72px;
+            }
+
+      .footer {
+              /* Set the fixed height of the footer here */
+              height: 70px;
+              }
     {% block style %}
     {% endblock %}
     </style>
@@ -78,10 +94,50 @@
               <a class="dropdown-item" href="/general/sectionprops">Section Properties (ALPHA)</a>
             </div>
           </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Analysis Calcs
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="/analysis/simplebeam">Simple Beam Analysis</a>
+            </div>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Foundation Calcs
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="/foundations//ibc_unconstrained_pole_fnd">IBC Unconstrained Pole Foundation</a>
+            </div>
+          </li>
         </ul>
       </div>
     </nav>
 </header>
+
+<!-- Cookie Consent -->
+<script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
+<script>
+window.cookieconsent.initialise({
+  "palette": {
+    "popup": {
+      "background": "#3c404d",
+      "text": "#d6d6d6"
+    },
+    "button": {
+      "background": "#8bed4f"
+    }
+  },
+  "theme": "classic",
+  "position": "bottom-right",
+  "content": {
+    "message": "This website uses cookies to ensure you get the best experience on our website. This includes usage metrics such as location of access, technology used, screen resolution, etc. A cookie will also be stored signifying your acceptance of this dialog with an expiry of 1 year.",
+    "dismiss": "Accept",
+    "link": "Learn more"
+  }
+});
+</script>
+<!-- Cookie Consent -->
 
 <body>    
     <main role="main" class="container">
