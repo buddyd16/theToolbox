@@ -84,6 +84,12 @@
                 <!-- Formula Results -->
                 <table class="table table-striped w-auto small">
                     <tr>
+                        <td class="text-right text-nowrap">M<sub>o</sub> :</td>
+                        <td>{{"%.4f"|format(results["meff"])}}</td>
+                        <td class="text-left text-nowrap">ft-lbs</td>
+                        <td>Effective Moment at the start of embedment.</td>
+                    </tr>
+                    <tr>
                         <td class="text-right text-nowrap">b :</td>
                         <td>{{"%.4f"|format(results["b"])}}</td>
                         <td>ft</td>
@@ -115,28 +121,39 @@
                     </tr>
                 </table>
             </div>
-            <div class=""row">
-            <p>IBC equation 18-1 is a modified form of the Rutledge formula. However IBC does not provide 
-                adequate definition to form shear and moment digrams below the soil surface. This program uses the embedment depth
-                and S<sub>1</sub> values computed per IBC and then solves for the zero point depth as depicted in Pole Building Design
-                by Donald Patterson (dimension A in figure 2). It is important to realize that these shears and moments are generated
-                using approximate methods from approximate inputs so the designer should proceed accordingly.
+            <div class="row">
+            <p>IBC equation 18-1 is a modified form of the Rutledge formula. IBC 2018 does not provide 
+                adequate definition of the eq 18-1 parameters to form shear and moment diagrams below the soil surface. 
+                This program uses the embedment depth and S<sub>1</sub> values computed per IBC and then solves 
+                for the zero point depth as depicted in Pole Building Design by Donald Patterson (dimension A in figure 2). 
+                It is important to realize that these shears and moments are generated using approximate methods 
+                from approximate inputs so the designer should proceed accordingly.
             </p>
             </div>
             <div class="row">
                 <!-- Plots -->
-                <div class="col">
+                <div class="col-6">
                     <div id="vPlot" class="w-100 plot"></div>
                 </div>
-                <div class="col">
+                <div class="col-6">
                     <div id="mPlot" class="w-100 plot"></div>
                 </div>
+            </div>
+            <div class="row">
                 <div class="col">
                     <figure class="figure">
                     <!-- Rutledge Diagram from Pole Building Design-->
                     <img style="max-width: 300px;"src="{{ url_for('foundations_bp.static', filename='images/rutledge_pole_fnd.svg') }}">
                     <figcaption class="figure-caption">Figure 2 - Pole Building Design by Donald Patterson</figcaption>
                     </figure>
+                </div>
+                <div class="col">
+                    <h5>Rutledge Formula Results:</h5>
+                    <table class="table table-striped w-auto small">
+                    {% for key, value in results["rutledge"].items() %}
+                    <tr><td class="text-right text-nowrap">{{key}} :</td><td>{{"%.3f"|format(value)}}</td></tr>
+                    {% endfor %}
+                    </table>
                 </div>
             </div>
         </div>
