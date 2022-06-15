@@ -32,8 +32,8 @@ def coordinate_rotation(x, y, xo, yo, angle):
 
     theta = math.radians(angle)
 
-    x_t = (x-xo)*math.cos(theta)+(y-yo)*math.sin(theta)
-    y_t = -1.0*(x-xo)*math.sin(theta)+(y-yo)*math.cos(theta)
+    x_t = (x-xo)*math.cos(theta)-(y-yo)*math.sin(theta)
+    y_t = (x-xo)*math.sin(theta)+(y-yo)*math.cos(theta)
 
     x_t = x_t+xo
     y_t = y_t+yo
@@ -72,6 +72,7 @@ class Section:
 
         self.E = E
         self.Fy = Fy
+        self.solid = solid
 
         # check if a closed polygon is formed from the coordinates
         # if not add another x and y coordinate equal to the firts
@@ -123,162 +124,171 @@ class Section:
         else:
             self.calc_props()
 
-    def change_n(self,n):
-            self.n = n
-            self.calc_props()
+    def compute_n(self, other):
+        n = self.E / other.E
+        self.n = n
+        self.calc_props()
+
+    def change_n(self, n):
+        self.n = n
+        self.calc_props()
             
     def calc_props(self):
-            x = self.x
-            y = self.y
-            n = self.n
-            
-            
-            self.area = sum([(x[i]*y[i+1])-(x[i+1]*y[i]) for i in range(len(x[:-1]))])/2.0
-            self.area = self.area*n
-            
-            self.output.append(self.area)
-            self.output_strings.append('Area')
+        x = self.x
+        y = self.y
+        n = self.n
 
-            # properties about the global x and y axis
-            
-            self.cx = sum([(x[i]+x[i+1])*((x[i]*y[i+1])-(x[i+1]*y[i])) for i in range(len(x[:-1]))])/(6*self.area)
-            self.cx = self.cx*n
-            self.output.append(self.cx)
-            self.output_strings.append('Cx')
-            self.cy = sum([(y[i]+y[i+1])*((x[i]*y[i+1])-(x[i+1]*y[i])) for i in range(len(x[:-1]))])/(6*self.area)
-            self.cy = self.cy*n
-            self.output.append(self.cy)
-            self.output_strings.append('Cy')
-            self.output.append('---')
-            self.output_strings.append('Global Axis:')           
-            self.Ix = sum([((y[i]*y[i])+(y[i]*y[i+1])+(y[i+1]*y[i+1]))*((x[i]*y[i+1])-(x[i+1]*y[i])) for i in range(len(x[:-1]))])/(12.0)
-            self.Ix = self.Ix*n
-            self.output.append(self.Ix)
-            self.output_strings.append('Ix')
-            self.Iy = sum([((x[i]*x[i])+(x[i]*x[i+1])+(x[i+1]*x[i+1]))*((x[i]*y[i+1])-(x[i+1]*y[i])) for i in range(len(x[:-1]))])/(12.0)
-            self.Iy = self.Iy*n
-            self.output.append(self.Iy)
-            self.output_strings.append('Iy')
-            self.Ixy = sum([((x[i]*y[i+1])+(2*x[i]*y[i])+(2*x[i+1]*y[i+1])+(x[i+1]*y[i]))*(x[i]*y[i+1]-x[i+1]*y[i]) for i in range(len(x[:-1]))])/(24.0)
-            self.Ixy = self.Ixy*n
-            self.output.append(self.Ixy)
-            self.output_strings.append('Ixy')
-            self.Jz = self.Ix + self.Iy
-            self.output.append(self.Jz)
-            self.output_strings.append('Jz')
-            self.sx_top = self.Ix / abs(max(y) - self.cy)
-            self.output.append(self.sx_top)
-            self.output_strings.append('Sx,top')
-            self.sx_bottom = self.Ix / abs(min(y) - self.cy)
-            self.output.append(self.sx_bottom)
-            self.output_strings.append('Sx,botom')
-            self.sy_right = self.Iy / abs(max(x) - self.cx)
-            self.output.append(self.sy_right)
-            self.output_strings.append('Sy,right')
-            self.sy_left = self.Iy / abs(min(x) - self.cx)
-            self.output.append(self.sy_left)
-            self.output_strings.append('Sy,left')
-            
-            self.rx = math.sqrt(self.Ix/self.area)
-            self.output.append(self.rx)
-            self.output_strings.append('rx')
-            self.ry = math.sqrt(self.Iy/self.area)
-            self.output.append(self.ry)
-            self.output_strings.append('ry')
-            self.rz = math.sqrt(self.Jz/self.area)
-            self.output.append(self.rz)
-            self.output_strings.append('rz')
-            
-            # properties about the cross section centroidal x and y axis
-            # parallel axis theorem Ix = Ixx + A*d^2
-            # therefore to go from the global axis to the local
-            # Ixx = Ix - A*d^2
-            self.output.append('--')
-            self.output_strings.append('Shape Centroidal Axis:')
-            self.Ixx = self.Ix - (self.area*self.cy*self.cy)
-            self.output.append(self.Ixx)
-            self.output_strings.append('Ixx')
-            self.Iyy = self.Iy - (self.area*self.cx*self.cx)
-            self.output.append(self.Iyy)
-            self.output_strings.append('Iyy')
-            self.Ixxyy = self.Ixy - (self.area*self.cx*self.cy)
-            self.output.append(self.Ixxyy)
-            self.output_strings.append('Ixxyy')
-            self.Jzz = self.Ixx + self.Iyy
-            self.output.append(self.Jzz)
-            self.output_strings.append('Jzz')
-            self.sxx_top = self.Ixx / abs(max(y) - self.cy)
-            self.output.append(self.sxx_top)
-            self.output_strings.append('Sxx,top')
-            self.sxx_bottom = self.Ixx / abs(min(y) - self.cy)
-            self.output.append(self.sxx_bottom)
-            self.output_strings.append('Sxx,bottom')
-            self.syy_right = self.Iyy / abs(max(x) - self.cx)
-            self.output.append(self.syy_right)
-            self.output_strings.append('Syy,right')
-            self.syy_left = self.Iyy / abs(min(x) - self.cx)
-            self.output.append(self.syy_left)
-            self.output_strings.append('Syy,left')
-            
-            self.rxx = math.sqrt(self.Ixx/self.area)
-            self.output.append(self.rxx)
-            self.output_strings.append('rxx')
-            self.ryy = math.sqrt(self.Iyy/self.area)
-            self.output.append(self.ryy)
-            self.output_strings.append('ryy')
-            self.rzz = math.sqrt(self.Jzz/self.area)
-            self.output.append(self.rzz)
-            self.output_strings.append('rzz')
-            
-            # Cross section principal Axis
-            
-            two_theta = math.atan2((-1*2.0*self.Ixxyy),(1E-16+(self.Ixx - self.Iyy)))
-            A = (self.Ixx+self.Iyy)/2.0
-            B = (self.Ixx-self.Iyy)/2.0
-            I1 = A+math.sqrt((B*B)+(self.Ixxyy*self.Ixxyy))
-            I2 = A-math.sqrt((B*B)+(self.Ixxyy*self.Ixxyy))
-            
-            self.output.append('--')
-            self.output_strings.append('Shape Principal Axis:')
-            self.Iuu = A+(B*math.cos(two_theta))-(self.Ixxyy*math.sin(two_theta))
-            self.output.append(self.Iuu)
-            self.output_strings.append('Iuu')
-            self.Ivv = A-(B*math.cos(two_theta))+(self.Ixxyy*math.sin(two_theta))
-            self.output.append(self.Ivv)
-            self.output_strings.append('Ivv')
-            self.Iuuvv = (B*math.sin(two_theta))+(self.Ixxyy*math.cos(two_theta))
-            self.output.append(self.Iuuvv)
-            self.output_strings.append('Iuuvv')
-            
-            if (I1-1E-10)<=self.Iuu and (I1+1E-10)>=self.Iuu:
-                self.theta1 = math.degrees(two_theta/2.0)
-                self.theta2 = self.theta1 + 90.0
-            else:
-                self.theta2 = math.degrees(two_theta/2.0)
-                self.theta1 = self.theta2 + 90.0
-            
-            self.output.append(self.theta1)
-            self.output_strings.append('Theta1,u')
-            self.output.append(self.theta2)
-            self.output_strings.append('Theta2,v')
-            
-            # Create coordinates for the XX,YY,UU,VV axis lines
-            
-            self.xx_axis=[min(x)-1,self.cy,max(x)+1,self.cy]
-            self.yy_axis=[self.cx,min(y)-1,self.cx,max(y)+1]
-            
-            # UU axis coordinates
-            
-            u1 = coordinate_rotation(self.xx_axis[0],self.xx_axis[1],self.cx,self.cy,self.theta1)
-            u2 = coordinate_rotation(self.xx_axis[2],self.xx_axis[3],self.cx,self.cy,self.theta1)
-            
-            self.uu_axis = [u1[0],u1[1],u2[0],u2[1]]
-            
-            # VV axis coordinates
-            v1 = coordinate_rotation(self.xx_axis[0],self.xx_axis[1],self.cx,self.cy,self.theta2)
-            v2 = coordinate_rotation(self.xx_axis[2],self.xx_axis[3],self.cx,self.cy,self.theta2)
-            
-            self.vv_axis = [v1[0],v1[1],v2[0],v2[1]]
+        self.area = sum([(x[i]*y[i+1])-(x[i+1]*y[i]) for i in range(len(x[:-1]))])/2.0
+        self.narea = self.area*n
+        
+        self.output.append(self.area)
+        self.output_strings.append('Area')
+
+        # properties about the global x and y axis
+        
+        self.cx = sum([(x[i]+x[i+1])*((x[i]*y[i+1])-(x[i+1]*y[i])) for i in range(len(x[:-1]))])/(6*self.area)
+        self.cx = self.cx
+        self.output.append(self.cx)
+        self.output_strings.append('Cx')
+        self.cy = sum([(y[i]+y[i+1])*((x[i]*y[i+1])-(x[i+1]*y[i])) for i in range(len(x[:-1]))])/(6*self.area)
+        self.cy = self.cy
+        self.output.append(self.cy)
+        self.output_strings.append('Cy')
+        self.output.append('---')
+        self.output_strings.append('Global Axis:')           
+        self.Ix = sum([((y[i]*y[i])+(y[i]*y[i+1])+(y[i+1]*y[i+1]))*((x[i]*y[i+1])-(x[i+1]*y[i])) for i in range(len(x[:-1]))])/(12.0)
+        self.nIx = self.Ix*n
+        self.output.append(self.Ix)
+        self.output_strings.append('Ix')
+        self.Iy = sum([((x[i]*x[i])+(x[i]*x[i+1])+(x[i+1]*x[i+1]))*((x[i]*y[i+1])-(x[i+1]*y[i])) for i in range(len(x[:-1]))])/(12.0)
+        self.nIy = self.Iy*n
+        self.output.append(self.Iy)
+        self.output_strings.append('Iy')
+        self.Ixy = sum([((x[i]*y[i+1])+(2*x[i]*y[i])+(2*x[i+1]*y[i+1])+(x[i+1]*y[i]))*(x[i]*y[i+1]-x[i+1]*y[i]) for i in range(len(x[:-1]))])/(24.0)
+        self.nIxy = self.Ixy*n
+        self.output.append(self.Ixy)
+        self.output_strings.append('Ixy')
+        self.Jz = self.Ix + self.Iy
+        self.nJz = self.Jz*n
+        self.output.append(self.Jz)
+        self.output_strings.append('Jz')
+        self.sx_top = self.Ix / abs(max(y) - self.cy)
+        self.output.append(self.sx_top)
+        self.output_strings.append('Sx,top')
+        self.sx_bottom = self.Ix / abs(min(y) - self.cy)
+        self.output.append(self.sx_bottom)
+        self.output_strings.append('Sx,botom')
+        self.sy_right = self.Iy / abs(max(x) - self.cx)
+        self.output.append(self.sy_right)
+        self.output_strings.append('Sy,right')
+        self.sy_left = self.Iy / abs(min(x) - self.cx)
+        self.output.append(self.sy_left)
+        self.output_strings.append('Sy,left')
+        
+        self.rx = math.sqrt(self.Ix/self.area)
+        self.output.append(self.rx)
+        self.output_strings.append('rx')
+        self.ry = math.sqrt(self.Iy/self.area)
+        self.output.append(self.ry)
+        self.output_strings.append('ry')
+        self.rz = math.sqrt(self.Jz/self.area)
+        self.output.append(self.rz)
+        self.output_strings.append('rz')
+        
+        # properties about the cross section centroidal x and y axis
+        # parallel axis theorem Ix = Ixx + A*d^2
+        # therefore to go from the global axis to the local
+        # Ixx = Ix - A*d^2
+        self.output.append('--')
+        self.output_strings.append('Shape Centroidal Axis:')
+        self.Ixx = self.Ix - (self.area*self.cy*self.cy)
+        self.nIxx = self.Ixx*n
+        self.output.append(self.Ixx)
+        self.output_strings.append('Ixx')
+        self.Iyy = self.Iy - (self.area*self.cx*self.cx)
+        self.nIyy = self.Iyy*n
+        self.output.append(self.Iyy)
+        self.output_strings.append('Iyy')
+        self.Ixxyy = self.Ixy - (self.area*self.cx*self.cy)
+        self.nIxxyy = self.Ixxyy*n
+        self.output.append(self.Ixxyy)
+        self.output_strings.append('Ixxyy')
+        self.Jzz = self.Ixx + self.Iyy
+        self.nJzz = self.Jzz*n
+        self.output.append(self.Jzz)
+        self.output_strings.append('Jzz')
+        self.sxx_top = self.Ixx / abs(max(y) - self.cy)
+        self.output.append(self.sxx_top)
+        self.output_strings.append('Sxx,top')
+        self.sxx_bottom = self.Ixx / abs(min(y) - self.cy)
+        self.output.append(self.sxx_bottom)
+        self.output_strings.append('Sxx,bottom')
+        self.syy_right = self.Iyy / abs(max(x) - self.cx)
+        self.output.append(self.syy_right)
+        self.output_strings.append('Syy,right')
+        self.syy_left = self.Iyy / abs(min(x) - self.cx)
+        self.output.append(self.syy_left)
+        self.output_strings.append('Syy,left')
+        
+        self.rxx = math.sqrt(self.Ixx/self.area)
+        self.output.append(self.rxx)
+        self.output_strings.append('rxx')
+        self.ryy = math.sqrt(self.Iyy/self.area)
+        self.output.append(self.ryy)
+        self.output_strings.append('ryy')
+        self.rzz = math.sqrt(self.Jzz/self.area)
+        self.output.append(self.rzz)
+        self.output_strings.append('rzz')
+        
+        # Cross section principal Axis
+        
+        two_theta = math.atan2((-1*2.0*self.Ixxyy),(1E-16+(self.Ixx - self.Iyy)))
+        A = (self.Ixx+self.Iyy)/2.0
+        B = (self.Ixx-self.Iyy)/2.0
+        I1 = A+math.sqrt((B*B)+(self.Ixxyy*self.Ixxyy))
+        I2 = A-math.sqrt((B*B)+(self.Ixxyy*self.Ixxyy))
+        
+        self.output.append('--')
+        self.output_strings.append('Shape Principal Axis:')
+        self.Iuu = A+(B*math.cos(two_theta))-(self.Ixxyy*math.sin(two_theta))
+        self.output.append(self.Iuu)
+        self.output_strings.append('Iuu')
+        self.Ivv = A-(B*math.cos(two_theta))+(self.Ixxyy*math.sin(two_theta))
+        self.output.append(self.Ivv)
+        self.output_strings.append('Ivv')
+        self.Iuuvv = (B*math.sin(two_theta))+(self.Ixxyy*math.cos(two_theta))
+        self.output.append(self.Iuuvv)
+        self.output_strings.append('Iuuvv')
+        
+        if (I1-1E-10)<=self.Iuu and (I1+1E-10)>=self.Iuu:
+            self.theta1 = math.degrees(two_theta/2.0)
+            self.theta2 = self.theta1 + 90.0
+        else:
+            self.theta2 = math.degrees(two_theta/2.0)
+            self.theta1 = self.theta2 + 90.0
+        
+        self.output.append(self.theta1)
+        self.output_strings.append('Theta1,u')
+        self.output.append(self.theta2)
+        self.output_strings.append('Theta2,v')
+        
+        # Create coordinates for the XX,YY,UU,VV axis lines
+        
+        self.xx_axis=[min(x)-1,self.cy,max(x)+1,self.cy]
+        self.yy_axis=[self.cx,min(y)-1,self.cx,max(y)+1]
+        
+        # UU axis coordinates
+        
+        u1 = coordinate_rotation(self.xx_axis[0],self.xx_axis[1],self.cx,self.cy,self.theta1)
+        u2 = coordinate_rotation(self.xx_axis[2],self.xx_axis[3],self.cx,self.cy,self.theta1)
+        
+        self.uu_axis = [u1[0],u1[1],u2[0],u2[1]]
+        
+        # VV axis coordinates
+        v1 = coordinate_rotation(self.xx_axis[0],self.xx_axis[1],self.cx,self.cy,self.theta2)
+        v2 = coordinate_rotation(self.xx_axis[2],self.xx_axis[3],self.cx,self.cy,self.theta2)
+        
+        self.vv_axis = [v1[0],v1[1],v2[0],v2[1]]
 
     def calc_s_at_vertices(self):
         sx = []
@@ -294,15 +304,15 @@ class Section:
             
         for x in shape.x:
             if x == 0:
-                x=0.00000000000001
+                x = 0.00000000000001
             else:
                 pass
             
             sy.append(self.Iyy / abs(x - self.cx))
         
-        return sx,sy
+        return sx, sy
             
-    def parallel_axis_theorem(self, x, y):
+    def parallel_axis_theorem(self, x, y, transformed=False):
         '''
         given a new global x,y coordinate for a new
         set of x, y axis return the associated Ix, Iy, and Ixy
@@ -313,11 +323,16 @@ class Section:
             dx = self.cx - x
             dy = self.cy - y
             
-            Ix = self.Ixx + (self.area*dy*dy)
-            Iy = self.Iyy + (self.area*dx*dx)
-            Ixy = self.Ixxyy + (self.area*dx*dy)
+            if transformed:
+                Ix = (self.Ixx + (self.area*dy*dy))*self.n
+                Iy = (self.Iyy + (self.area*dx*dx))*self.n
+                Ixy = (self.Ixxyy + (self.area*dx*dy))*self.n
+            else:
+                Ix = self.Ixx + (self.area*dy*dy)
+                Iy = self.Iyy + (self.area*dx*dx)
+                Ixy = self.Ixxyy + (self.area*dx*dy)
             
-            return [Ix,Iy,Ixy]
+            return [Ix, Iy, Ixy]
     
     def transformed_vertices(self, xo, yo, angle):
         '''
@@ -395,15 +410,15 @@ class Composite_Section:
 
         self.sections = []
     
-    def add_section(self,section):
+    def add_section(self, section):
         
         self.sections.append(section)
     
-    def remove_section(self,section_index):
+    def remove_section(self, section_index):
 
         self.sections.pop(section_index)
     
-    def calculate_properties(self):
+    def calculate_properties(self): 
 
         # determine the global centroid location and total composite area
         # cx = sum A*dx / sum A
@@ -416,19 +431,20 @@ class Composite_Section:
         self.output_strings = []    
         
         self.area = sum([section.area for section in self.sections])
-        
+        self.transformedarea = sum([section.narea for section in self.sections])
+
         self.output.append(self.area)
         self.output_strings.append('Area')
         
-        sum_A_dx = sum([section.area*section.cx for section in self.sections])
-        sum_A_dy = sum([section.area*section.cy for section in self.sections])
+        sum_A_dx = sum([section.narea*section.cx for section in self.sections])
+        sum_A_dy = sum([section.narea*section.cy for section in self.sections])
         
-        self.cx = sum_A_dx / self.area
+        self.cx = sum_A_dx / self.transformedarea
         
         self.output.append(self.cx)
         self.output_strings.append('cx')
         
-        self.cy = sum_A_dy / self.area
+        self.cy = sum_A_dy / self.transformedarea
         
         self.output.append(self.cy)
         self.output_strings.append('cy')
@@ -438,17 +454,17 @@ class Composite_Section:
         
         # determine moment of inertias about the centroid coordinates
         
-        self.Ix = sum([section.parallel_axis_theorem(self.cx, self.cy)[0] for section in self.sections])
+        self.Ix = sum([section.parallel_axis_theorem(self.cx, self.cy, transformed=True)[0] for section in self.sections])
 
         self.output.append(self.Ix)
         self.output_strings.append('Ix')
         
-        self.Iy = sum([section.parallel_axis_theorem(self.cx, self.cy)[1] for section in self.sections])
+        self.Iy = sum([section.parallel_axis_theorem(self.cx, self.cy, transformed=True)[1] for section in self.sections])
 
         self.output.append(self.Iy)
         self.output_strings.append('Iy')
         
-        self.Ixy = sum([section.parallel_axis_theorem(self.cx, self.cy)[2] for section in self.sections])
+        self.Ixy = sum([section.parallel_axis_theorem(self.cx, self.cy, transformed=True)[2] for section in self.sections])
 
         self.output.append(self.Ixy)
         self.output_strings.append('Ixy')
@@ -471,21 +487,21 @@ class Composite_Section:
         
         # composite section principal Axis
         
-        two_theta = math.atan2((-1*2.0*self.Ixxyy),(1E-16+(self.Ixx - self.Iyy)))
-        A = (self.Ixx+self.Iyy)/2.0
-        B = (self.Ixx-self.Iyy)/2.0
-        I1 = A+math.sqrt((B*B)+(self.Ixxyy*self.Ixxyy))
-        I2 = A-math.sqrt((B*B)+(self.Ixxyy*self.Ixxyy))
+        two_theta = math.atan2((-1*2.0*self.Ixy),(1E-16+(self.Ix - self.Iy)))
+        A = (self.Ix+self.Iy)/2.0
+        B = (self.Ix-self.Iy)/2.0
+        I1 = A+math.sqrt((B*B)+(self.Ixy*self.Ixy))
+        I2 = A-math.sqrt((B*B)+(self.Ixy*self.Ixy))
         
         self.output.append('--')
         self.output_strings.append('Shape Principal Axis:')
-        self.Iuu = A+(B*math.cos(two_theta))-(self.Ixxyy*math.sin(two_theta))
+        self.Iuu = A+(B*math.cos(two_theta))-(self.Ixy*math.sin(two_theta))
         self.output.append(self.Iuu)
         self.output_strings.append('Iuu')
-        self.Ivv = A-(B*math.cos(two_theta))+(self.Ixxyy*math.sin(two_theta))
+        self.Ivv = A-(B*math.cos(two_theta))+(self.Ixy*math.sin(two_theta))
         self.output.append(self.Ivv)
         self.output_strings.append('Ivv')
-        self.Iuuvv = (B*math.sin(two_theta))+(self.Ixxyy*math.cos(two_theta))
+        self.Iuuvv = (B*math.sin(two_theta))+(self.Ixy*math.cos(two_theta))
         self.output.append(self.Iuuvv)
         self.output_strings.append('Iuuvv')
         
@@ -502,9 +518,15 @@ class Composite_Section:
         self.output_strings.append('Theta2,v')
         
         # Create coordinates for the XX,YY,UU,VV axis lines
-        
-        self.xx_axis=[min([section.x for section in self.sections])-1,self.cy,max([section.x for section in self.sections])+1,self.cy]
-        self.yy_axis=[self.cx,min([section.y for section in self.sections])-1,self.cx,max([section.y for section in self.sections])+1]
+        x = []
+        y = []
+
+        for section in self.sections:
+            x.extend(section.x)
+            y.extend(section.y)
+
+        self.xx_axis=[min(x)-1,self.cy,max(x)+1,self.cy]
+        self.yy_axis=[self.cx,min(y)-1,self.cx,max(y)+1]
         
         # UU axis coordinates
         
