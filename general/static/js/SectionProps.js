@@ -72,6 +72,15 @@ function degreesToRadians(degrees){
 //Add a new collapsing card for a new shape
 function newshapecard(shapenum){
 
+    let length = "in";
+    let stress = "ksi";
+
+    if (units != "imperial"){
+        length = "mm";
+        stress = "MPa";
+    }
+
+
     let new_card = '<div class=\"card\" id=\"'+ shapenum +'Card\">' +
                    '<div class=\"card-header\" id=\"'+ shapenum +'Heading\">' +
                    '<h5 class=\"mb-0\">' +
@@ -87,11 +96,11 @@ function newshapecard(shapenum){
                    '<tr>' +
                    '<td>Modulus of Elasticity, E</td>' +
                    '<td><input name=\"'+ shapenum +'E\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"29000\"></td>' +
-                   '<td class=\"stress_units\">ksi</td>' +
+                   '<td class=\"stress_units\">'+ stress +'</td>' +
                    '<tr>' +
                    '<td>Yield Stress: </td>' +
                    '<td><input name=\"'+ shapenum +'Fy\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"36\"></td>' +
-                   '<td class=\"stress_units\">ksi</td>' +
+                   '<td class=\"stress_units\">'+ stress +'</td>' +
                    '<tr>' +
                    '<td>Void or Solid?</td>' +
                    '<td>' +
@@ -100,14 +109,19 @@ function newshapecard(shapenum){
                    '<option value=\"0\"> Void </option>' +
                    '</select>' +
                    '</td>' +
+                   '</tr>' +
+                   '<tr>' +
+                   '<td>Plot Color</td>' +
+                   '<td><input type=\"color\" id=\"'+ shapenum +'Color\" name=\"color\" value=\"#cc0000\" onchange=UpdateChart();></td>' +
+                   '</tr>' +
                    '</table>' +
                    '<h6>'+ shapenum +' Vertices:</h6>' +
                    '<table id=\"'+ shapenum +'vertexTable\" class=\"table table-sm w-auto\">' +
                    '<thead>' +
                    '<tr>' +
                    '<th> Vertex ID </th>' +
-                   '<th class=\"text-center xvertexheader\"> x (in) </th>' +
-                   '<th class=\"text-center yvertexheader\"> y (in) </th>' +
+                   '<th class=\"text-center xvertexheader\"> x (' + length +') </th>' +
+                   '<th class=\"text-center yvertexheader\"> y (' + length +') </th>' +
                    '</tr>' +
                    '</thead>' +
                    '<tbody>' +
@@ -145,17 +159,17 @@ function newshapecard(shapenum){
                    '<tr>' +
                    '<td>Area :</td>' +
                    '<td id="'+ shapenum +'Area"></td>' +
-                   '<td class="area_units">in.<sup>2</sup></td>' +
+                   '<td class=\"area_units\">' + length +'<sup>2</sup></td>' +
                    '</tr>' +
                    '<tr>' +
                    '<td>x<sub>c</sub></td>' +
                    '<td id="'+ shapenum +'Xc"></td>' +
-                   '<td class="length_units">in.</td>' +
+                   '<td class=\"length_units\">' + length +'</td>' +
                    '</tr>' +
                    '<tr>' +
                    '<td>y<sub>c</sub></td>' +
                    '<td id="'+ shapenum +'Yc"></td>' +
-                   '<td class="length_units">in.</td>' +
+                   '<td class=\"length_units\">' + length +'</td>' +
                    '</tr>' +
                    '</table>' +
                    '<h6>Shape Modifications</h6>'+
@@ -363,6 +377,7 @@ function UpdateChart(){
 
         let shapestrg = "shape"+(i+1);
         let shapevoid = $('#'+shapestrg+'VoidSelect').val();
+        let plotcolor = $('#'+shapestrg+'Color').val();
 
         let x = [];
         let y = [];
@@ -388,12 +403,13 @@ function UpdateChart(){
                 y: y,
                 mode: 'lines+markers',
                 name: shapestrg,
+                fill: 'tozeroy',
                 marker: {
                     size: 4,
-                    color: 'rgb(120, 120, 120)'
+                    color: plotcolor
                 },
                 line: {
-                    color: 'rgb(180, 180, 180)',
+                    color: plotcolor,
                     dash: 'dash',
                     width: 1
                 },
@@ -406,7 +422,7 @@ function UpdateChart(){
                 name: shapestrg+'_centroid',
                 marker: {
                     size: 8,
-                    color: 'rgb(180, 180, 180)',
+                    color: plotcolor,
                     symbol: 'cross'
                 },
             });
@@ -417,12 +433,13 @@ function UpdateChart(){
                 y: y,
                 mode: 'lines+markers',
                 name: shapestrg,
+                fill: 'tozeroy',
                 marker: {
                     size: 4,
-                    color: 'rgb(180, 0, 0)'
+                    color: plotcolor
                 },
                 line: {
-                    color: 'rgb(150, 0, 0)'
+                    color: plotcolor
                 },
             });
 
@@ -433,7 +450,7 @@ function UpdateChart(){
                 name: shapestrg+'_centroid',
                 marker: {
                     size: 8,
-                    color: 'rgb(150, 0, 0)',
+                    color: plotcolor,
                     symbol: 'cross'
                 },
             });
