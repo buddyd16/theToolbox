@@ -82,6 +82,11 @@
                                                 <option value="0" {{ "selected=""selected""" if shape["Solid"] != 1}}> Void </option>
                                             </select>
                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Plot Color</td>
+                                        <td><input type="color" id="shape{{ loop.index }}Color" name="shape{{ loop.index }}Color" value="{{ shape["Color"] }}" onchange="UpdateChart();"></td>
+                                    </tr>
                                 </table>
                                 <h6>Shape{{ loop.index }} Vertices:</h6>
                                 <table id="shape{{ loop.index }}vertexTable" class="table table-sm w-auto">
@@ -235,7 +240,7 @@
     {% if results["Sections"] != None %}
     {% for shape in results["Sections"] %}
     <!-- General Results Area and Centroid -->
-        <table class="table table-striped table-hover table-sm table-dark">
+        <table class="table table-striped table-hover table-sm">
         <tr><td colspan="3" class="text-center text-nowrap"><strong><u><h4>Shape{{loop.index}} Results</h4></u></strong></td></tr>
 
         <!-- Warnings if there are any -->
@@ -248,7 +253,7 @@
         <tr><td class="text-right text-nowrap">n</td><td class="text-center text-nowrap">{{"%.3f"|format(shape.n)}}</td><td>Modular Ratio relative to Shape 1, E<sub>s</sub>/E<sub>1</sub></td></tr>
         </table>
     <!-- Properties about the centroid -->
-        <table class="table table-striped table-hover table-sm table-dark">
+        <table class="table table-striped table-hover table-sm">
         <tr><td colspan="3" class="text-center text-nowrap"><strong><u>Properties about the Centroidal XX,YY Axis</u></strong></td></tr>
         <tr><td class="text-right text-nowrap">I<sub>xx</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Ixx)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the XX-Axis</td></tr>
         <tr><td class="text-right text-nowrap">I<sub>yy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Iyy)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the YY-Axis</td></tr>
@@ -263,7 +268,7 @@
         <tr><td class="text-right text-nowrap">r<sub>zz</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.rzz)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the ZZ-axis</td></tr>
         </table>
     <!-- Properties about the global x and y -->
-        <table class="table table-striped table-hover table-sm table-dark">
+        <table class="table table-striped table-hover table-sm ">
         <tr><td colspan="3"  class="text-center text-nowrap"><strong><u>Properties about the Global X,Y Axis</u></strong></td></tr>
         <tr><td class="text-right text-nowrap">I<sub>x</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Ix)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the X-Axis</td></tr>
         <tr><td class="text-right text-nowrap">I<sub>y</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Iy)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the Y-Axis</td></tr>
@@ -278,7 +283,7 @@
         <tr><td class="text-right text-nowrap">r<sub>z</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.rz)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the Z-axis</td></tr>
         </table>
     <!-- Principal Axis Properties -->
-        <table class="table table-striped table-hover table-sm table-dark">
+        <table class="table table-striped table-hover table-sm">
         <tr><td colspan="3" class="text-center text-nowrap"><strong><u>Principal Axis</u></strong></td></tr>
         <tr><td class="text-right text-nowrap">I<sub>uu</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Iuu)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the UU-Axis</td></tr>
         <tr><td class="text-right text-nowrap">I<sub>vv</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Ivv)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the VV-Axis</td></tr>
