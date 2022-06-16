@@ -44,18 +44,9 @@ function areaAndCentroid(shapestrg){
         y.push(Number($(this).val()));
     });
 
-    console.log(x);
-    console.log(y);
-    console.log([x.length, y.length]);
-
     x.forEach(function(item, index){
 
         if (index < (x.length-1)){
-            console.log([x[index],y[index+1],x[index+1],y[index]]);
-            console.log((x[index]*y[index+1])-(x[index+1]*y[index]));
-            console.log((x[index]+x[index+1])*((x[index]*y[index+1])-(x[index+1]*y[index])));
-            console.log((y[index]+y[index+1])*((x[index]*y[index+1])-(x[index+1]*y[index])));
-
             area += (x[index]*y[index+1])-(x[index+1]*y[index]);
             cx += (x[index]+x[index+1])*((x[index]*y[index+1])-(x[index+1]*y[index]));
             cy += (y[index]+y[index+1])*((x[index]*y[index+1])-(x[index+1]*y[index]));
@@ -207,8 +198,6 @@ function addFirstVertexRow(shapestrg) {
 
     let shapetbl = shapestrg +"vertexTable";
 
-    console.log(shapetbl);
-
     $("#"+ shapetbl +" tbody tr:last").before(
         '<tr class=\"user vertex\">' +
         '<td>' + Number($("#"+ shapetbl +" tbody tr").length).toString() + '</td>' +
@@ -275,18 +264,14 @@ function translateVertices(shapestrg){
     let xt = Number($("#translate_"+shapestrg+"_x").val());
     let yt = Number($("#translate_"+shapestrg+"_y").val());
 
-    console.log([xt,yt]);
-
     $("."+shapestrg+"x").each(function(){
         let x = Number($(this).val()) + xt;
-        console.log(x);
 
         $(this).val(x);
     });
 
     $("."+shapestrg+"y").each(function(){
         let y = Number($(this).val()) + yt;
-        console.log(y);
         
         $(this).val(y);
     });
@@ -303,8 +288,6 @@ function rotateVertices(shapestrg){
     let angle = degreesToRadians(rotation_degrees);
     let i = 0;
 
-    console.log([rotation_degrees,angle,xc,yc]);
-
     let x = [];
     let y = [];
 
@@ -319,10 +302,6 @@ function rotateVertices(shapestrg){
         y.push(Number($(this).val()));
     });
 
-    console.log(x);
-    console.log(y);
-    console.log([x.length, y.length]);
-
     //Perform Rotation
     let xr = [];
     let yr = [];
@@ -336,22 +315,17 @@ function rotateVertices(shapestrg){
         yr.push(new_y);
     });
 
-    console.log([x.length, xr.length, y.length, yr.length]);
-
     // Write Rotation back to DOM
     $("."+shapestrg+"x").each(function(){
         $(this).val(xr[i]);
         i++;
-        console.log(i);
     });
 
     i=0;
-    console.log(i);
 
     $("."+shapestrg+"y").each(function(){
         $(this).val(yr[i]);
         i++;
-        console.log(i);
     });
 
     areaAndCentroid(shapestrg);
@@ -389,7 +363,6 @@ function UpdateChart(){
 
         let shapestrg = "shape"+(i+1);
         let shapevoid = $('#'+shapestrg+'VoidSelect').val();
-        console.log(shapevoid);
 
         let x = [];
         let y = [];
@@ -470,8 +443,79 @@ function UpdateChart(){
 
     }
 
-    console.log(trace_shapes);
+    if (modelRun == 1){
+        trace_shapes.push({
+            x: xx_axis_x,
+            y: xx_axis_y,
+            mode: 'lines+markers',
+            name: "XX-Axis",
+            marker: {
+                size: 4,
+                color: 'rgb(255, 0, 0)'
+            },
+            line: {
+                color: 'rgb(255, 0, 0)',
+                dash: 'dash'
+            },
+        });
 
+        trace_shapes.push({
+            x: yy_axis_x,
+            y: yy_axis_y,
+            mode: 'lines+markers',
+            name: "YY-Axis",
+            marker: {
+                size: 4,
+                color: 'rgb(0, 0, 255)'
+            },
+            line: {
+                color: 'rgb(0, 0, 255)',
+                dash: 'dash'
+            },
+        });
+
+        trace_shapes.push({
+            x: uu_axis_x,
+            y: uu_axis_y,
+            mode: 'lines+markers',
+            name: "UU-Axis",
+            marker: {
+                size: 4,
+                color: 'rgb(0, 255, 0)'
+            },
+            line: {
+                color: 'rgb(0, 255, 0)',
+                dash: 'dash'
+            },
+        });
+
+        trace_shapes.push({
+            x: vv_axis_x,
+            y: vv_axis_y,
+            mode: 'lines+markers',
+            name: "VV-Axis",
+            marker: {
+                size: 4,
+                color: 'rgb(255, 0, 255)'
+            },
+            line: {
+                color: 'rgb(255, 0, 255)',
+                dash: 'dash'
+            },
+        });
+
+        trace_shapes.push({
+            x: centroid_x,
+            y: centroid_y,
+            mode: 'markers',
+            name: "Global Centroid",
+            marker: {
+                size: 10,
+                color: 'rgb(0, 200, 0)',
+                symbol: 'cross'
+            },
+        });
+    }
     // Add Traces to Plot
     Plotly.addTraces(graphDiv, trace_shapes);
 };
@@ -533,11 +577,17 @@ function main() {
 
     Plotly.newPlot("SectionPlot", [trace1,trace2], section_layout);
     
-    areaAndCentroid("shape1");
+    for(let i=0; i<shape_count; i++){
+
+        let shapestrg = "shape"+(i+1);
+        areaAndCentroid(shapestrg);
+    };
     
         // Units toggle
     $('input:radio[name="units"]').change(function() {
         
+        modelRun = 0;
+
         units = $(this).val();
 
         if(units == "imperial"){
@@ -622,12 +672,12 @@ function main() {
     $("#add_shape").click(function(){
 
         shape_count += 1;
-        console.log(shape_count);
         $("#numshapes").val(shape_count);
         let shapestrg = "shape"+shape_count;
         let new_card = newshapecard(shapestrg);
         
         $("#accordion").append(new_card);
+        modelRun = 0;
 
         areaAndCentroid(shapestrg);
 
@@ -641,8 +691,9 @@ function main() {
             $("#"+shapestrg+"Card").remove();
 
             shape_count -= 1;
-            console.log(shape_count);
             $("#numshapes").val(shape_count);
+            modelRun = 0;
+
         }
 
         UpdateChart();
