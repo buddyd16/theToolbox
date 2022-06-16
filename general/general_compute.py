@@ -23,18 +23,13 @@ def linear_interpolate(x1,x2,x,y1,y2):
         return ["x must be between x1 and x2",0]
         
 
-def sectionProps(x,y, sections):
-    
-    x=[float(i) for i in x]
-    y=[float(j) for j in y]
-    
-    shape = sectionprops.Section(x,y)
+def sectionProps(sections):
 
     # NEW STUFF HERE
     shapes = []
     composite = sectionprops.Composite_Section()
 
-    for section in sections:
+    for i,section in enumerate(sections):
         x = section["X"]
         y = section["Y"]
         e = section["E"]
@@ -44,7 +39,15 @@ def sectionProps(x,y, sections):
         else:
             solid = False
 
-        shapes.append(sectionprops.Section(x,y,solid,n=1,E=e,Fy=fy))
+        if i == 0:
+            modRatio = 1
+        else:
+            modRatio = e / sections[0]["E"]
+            print(e)
+            print(sections[0]["E"])
+            print(modRatio)
+
+        shapes.append(sectionprops.Section(x,y,solid,n=modRatio,E=e,Fy=fy))
         print(shapes[-1])
         composite.add_section(shapes[-1])
     
@@ -55,17 +58,5 @@ def sectionProps(x,y, sections):
 
     # END NEW STUFF
     
-    web_output = []
-    web_warnings = shape.warnings
-    
-    
-    for i,j in zip(shape.output,shape.output_strings):
-        if type(i) is str:
-            web_output.append('{1} = {0}'.format(i,j))
-        else:
-            web_output.append('{1} = {0:.3f}'.format(i,j))
-    
-    centroid_web = f'{{x: {shape.cx}, y: {shape.cy}}}'
-    
-    return web_output, web_warnings, centroid_web, shape
+    return (composite, shapes)
 

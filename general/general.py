@@ -13,17 +13,7 @@ def web_interpolate():
 @general_bp.route('/sectionprops', methods=['GET','POST'])
 def web_section_props():
     if request.method == 'POST':    
-        data_x = request.form.getlist("shape1x")
-        data_y = request.form.getlist("shape1y")
-        
        
-        
-        vertices = []
-        
-        for i,j in enumerate(data_x):
-            
-            vertices.append([i+1,j,data_y[i]])
-        
         # New Work
         units = request.form.get("units")
         num_shapes = int(request.form.get("numshapes"))
@@ -41,9 +31,9 @@ def web_section_props():
         inputs = {"units": units, "ShapesIn": sections,"ShapeCount": num_shapes}
         print(inputs)
 
-        results,warnings,centroid, shape = gen_calc.sectionProps(data_x,data_y,sections)
+        Results = gen_calc.sectionProps(sections)
 
-        results = {"centroid": centroid}
+        results = {"CompositeSection": Results[0], "Sections":Results[1]}
 
     else:
         
@@ -56,13 +46,9 @@ def web_section_props():
         shape= None
 
         inputs = {"units": "imperial", "ShapesIn": input_shapes,"ShapeCount": len(input_shapes)}
-        results = {"centroid": centroid}
+        results = {"CompositeSection": None, "Sections": None}
         
     return render_template('general/sectionprops.html',
-                            inputs=inputs, 
-                            vertices=vertices, 
-                            result=results,
-                            warning=warnings, 
-                            centroid = centroid, 
-                            shape=shape, 
-                            title='section properties')
+                            inputs = inputs ,  
+                            results = results , 
+                            title = 'section properties')

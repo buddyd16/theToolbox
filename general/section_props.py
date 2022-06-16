@@ -454,54 +454,54 @@ class Composite_Section:
         
         # determine moment of inertias about the centroid coordinates
         
-        self.Ix = sum([section.parallel_axis_theorem(self.cx, self.cy, transformed=True)[0] for section in self.sections])
+        self.Ixx = sum([section.parallel_axis_theorem(self.cx, self.cy, transformed=True)[0] for section in self.sections])
 
-        self.output.append(self.Ix)
-        self.output_strings.append('Ix')
+        self.output.append(self.Ixx)
+        self.output_strings.append('Ixx')
         
-        self.Iy = sum([section.parallel_axis_theorem(self.cx, self.cy, transformed=True)[1] for section in self.sections])
+        self.Iyy = sum([section.parallel_axis_theorem(self.cx, self.cy, transformed=True)[1] for section in self.sections])
 
-        self.output.append(self.Iy)
-        self.output_strings.append('Iy')
+        self.output.append(self.Iyy)
+        self.output_strings.append('Iyy')
         
-        self.Ixy = sum([section.parallel_axis_theorem(self.cx, self.cy, transformed=True)[2] for section in self.sections])
+        self.Ixxyy = sum([section.parallel_axis_theorem(self.cx, self.cy, transformed=True)[2] for section in self.sections])
 
-        self.output.append(self.Ixy)
-        self.output_strings.append('Ixy')
+        self.output.append(self.Ixxyy)
+        self.output_strings.append('Ixxyy')
         
-        self.Jz = self.Ix + self.Iy
+        self.Jzz = self.Ixx + self.Iyy
         
-        self.output.append(self.Jz)
-        self.output_strings.append('Jz')
+        self.output.append(self.Jzz)
+        self.output_strings.append('Jzz')
         
         # radii of gyration - centroidal axis
-        self.rx = math.sqrt(self.Ix/self.area)
-        self.output.append(self.rx)
-        self.output_strings.append('rx')
-        self.ry = math.sqrt(self.Iy/self.area)
-        self.output.append(self.ry)
-        self.output_strings.append('ry')
-        self.rz = math.sqrt(self.Jz/self.area)
-        self.output.append(self.rz)
-        self.output_strings.append('rz')
+        self.rxx = math.sqrt(self.Ixx/self.area)
+        self.output.append(self.rxx)
+        self.output_strings.append('rxx')
+        self.ryy = math.sqrt(self.Iyy/self.area)
+        self.output.append(self.ryy)
+        self.output_strings.append('ryy')
+        self.rzz = math.sqrt(self.Jzz/self.area)
+        self.output.append(self.rzz)
+        self.output_strings.append('rzz')
         
         # composite section principal Axis
         
-        two_theta = math.atan2((-1*2.0*self.Ixy),(1E-16+(self.Ix - self.Iy)))
-        A = (self.Ix+self.Iy)/2.0
-        B = (self.Ix-self.Iy)/2.0
-        I1 = A+math.sqrt((B*B)+(self.Ixy*self.Ixy))
-        I2 = A-math.sqrt((B*B)+(self.Ixy*self.Ixy))
+        two_theta = math.atan2((-1*2.0*self.Ixxyy),(1E-16+(self.Ixx - self.Iyy)))
+        A = (self.Ixx+self.Iyy)/2.0
+        B = (self.Ixx-self.Iyy)/2.0
+        I1 = A+math.sqrt((B*B)+(self.Ixxyy*self.Ixxyy))
+        I2 = A-math.sqrt((B*B)+(self.Ixxyy*self.Ixxyy))
         
         self.output.append('--')
         self.output_strings.append('Shape Principal Axis:')
-        self.Iuu = A+(B*math.cos(two_theta))-(self.Ixy*math.sin(two_theta))
+        self.Iuu = A+(B*math.cos(two_theta))-(self.Ixxyy*math.sin(two_theta))
         self.output.append(self.Iuu)
         self.output_strings.append('Iuu')
-        self.Ivv = A-(B*math.cos(two_theta))+(self.Ixy*math.sin(two_theta))
+        self.Ivv = A-(B*math.cos(two_theta))+(self.Ixxyy*math.sin(two_theta))
         self.output.append(self.Ivv)
         self.output_strings.append('Ivv')
-        self.Iuuvv = (B*math.sin(two_theta))+(self.Ixy*math.cos(two_theta))
+        self.Iuuvv = (B*math.sin(two_theta))+(self.Ixxyy*math.cos(two_theta))
         self.output.append(self.Iuuvv)
         self.output_strings.append('Iuuvv')
         
