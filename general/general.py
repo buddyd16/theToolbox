@@ -26,10 +26,10 @@ def web_section_props():
                              "Fy": float(request.form.get(shapestrg+"Fy")),
                              "Solid": int(request.form.get(shapestrg+"Solid")),
                              "X": [float(i) for i in request.form.getlist(shapestrg+"x")],
-                             "Y": [float(i) for i in request.form.getlist(shapestrg+"y")]})
+                             "Y": [float(i) for i in request.form.getlist(shapestrg+"y")],
+                             "Color": request.form.get(shapestrg+"Color")})
         
         inputs = {"units": units, "ShapesIn": sections,"ShapeCount": num_shapes}
-        print(inputs)
 
         Results = gen_calc.sectionProps(sections)
 
@@ -37,13 +37,8 @@ def web_section_props():
 
     else:
         
-        default_shape = {"E":29000,"Fy":36,"Solid":1,"X":[0,1,1,0],"Y":[0,0,1,0]}
+        default_shape = {"E":29000,"Fy":36,"Solid":1,"X":[0,1,1,0],"Y":[0,0,1,0],"Color": "#cc0000"}
         input_shapes = [default_shape]
-        vertices = None
-        results = None
-        warnings = None
-        centroid = '{x:0,y:0}'
-        shape= None
 
         inputs = {"units": "imperial", "ShapesIn": input_shapes,"ShapeCount": len(input_shapes)}
         results = {"CompositeSection": None, "Sections": None}
