@@ -46,12 +46,12 @@
                     </div>
                 </div>
 
-                <h7>Shape Count: <input id="numshapes" name="numshapes" class="numshapes input-sm" style="width:95px" type="number" step="any" value="1" readonly></h7>
+                <h7>Shape Count: <input id="numshapes" name="numshapes" class="numshapes input-sm" style="width:95px" type="number" step="any" value="{{ inputs["ShapeCount"] }}" readonly></h7>
 
                 <!-- Begin Accordion -->
                 <div id="accordion">
                     <!-- loop through input shapes -->
-                    {% for shape in inputs["ShapesIn"] %}
+                    {% for shape in inputs["ShapesIn"] %}                    
                     <!-- Shape Card -->
                     <div class="card" id="shape{{ loop.index }}Card">
                         <div class="card-header" id="shape{{ loop.index }}Heading">
@@ -68,18 +68,18 @@
                                 <table id="shape{{ loop.index }}PropsTable" class="table table-sm w-auto">
                                     <tr>
                                         <td>Modulus of Elasticity, E</td>
-                                        <td><input name="shape{{ loop.index }}E" class="input-sm" style="width:95px" type="number" step="any" value="29000"></td>
-                                        <td class="stress_units">ksi</td>
+                                        <td><input name="shape{{ loop.index }}E" class="input-sm" style="width:95px" type="number" step="any" value="{{ shape["E"] }}"></td>
+                                        <td class="stress_units">{{ "ksi" if inputs["units"] == "imperial" else "MPa" }}</td>
                                     <tr>
                                         <td>Yield Stress: </td>
-                                        <td><input name="shape{{ loop.index }}Fy" class="input-sm" style="width:95px" type="number" step="any" value="36"></td>
-                                        <td class="stress_units">ksi</td>
+                                        <td><input name="shape{{ loop.index }}Fy" class="input-sm" style="width:95px" type="number" step="any" value="{{ shape["Fy"] }}"></td>
+                                        <td class="stress_units">{{ "ksi" if inputs["units"] == "imperial" else "MPa" }}</td>
                                     <tr>
                                         <td>Void or Solid?</td>
                                         <td>
                                             <select id="shape{{ loop.index }}VoidSelect" name="shape{{ loop.index }}Solid" class="input-sm" style="width:95px" onchange="UpdateChart();">
-                                                <option value="1"> Solid </option>
-                                                <option value="0"> Void </option>
+                                                <option value="1" {{ "selected=""selected""" if shape["Solid"] == 1}}> Solid </option>
+                                                <option value="0" {{ "selected=""selected""" if shape["Solid"] != 1}}> Void </option>
                                             </select>
                                         </td>
                                 </table>
@@ -88,27 +88,26 @@
                                     <thead>
                                         <tr>
                                         <th> Vertex ID </th>
-                                        <th class="text-center xvertexheader"> x (in) </th>
-                                        <th class="text-center yvertexheader"> y (in) </th>
+                                        <th class="text-center xvertexheader"> x ({{ "in" if inputs["units"] == "imperial" else "mm" }}) </th>
+                                        <th class="text-center yvertexheader"> y ({{ "in" if inputs["units"] == "imperial" else "mm" }}) </th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                     <!-- Persist Form Data from Input after POST -->
-                                    {% if vertices != None %}
+                                    {% set outer_loop = loop %}
+                                    {% for x in shape["X"] %}
     
-                                    {% for vertex in vertices %}
-    
-                                    {% if vertex == vertices[-1] %}
-                                    <tr class="vertex">
-                                    <td>Close</td>
-                                    <td><input id="shape{{ loop.index }}lastX" name="shape{{ loop.index }}x" class="shape{{ loop.index }}x input-sm" style="width:95px" type="number" step="any" value="{{vertex[1]}}" readonly></td>
-                                    <td><input id="shape{{ loop.index }}lastY" name="shape{{ loop.index }}y" class="shape{{ loop.index }}y input-sm" style="width:95px" type="number" step="any" value="{{vertex[2]}}" readonly></td>
-                                    </tr>
-                                    {% elif vertex[0]>3 %}
+                                    {% if loop.index == shape["X"]|length %}
+                                        <tr class="vertex">
+                                        <td>Close</td>
+                                        <td><input id="shape{{ outer_loop.index }}lastX" name="shape{{ outer_loop.index }}x" class="shape{{ outer_loop.index }}x input-sm" style="width:95px" type="number" step="any" value="{{x}}" readonly></td>
+                                        <td><input id="shape{{ outer_loop.index }}lastY" name="shape{{ outer_loop.index }}y" class="shape{{ outer_loop.index }}y input-sm" style="width:95px" type="number" step="any" value="{{shape["Y"][-1]}}" readonly></td>
+                                        </tr>
+                                    {% elif loop.index > 3 %}
                                     <tr class="user vertex">
-                                    <td>{{vertex[0]}}</td>
-                                    <td><input name="shape{{ loop.index }}x" class="shape{{ loop.index }}x input-sm" style="width:95px" type="number" step="any" value="{{vertex[1]}}" onchange="areaAndCentroid('shape{{ loop.index }}');"></td>
-                                    <td><input name="shape{{ loop.index }}y" class="shape{{ loop.index }}y input-sm" style="width:95px" type="number" step="any" value="{{vertex[2]}}" onchange="areaAndCentroid('shape{{ loop.index }}');"></td>
+                                    <td>{{loop.index}}</td>
+                                    <td><input name="shape{{ outer_loop.index }}x" class="shape{{ outer_loop.index }}x input-sm" style="width:95px" type="number" step="any" value="{{x}}" onchange="areaAndCentroid('shape{{ outer_loop.index }}');"></td>
+                                    <td><input name="shape{{ outer_loop.index }}y" class="shape{{ outer_loop.index }}y input-sm" style="width:95px" type="number" step="any" value="{{shape["Y"][loop.index0]}}" onchange="areaAndCentroid('shape{{ outer_loop.index }}');"></td>
                                     <td>
                                         <button type="button" onclick="addVertexRow(this);" class="btn btn-secondary btn-success btn-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
@@ -123,13 +122,13 @@
                                         </a>
                                     </td>
                                     </tr>
-                                    {% elif vertex[0]==3 %}
+                                    {% elif loop.index == 3 %}
                                     <tr class="user vertex">
-                                    <td>{{vertex[0]}}</td>
-                                    <td><input name="shape{{ loop.index }}x" class="shape{{ loop.index }}x input-sm" style="width:95px" type="number" step="any" value="{{vertex[1]}}" onchange="areaAndCentroid('shape{{ loop.index }}');"></td>
-                                    <td><input name="shape{{ loop.index }}y" class="shape{{ loop.index }}y input-sm" style="width:95px" type="number" step="any" value="{{vertex[2]}}" onchange="areaAndCentroid('shape{{ loop.index }}');"></td>
+                                    <td>{{loop.index}}</td>
+                                    <td><input name="shape{{ outer_loop.index }}x" class="shape{{ outer_loop.index }}x input-sm" style="width:95px" type="number" step="any" value="{{x}}" onchange="areaAndCentroid('shape{{ outer_loop.index }}');"></td>
+                                    <td><input name="shape{{ outer_loop.index }}y" class="shape{{ outer_loop.index }}y input-sm" style="width:95px" type="number" step="any" value="{{shape["Y"][loop.index0]}}" onchange="areaAndCentroid('shape{{ outer_loop.index }}');"></td>
                                     <td>
-                                        <button type="button" onclick="addFirstVertexRow('shape{{ loop.index }}');" class="btn btn-secondary btn-success btn-sm">
+                                        <button type="button" onclick="addFirstVertexRow('shape{{ outer_loop.index }}');" class="btn btn-secondary btn-success btn-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
                                         <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
                                         </svg>
@@ -138,42 +137,12 @@
                                     </tr>
                                     {% else %}
                                     <tr class="user vertex">
-                                    <td>{{vertex[0]}}</td>
-                                    <td><input id="shape{{ loop.index }}firstX" name="shape{{ loop.index }}x" class="shape{{ loop.index }}x input-sm" style="width:95px" type="number" step="any" value="{{vertex[1]}}" onchange="first_to_last('shape{{ loop.index }}');"></td>
-                                    <td><input id="shape{{ loop.index }}firstY" name="shape{{ loop.index }}y" class="shape{{ loop.index }}y input-sm" style="width:95px" type="number" step="any" value="{{vertex[2]}}" onchange="first_to_last('shape{{ loop.index }}');"></td>
+                                    <td>{{loop.index}}</td>
+                                    <td><input id="shape{{ outer_loop.index }}firstX" name="shape{{ outer_loop.index }}x" class="shape{{ outer_loop.index }}x input-sm" style="width:95px" type="number" step="any" value="{{x}}" onchange="first_to_last('shape{{ outer_loop.index }}');"></td>
+                                    <td><input id="shape{{ outer_loop.index }}firstY" name="shape{{ outer_loop.index }}y" class="shape{{ outer_loop.index }}y input-sm" style="width:95px" type="number" step="any" value="{{shape["Y"][loop.index0]}}" onchange="first_to_last('shape{{ outer_loop.index }}');"></td>
                                     </tr>
                                     {% endif %}
                                     {% endfor %}
-                                    {% else %}
-                                    <!-- Initial Form -->
-                                    <tr class="user vertex">
-                                    <td>1</td>
-                                    <td><input id="shape{{ loop.index }}firstX" name="shape{{ loop.index }}x" class="shape{{ loop.index }}x input-sm" style="width:95px" type="number" step="any" value="0.0" onchange="first_to_last('shape{{ loop.index }}');"></td>
-                                    <td><input id="shape{{ loop.index }}firstY" name="shape{{ loop.index }}y" class="shape{{ loop.index }}y input-sm" style="width:95px" type="number" step="any" value="0.0" onchange="first_to_last('shape{{ loop.index }}');"></td>
-                                    </tr>
-                                    <tr class="user vertex">
-                                    <td>2</td>
-                                    <td><input name="shape{{ loop.index }}x" class="shape{{ loop.index }}x input-sm" style="width:95px" type="number" step="any" value="1.0" onchange="areaAndCentroid('shape{{ loop.index }}');"></td>
-                                    <td><input name="shape{{ loop.index }}y" class="shape{{ loop.index }}y input-sm" style="width:95px" type="number" step="any" value="0" onchange="areaAndCentroid('shape{{ loop.index }}');"></td>
-                                    </tr>
-                                    <tr class="user vertex">
-                                    <td>3</td>
-                                    <td><input name="shape{{ loop.index }}x" class="shape{{ loop.index }}x input-sm" style="width:95px" type="number" step="any" value="1" onchange="areaAndCentroid('shape{{ loop.index }}');"></td>
-                                    <td><input name="shape{{ loop.index }}y" class="shape{{ loop.index }}y input-sm" style="width:95px" type="number" step="any" value="1" onchange="areaAndCentroid('shape{{ loop.index }}');"></td>
-                                    <td>
-                                        <button type="button" onclick="addFirstVertexRow('shape{{ loop.index }}');" class="btn btn-secondary btn-success btn-sm">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
-                                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                                        </svg>
-                                        </button>
-                                    </td>
-                                    </tr>
-                                    <tr class="vertex">
-                                    <td>Close</td>
-                                    <td><input id="shape{{ loop.index }}lastX" name="shape{{ loop.index }}x" class="shape{{ loop.index }}x input-sm" style="width:95px" type="number" step="any" value="0.0" readonly></td>
-                                    <td><input id="shape{{ loop.index }}lastY" name="shape{{ loop.index }}y" class="shape{{ loop.index }}y input-sm" style="width:95px" type="number" step="any" value="0.0" readonly></td>
-                                    </tr>
-                                    {% endif %}
                                     </tbody>
                                 </table>
                                 <h6>Quick Properties</h6>
@@ -181,17 +150,17 @@
                                     <tr>
                                         <td>Area :</td>
                                         <td id="shape{{ loop.index }}Area"></td>
-                                        <td class="area_units">in.<sup>2</sup></td>
+                                        <td class="area_units">{{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>2</sup></td>
                                     </tr>
                                     <tr>
                                         <td>x<sub>c</sub></td>
                                         <td id="shape{{ loop.index }}Xc"></td>
-                                        <td class="length_units">in.</td>
+                                        <td class="length_units">{{ "in" if inputs["units"] == "imperial" else "mm" }}</td>
                                     </tr>
                                     <tr>
                                         <td>y<sub>c</sub></td>
                                         <td id="shape{{ loop.index }}Yc"></td>
-                                        <td class="length_units">in.</td>
+                                        <td class="length_units">{{ "in" if inputs["units"] == "imperial" else "mm" }}</td>
                                     </tr>
                                 </table>
                                 <h6>Shape Modifications:</h6>
@@ -235,80 +204,125 @@
         </div>
     </div>
     <div class="row">
-    {% if shape != None %}
+    {% if results["CompositeSection"] != None %}
+    <table class="table table-striped table-hover table-sm table-dark">
+        <tr><td colspan="3" class="text-center text-nowrap"><strong><u><h4>Composite Section Results</h4></u></strong></td></tr>
+        <tr><td class="text-right text-nowrap">Area </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].area)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>2</sup></td><td>Cross-Section Area</td></tr>
+        <tr><td class="text-right text-nowrap">Transformed Area </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].transformedarea)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>2</sup></td><td>Transformed Cross-Section Area</td></tr>
+        <tr><td class="text-right text-nowrap">Centroid </td><td class="text-center text-nowrap">({{"%.3f"|format(results["CompositeSection"].cx)}},{{"%.3f"|format(results["CompositeSection"].cy)}}) {{ "in" if inputs["units"] == "imperial" else "mm" }}</td><td>Centroid in Global Coordinates</td></tr>
+    </table>
+    <!-- Properties about the centroid -->
+    <table class="table table-striped table-hover table-sm table-dark">
+        <tr><td colspan="3" class="text-center text-nowrap"><strong><u>Properties about the Centroidal XX,YY Axis</u></strong></td></tr>
+        <tr><td class="text-right text-nowrap">I<sub>xx</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Ixx)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the XX-Axis</td></tr>
+        <tr><td class="text-right text-nowrap">I<sub>yy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Iyy)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the YY-Axis</td></tr>
+        <tr><td class="text-right text-nowrap">I<sub>xxyy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Ixxyy)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Product of Inertia</td></tr>
+        <tr><td class="text-right text-nowrap">I<sub>zz</sub> or J<sub>zz</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Jzz)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Polar Moment of Inertia</td></tr>
+        <tr><td class="text-right text-nowrap">r<sub>xx</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].rxx)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the XX-axis</td></tr>
+        <tr><td class="text-right text-nowrap">r<sub>yy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].ryy)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the YY-axis</td></tr>
+        <tr><td class="text-right text-nowrap">r<sub>zz</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].rzz)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the ZZ-axis</td></tr>
+    </table>
+    <!-- Principal Axis Properties -->
+    <table class="table table-striped table-hover table-sm table-dark">
+        <tr><td colspan="3" class="text-center text-nowrap"><strong><u>Principal Axis</u></strong></td></tr>
+        <tr><td class="text-right text-nowrap">I<sub>uu</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Iuu)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the UU-Axis</td></tr>
+        <tr><td class="text-right text-nowrap">I<sub>vv</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Ivv)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the VV-Axis</td></tr>
+        <tr><td class="text-right text-nowrap">I<sub>uuvv</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Iuuvv)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Product of Inertia</td></tr>
+        <tr><td class="text-right text-nowrap">&#952;<sub>uu</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].theta1)}}<sup>o</sup></td><td>Rotation from XX-Axis to the UU-Axis</td></tr>
+        <tr><td class="text-right text-nowrap">&#952;<sub>vv</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].theta2)}}<sup>o</sup></td><td>Rotation from XX-Axis to the VV-Axis</td></tr>
+    </table>
+    {% endif %}
+    {% if results["Sections"] != None %}
+    {% for shape in results["Sections"] %}
     <!-- General Results Area and Centroid -->
         <table class="table table-striped table-hover table-sm table-dark">
-        <tr><td colspan="3" class="text-center text-nowrap"><strong><u><h4>Results</h4></u></strong></td></tr>
+        <tr><td colspan="3" class="text-center text-nowrap"><strong><u><h4>Shape{{loop.index}} Results</h4></u></strong></td></tr>
 
         <!-- Warnings if there are any -->
-        {% if warning != '' %}
-        <tr><td colspan="3" class="text-center bg-warning"><p class="text-dark"><strong>{{warning}}</strong></p></td></tr>
+        {% if shape.warnings != '' %}
+        <tr><td colspan="3" class="text-center bg-warning"><p class="text-dark"><strong>{{shape.warnings}}</strong></p></td></tr>
         {% endif %}
 
-        <tr><td class="text-right text-nowrap">Area </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.area)}} in<sup>2</sup></td><td class="text-center text-nowrap">{{"%.3f"|format(shape.area/144.0)}} ft<sup>2</sup></td></tr>
-        <tr><td class="text-right text-nowrap">Centroid </td><td class="text-center text-nowrap">({{"%.3f"|format(shape.cx)}},{{"%.3f"|format(shape.cy)}}) in</td><td class="text-center text-nowrap">({{"%.3f"|format(shape.cx/12.0)}},{{"%.3f"|format(shape.cy/12.0)}}) ft</td></tr>
+        <tr><td class="text-right text-nowrap">Area </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.area)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>2</sup></td><td>Cross-Section Area</td></tr>
+        <tr><td class="text-right text-nowrap">Centroid </td><td class="text-center text-nowrap">({{"%.3f"|format(shape.cx)}},{{"%.3f"|format(shape.cy)}}) {{ "in" if inputs["units"] == "imperial" else "mm" }}</td><td>Centroid in Global Coordinates</td></tr>
+        <tr><td class="text-right text-nowrap">n</td><td class="text-center text-nowrap">{{"%.3f"|format(shape.n)}}</td><td>Modular Ratio relative to Shape 1, E<sub>s</sub>/E<sub>1</sub></td></tr>
         </table>
     <!-- Properties about the centroid -->
         <table class="table table-striped table-hover table-sm table-dark">
         <tr><td colspan="3" class="text-center text-nowrap"><strong><u>Properties about the Centroidal XX,YY Axis</u></strong></td></tr>
-        <tr><td class="text-right text-nowrap">I<sub>xx</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Ixx)}} in<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the XX-Axis</td></tr>
-        <tr><td class="text-right text-nowrap">I<sub>yy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Iyy)}} in<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the YY-Axis</td></tr>
-        <tr><td class="text-right text-nowrap">I<sub>xxyy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Ixxyy)}} in<sup>4</sup></td><td>Product of Inertia</td></tr>
-        <tr><td class="text-right text-nowrap">I<sub>zz</sub> or J<sub>zz</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Jzz)}} in<sup>4</sup></td><td>Polar Moment of Inertia</td></tr>
-        <tr><td class="text-right text-nowrap">S<sub>xx,top</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.sxx_top)}} in<sup>3</sup></td><td>Elastic Section Modulus to the Top Most Vertex</td></tr>
-        <tr><td class="text-right text-nowrap">S<sub>xx,bottom</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.sxx_bottom)}} in<sup>3</sup></td><td>Elastic Section Modulus to the Bottom Most Vertex</td></tr>
-        <tr><td class="text-right text-nowrap">S<sub>yy,left</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.syy_left)}} in<sup>3</sup></td><td>Elastic Section Modulus to the Left Most Vertex</td></tr>
-        <tr><td class="text-right text-nowrap">S<sub>yy,right</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.syy_left)}} in<sup>3</sup></td><td>Elastic Section Modulus to the Right Most Vertex</td></tr>
-        <tr><td class="text-right text-nowrap">r<sub>xx</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.rxx)}} in<sup>3</sup></td><td>Radius of Gyration about the XX-axis</td></tr>
-        <tr><td class="text-right text-nowrap">r<sub>yy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.ryy)}} in<sup>3</sup></td><td>Radius of Gyration about the YY-axis</td></tr>
-        <tr><td class="text-right text-nowrap">r<sub>zz</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.rzz)}} in<sup>3</sup></td><td>Radius of Gyration about the ZZ-axis</td></tr>
+        <tr><td class="text-right text-nowrap">I<sub>xx</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Ixx)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the XX-Axis</td></tr>
+        <tr><td class="text-right text-nowrap">I<sub>yy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Iyy)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the YY-Axis</td></tr>
+        <tr><td class="text-right text-nowrap">I<sub>xxyy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Ixxyy)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Product of Inertia</td></tr>
+        <tr><td class="text-right text-nowrap">I<sub>zz</sub> or J<sub>zz</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Jzz)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Polar Moment of Inertia</td></tr>
+        <tr><td class="text-right text-nowrap">S<sub>xx,top</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.sxx_top)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Top Most Vertex</td></tr>
+        <tr><td class="text-right text-nowrap">S<sub>xx,bottom</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.sxx_bottom)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Bottom Most Vertex</td></tr>
+        <tr><td class="text-right text-nowrap">S<sub>yy,left</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.syy_left)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Left Most Vertex</td></tr>
+        <tr><td class="text-right text-nowrap">S<sub>yy,right</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.syy_left)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Right Most Vertex</td></tr>
+        <tr><td class="text-right text-nowrap">r<sub>xx</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.rxx)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the XX-axis</td></tr>
+        <tr><td class="text-right text-nowrap">r<sub>yy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.ryy)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the YY-axis</td></tr>
+        <tr><td class="text-right text-nowrap">r<sub>zz</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.rzz)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the ZZ-axis</td></tr>
         </table>
     <!-- Properties about the global x and y -->
         <table class="table table-striped table-hover table-sm table-dark">
         <tr><td colspan="3"  class="text-center text-nowrap"><strong><u>Properties about the Global X,Y Axis</u></strong></td></tr>
-        <tr><td class="text-right text-nowrap">I<sub>x</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Ix)}} in<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the X-Axis</td></tr>
-        <tr><td class="text-right text-nowrap">I<sub>y</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Iy)}} in<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the Y-Axis</td></tr>
-        <tr><td class="text-right text-nowrap">I<sub>xy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Ixy)}} in<sup>4</sup></td><td>Product of Inertia</td></tr>
-        <tr><td class="text-right text-nowrap">I<sub>z</sub> or J<sub>z</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Jz)}} in<sup>4</sup></td><td>Polar Moment of Inertia</td></tr>
-        <tr><td class="text-right text-nowrap">S<sub>x,top</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.sx_top)}} in<sup>3</sup></td><td>Elastic Section Modulus to the Top Most Vertex</td></tr>
-        <tr><td class="text-right text-nowrap">S<sub>x,bottom</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.sx_bottom)}} in<sup>3</sup></td><td>Elastic Section Modulus to the Bottom Most Vertex</td></tr>
-        <tr><td class="text-right text-nowrap">S<sub>y,left</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.sy_left)}} in<sup>3</sup></td><td>Elastic Section Modulus to the Left Most Vertex</td></tr>
-        <tr><td class="text-right text-nowrap">S<sub>y,right</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.sy_left)}} in<sup>3</sup></td><td>Elastic Section Modulus to the Right Most Vertex</td></tr>
-        <tr><td class="text-right text-nowrap">r<sub>x</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.rx)}} in<sup>3</sup></td><td>Radius of Gyration about the X-axis</td></tr>
-        <tr><td class="text-right text-nowrap">r<sub>y</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.ry)}} in<sup>3</sup></td><td>Radius of Gyration about the Y-axis</td></tr>
-        <tr><td class="text-right text-nowrap">r<sub>z</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.rz)}} in<sup>3</sup></td><td>Radius of Gyration about the Z-axis</td></tr>
+        <tr><td class="text-right text-nowrap">I<sub>x</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Ix)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the X-Axis</td></tr>
+        <tr><td class="text-right text-nowrap">I<sub>y</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Iy)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the Y-Axis</td></tr>
+        <tr><td class="text-right text-nowrap">I<sub>xy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Ixy)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Product of Inertia</td></tr>
+        <tr><td class="text-right text-nowrap">I<sub>z</sub> or J<sub>z</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Jz)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Polar Moment of Inertia</td></tr>
+        <tr><td class="text-right text-nowrap">S<sub>x,top</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.sx_top)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Top Most Vertex</td></tr>
+        <tr><td class="text-right text-nowrap">S<sub>x,bottom</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.sx_bottom)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Bottom Most Vertex</td></tr>
+        <tr><td class="text-right text-nowrap">S<sub>y,left</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.sy_left)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Left Most Vertex</td></tr>
+        <tr><td class="text-right text-nowrap">S<sub>y,right</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.sy_left)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Right Most Vertex</td></tr>
+        <tr><td class="text-right text-nowrap">r<sub>x</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.rx)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the X-axis</td></tr>
+        <tr><td class="text-right text-nowrap">r<sub>y</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.ry)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the Y-axis</td></tr>
+        <tr><td class="text-right text-nowrap">r<sub>z</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.rz)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the Z-axis</td></tr>
         </table>
     <!-- Principal Axis Properties -->
         <table class="table table-striped table-hover table-sm table-dark">
         <tr><td colspan="3" class="text-center text-nowrap"><strong><u>Principal Axis</u></strong></td></tr>
-        <tr><td class="text-right text-nowrap">I<sub>uu</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Iuu)}} in<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the UU-Axis</td></tr>
-        <tr><td class="text-right text-nowrap">I<sub>vv</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Ivv)}} in<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the VV-Axis</td></tr>
-        <tr><td class="text-right text-nowrap">I<sub>uuvv</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Iuuvv)}} in<sup>4</sup></td><td>Product of Inertia</td></tr>
+        <tr><td class="text-right text-nowrap">I<sub>uu</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Iuu)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the UU-Axis</td></tr>
+        <tr><td class="text-right text-nowrap">I<sub>vv</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Ivv)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the VV-Axis</td></tr>
+        <tr><td class="text-right text-nowrap">I<sub>uuvv</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Iuuvv)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Product of Inertia</td></tr>
         <tr><td class="text-right text-nowrap">&#952;<sub>uu</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.theta1)}}<sup>o</sup></td><td>Rotation from XX-Axis to the UU-Axis</td></tr>
         <tr><td class="text-right text-nowrap">&#952;<sub>vv</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.theta2)}}<sup>o</sup></td><td>Rotation from XX-Axis to the VV-Axis</td></tr>
         </table>
+    {% endfor %}
     {% endif %}
     </div>
 </div>
 
 <script type="text/javascript">
 // Initialize the Shape Count
-let shape_count = 1;
+let shape_count = {{ inputs["ShapeCount"] }};
+console.log(shape_count);
 
 // Initialize Units
 let units = "imperial";
 
-var centroid = [{{centroid}}];
-{% if shape != None %}
-var xx_axis = [{x: {{shape.xx_axis[0]}}, y:{{shape.xx_axis[1]}}},{x: {{shape.xx_axis[2]}}, y:{{shape.xx_axis[3]}}}];
-var yy_axis = [{x: {{shape.yy_axis[0]}}, y:{{shape.yy_axis[1]}}},{x: {{shape.yy_axis[2]}}, y:{{shape.yy_axis[3]}}}];
-var uu_axis = [{x: {{shape.uu_axis[0]}}, y:{{shape.uu_axis[1]}}},{x: {{shape.uu_axis[2]}}, y:{{shape.uu_axis[3]}}}];
-var vv_axis = [{x: {{shape.vv_axis[0]}}, y:{{shape.vv_axis[1]}}},{x: {{shape.vv_axis[2]}}, y:{{shape.vv_axis[3]}}}];
+{% if results["CompositeSection"] != None %}
+let modelRun = 1;
+let centroid_x = [ {{"%.3f"|format(results["CompositeSection"].cx)}} ];
+let centroid_y = [ {{"%.3f"|format(results["CompositeSection"].cy)}} ];
+let xx_axis_x = [ {{results["CompositeSection"].xx_axis[0]}}, {{results["CompositeSection"].xx_axis[2]}} ];
+let xx_axis_y = [ {{results["CompositeSection"].xx_axis[1]}}, {{results["CompositeSection"].xx_axis[3]}} ];
+let yy_axis_x = [ {{results["CompositeSection"].yy_axis[0]}}, {{results["CompositeSection"].yy_axis[2]}} ];
+let yy_axis_y = [ {{results["CompositeSection"].yy_axis[1]}}, {{results["CompositeSection"].yy_axis[3]}} ];
+let uu_axis_x = [ {{results["CompositeSection"].uu_axis[0]}}, {{results["CompositeSection"].uu_axis[2]}} ];
+let uu_axis_y = [ {{results["CompositeSection"].uu_axis[1]}}, {{results["CompositeSection"].uu_axis[3]}} ];
+let vv_axis_x = [ {{results["CompositeSection"].vv_axis[0]}}, {{results["CompositeSection"].vv_axis[2]}} ];
+let vv_axis_y = [ {{results["CompositeSection"].vv_axis[1]}}, {{results["CompositeSection"].vv_axis[3]}} ];
 {% else %}
-var xx_axis = [{x: 0, y:0},{x: 0, y:0}];
-var yy_axis = [{x: 0, y:0},{x: 0, y:0}];
-var uu_axis = [{x: 0, y:0},{x: 0, y:0}];
-var vv_axis = [{x: 0, y:0},{x: 0, y:0}];
+let modelRun = 0;
+let centroid_x = 0;
+let centroid_y = 0;
+let xx_axis_x = 0;
+let xx_axis_y = 0;
+let yy_axis_x = 0;
+let yy_axis_y = 0;
+let uu_axis_x = 0;
+let uu_axis_y = 0;
+let vv_axis_x = 0
+let vv_axis_y = 0;
 {% endif %}
 </script>
 
