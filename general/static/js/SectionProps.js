@@ -81,7 +81,7 @@ function newshapecard(shapenum){
     }
 
 
-    let new_card = '<div class=\"card\" id=\"'+ shapenum +'Card\">' +
+    let new_card = '<div class=\"card my-2\" id=\"'+ shapenum +'Card\">' +
                    '<div class=\"card-header\" id=\"'+ shapenum +'Heading\">' +
                    '<h5 class=\"mb-0\">' +
                    '<button type=\"button\" id=\"'+ shapenum +'HeadingButton\" class=\"btn btn-link\" data-toggle=\"collapse\" data-target=\"#'+ shapenum +'Collapse\" aria-expanded=\"flase\" aria-controls=\"'+ shapenum +'Collapse\">' +
@@ -95,11 +95,11 @@ function newshapecard(shapenum){
                    '<table id=\"'+ shapenum +'PropsTable\" class=\"table table-sm w-auto\">' +
                    '<tr>' +
                    '<td>Modulus of Elasticity, E</td>' +
-                   '<td><input name=\"'+ shapenum +'E\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"29000\"></td>' +
+                   '<td><input id=\"'+ shapenum +'E\" name=\"'+ shapenum +'E\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"29000\"></td>' +
                    '<td class=\"stress_units\">'+ stress +'</td>' +
                    '<tr>' +
                    '<td>Yield Stress: </td>' +
-                   '<td><input name=\"'+ shapenum +'Fy\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"36\"></td>' +
+                   '<td><input id=\"'+ shapenum +'Fy\" name=\"'+ shapenum +'Fy\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"36\"></td>' +
                    '<td class=\"stress_units\">'+ stress +'</td>' +
                    '<tr>' +
                    '<td>Void or Solid?</td>' +
@@ -112,7 +112,7 @@ function newshapecard(shapenum){
                    '</tr>' +
                    '<tr>' +
                    '<td>Plot Color</td>' +
-                   '<td><input type=\"color\" id=\"'+ shapenum +'Color\" name=\"color\" value=\"#cc0000\" onchange=UpdateChart();></td>' +
+                   '<td><input type=\"color\" id=\"'+ shapenum +'Color\" name=\"'+ shapenum +'Color\" value=\"#cc0000\" onchange=UpdateChart();></td>' +
                    '</tr>' +
                    '</table>' +
                    '<h6>'+ shapenum +' Vertices:</h6>' +
@@ -124,7 +124,7 @@ function newshapecard(shapenum){
                    '<th class=\"text-center yvertexheader\"> y (' + length +') </th>' +
                    '</tr>' +
                    '</thead>' +
-                   '<tbody>' +
+                   '<tbody id=\"'+ shapenum +'vertexTableBody\">' +
                    '<tr class=\"user vertex\">' +
                    '<td>1</td>' +
                    '<td><input id=\"'+ shapenum +'firstX\" name=\"'+ shapenum +'x\" class=\"'+ shapenum +'x input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0.0\" onchange=first_to_last(\"'+ shapenum +'\");></td>' +
@@ -198,11 +198,221 @@ function newshapecard(shapenum){
                    '<td><input id=\"rotate_'+ shapenum +'_y\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0\"></td>' +
                    '<td><button type=\"button\" onclick=\"rotateVertices(\''+ shapenum +'\');\" class=\"btn btn-secondary btn-sm\">Rotate</button></td>' +
                    '</tr>' +
+                   '<tr>' +
+                   '<td></td>' +
+                   '<td></td>' +
+                   '<td><button type=\"button\" onclick=\"mirrorY(\''+ shapenum +'\');\" class=\"btn btn-secondary btn-sm\">Mirror about Y</button></td>' +
+                   '<td><button type=\"button\" onclick=\"mirrorX(\''+ shapenum +'\');\" class=\"btn btn-secondary btn-sm\">Mirror about X</button></td>' +
+                   '</tr>' +
                    '</table>' +
                    '</div>' +
                    '</div>' +
                    '</div>'
     
+    return new_card;
+};
+
+//Copy the last shape added
+function copyshapecard(shapenum, copyshapestrg){
+
+    //Set Units
+    let length = "in";
+    let stress = "ksi";
+
+    if (units != "imperial"){
+        length = "mm";
+        stress = "MPa";
+    }
+
+    //Get all of the properties to copy
+    let E = $('#'+ copyshapestrg +'E').val();
+    let Fy =  $('#'+ copyshapestrg +'Fy').val();
+    let shapevoid = $('#'+copyshapestrg+'VoidSelect').val();
+    let plotcolor = $('#'+ copyshapestrg +'Color').val();
+
+    //Get the X,Y vertices Arrays
+    let x = [];
+    let y = [];
+
+    //Get all X coordinates
+    //Items are found in document order so X,Y pairs should be correct
+    $("."+copyshapestrg+"x").each(function(){
+        x.push(Number($(this).val()));
+    });
+
+    //Get all Y coordinates
+    $("."+copyshapestrg+"y").each(function(){
+        y.push(Number($(this).val()));
+    });
+
+    //Put together the HTML string for the copied shape
+    let new_card = '<div class=\"card my-2\" id=\"'+ shapenum +'Card\">' +
+                    '<div class=\"card-header\" id=\"'+ shapenum +'Heading\">' +
+                    '<h5 class=\"mb-0\">' +
+                    '<button type=\"button\" id=\"'+ shapenum +'HeadingButton\" class=\"btn btn-link\" data-toggle=\"collapse\" data-target=\"#'+ shapenum +'Collapse\" aria-expanded=\"flase\" aria-controls=\"'+ shapenum +'Collapse\">' +
+                    ''+ shapenum +' Input Data' +
+                    '</button>' +
+                    '</h5>' +
+                    '</div>' +
+                    '<div id=\"'+ shapenum +'Collapse\" class=\"collapse\" aria-labelledby=\"'+ shapenum +'Heading\" data-parent=\"#accordion\">' +
+                    '<div class=\"card-body\" id=\"'+ shapenum +'Body\">' +
+                    '<h6>'+ shapenum +' Properties:</h6>' +
+                    '<table id=\"'+ shapenum +'PropsTable\" class=\"table table-sm w-auto\">' +
+                    '<tr>' +
+                    '<td>Modulus of Elasticity, E</td>' +
+                    '<td><input id=\"'+ shapenum +'E\" name=\"'+ shapenum +'E\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"'+E+'\"></td>' +
+                    '<td class=\"stress_units\">'+ stress +'</td>' +
+                    '<tr>' +
+                    '<td>Yield Stress: </td>' +
+                    '<td><input id=\"'+ shapenum +'Fy\" name=\"'+ shapenum +'Fy\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"'+Fy+'\"></td>' +
+                    '<td class=\"stress_units\">'+ stress +'</td>' +
+                    '<tr>' +
+                    '<td>Void or Solid?</td>' +
+                    '<td>' +
+                    '<select id=\"'+ shapenum +'VoidSelect\" name=\"'+ shapenum +'Solid\" class=\"input-sm\" style=\"width:95px\" onchange=UpdateChart();>'
+    
+    console.log(shapevoid);
+    console.log(shapevoid == 1)
+    if(shapevoid == 1){
+        new_card += '<option value=\"1\" selected=\"selected\"> Solid </option>' +
+                    '<option value=\"0\"> Void </option>'
+    } else {
+        new_card += '<option value=\"1\"> Solid </option>' +
+                    '<option value=\"0\" selected=\"selected\"> Void </option>'
+    };
+                    
+    new_card += '</select>' +
+                    '</td>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<td>Plot Color</td>' +
+                    '<td><input type=\"color\" id=\"'+ shapenum +'Color\" name=\"'+ shapenum +'Color\" value=\"'+plotcolor+'\" onchange=UpdateChart();></td>' +
+                    '</tr>' +
+                    '</table>' +
+                    '<h6>'+ shapenum +' Vertices:</h6>' +
+                    '<table id=\"'+ shapenum +'vertexTable\" class=\"table table-sm w-auto\">' +
+                    '<thead>' +
+                    '<tr>' +
+                    '<th> Vertex ID </th>' +
+                    '<th class=\"text-center xvertexheader\"> x (' + length +') </th>' +
+                    '<th class=\"text-center yvertexheader\"> y (' + length +') </th>' +
+                    '</tr>' +
+                    '</thead>' +
+                    '<tbody id=\"'+ shapenum +'vertexTableBody\">'
+
+    // Loop through vertices
+    x.forEach(function(item, index){
+        console.log(index);
+        console.log(x.length);
+
+        if (index == 0){
+            new_card += '<tr class=\"user vertex\">' +
+                        '<td>'+(index+1)+'</td>' +
+                        '<td><input id=\"'+ shapenum +'firstX\" name=\"'+ shapenum +'x\" class=\"'+ shapenum +'x input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"'+x[index]+'\" onchange=first_to_last(\"'+ shapenum +'\");></td>' +
+                        '<td><input id=\"'+ shapenum +'firstY\" name=\"'+ shapenum +'y\" class=\"'+ shapenum +'y input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"'+y[index]+'\" onchange=first_to_last(\"'+ shapenum +'\");></td>' +
+                        '</tr>'
+        } else if (index == 1){
+            new_card += '<tr class=\"user vertex\">' +
+                        '<td>'+(index+1)+'</td>' +
+                        '<td><input name=\"'+ shapenum +'x\" class=\"'+ shapenum +'x input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"'+x[index]+'\" onchange=areaAndCentroid(\"'+ shapenum +'\");></td>' +
+                        '<td><input name=\"'+ shapenum +'y\" class=\"'+ shapenum +'y input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"'+y[index]+'\" onchange=areaAndCentroid(\"'+ shapenum +'\");></td>' +
+                        '</tr>'
+        } else if (index == 2){
+            new_card += '<tr class=\"user vertex\">' +
+                        '<td>'+(index+1)+'</td>' +
+                        '<td><input name=\"'+ shapenum +'x\" class=\"'+ shapenum +'x input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"'+x[index]+'\" onchange=areaAndCentroid(\"'+ shapenum +'\");></td>' +
+                        '<td><input name=\"'+ shapenum +'y\" class=\"'+ shapenum +'y input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"'+y[index]+'\" onchange=areaAndCentroid(\"'+ shapenum +'\");></td>' +
+                        '<td>' +
+                        '<button type=\"button\" onclick=addFirstVertexRow(\"'+ shapenum +'\"); class=\"btn btn-secondary btn-success btn-sm\">' +
+                        '<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" class=\"bi bi-plus\" viewBox=\"0 0 16 16\">' +
+                        '<path d=\"M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z\"/>' +
+                        '</svg>' +
+                        '</button>' +
+                        '</td>' +
+                        '</tr>'
+        } else if (index+1 == x.length){
+            new_card += '<tr class=\"vertex\">' +
+                        '<td>Close</td>' +
+                        '<td><input id=\"'+ shapenum +'lastX\" name=\"'+ shapenum +'x\" class=\"'+ shapenum +'x input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"'+x[index]+'\" readonly></td>' +
+                        '<td><input id=\"'+ shapenum +'lastY\" name=\"'+ shapenum +'y\" class=\"'+ shapenum +'y input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"'+y[index]+'\" readonly></td>' +
+                        '</tr>'
+        } else {
+            new_card += '<tr class=\"user vertex\">' +
+            '<td>' + (index+1) + '</td>' +
+            '<td><input name=\"'+ shapenum +'x\" class=\"'+ shapenum +'x input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"'+x[index]+'\" onchange=areaAndCentroid(\"'+ shapenum +'\");></td>' +
+            '<td><input name=\"'+ shapenum +'y\" class=\"'+ shapenum +'y input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"'+y[index]+'\" onchange=areaAndCentroid(\"'+ shapenum +'\");></td>' +
+            '<td>' +
+            '<button type=\"button\" onclick=addVertexRow(this,\''+ shapenum +'\'); class=\"btn btn-secondary btn-success btn-sm\">' +
+            '<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" class=\"bi bi-plus\" viewBox=\"0 0 16 16\">' +
+            '<path d=\"M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z\"/>' +
+            '</svg>' + 
+            '</button>' +
+            '<a href=\"#\" onclick=\"removeVertexRow(this,\''+ shapenum +'\'); return false;\" class=\"badge badge-danger\" style=\"margin-left: 5px\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" class=\"bi bi-trash\" viewBox=\"0 0 16 16\">' +
+            '<path d=\"M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z\"/>' +
+            '<path fill-rule=\"evenodd\" d=\"M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z\"/>' +
+            '</svg></a></td>' +
+            '</tr>'
+        }
+
+    });
+
+    // Add the rest of the card
+    new_card += '</tbody>' +
+                    '</table>' +
+                    '<h6>Quick Properties</h6>' +
+                    '<table class="table table-sm">' +
+                    '<tr>' +
+                    '<td>Area :</td>' +
+                    '<td id="'+ shapenum +'Area"></td>' +
+                    '<td class=\"area_units\">' + length +'<sup>2</sup></td>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<td>x<sub>c</sub></td>' +
+                    '<td id="'+ shapenum +'Xc"></td>' +
+                    '<td class=\"length_units\">' + length +'</td>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<td>y<sub>c</sub></td>' +
+                    '<td id="'+ shapenum +'Yc"></td>' +
+                    '<td class=\"length_units\">' + length +'</td>' +
+                    '</tr>' +
+                    '</table>' +
+                    '<h6>Shape Modifications</h6>'+
+                    '<table class=\"table table-sm\">' +
+                    '<tr>' +
+                    '<td rowspan=\"2\" class=\"text-right align-bottom\">Translation: </td>' +
+                    '<td class=\"text-center\">x</td>' +
+                    '<td class=\"text-center\">y</td>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<td><input id=\"translate_'+ shapenum +'_x\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"1\"></td>' +
+                    '<td><input id=\"translate_'+ shapenum +'_y\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"1\"></td>' +
+                    '<td><button type=\"button\" onclick=\"translateVertices(\''+ shapenum +'\');\" class=\"btn btn-secondary btn-sm\">Translate</button></td>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<td rowspan=\"2\" class=\"align-bottom\">Rotation (degrees)<br>Counter-Clockwise Positive</td>' +
+                    '<td colspan=\"2\" class=\"text-center\">Center of Rotation</td>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<td class=\"text-center\">x</td>' +
+                    '<td class=\"text-center\">y</td>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<td><input id=\"rotate_'+ shapenum +'_theta\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0\"></td>' +
+                    '<td><input id=\"rotate_'+ shapenum +'_x\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0\"></td>' +
+                    '<td><input id=\"rotate_'+ shapenum +'_y\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0\"></td>' +
+                    '<td><button type=\"button\" onclick=\"rotateVertices(\''+ shapenum +'\');\" class=\"btn btn-secondary btn-sm\">Rotate</button></td>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<td></td>' +
+                    '<td></td>' +
+                    '<td><button type=\"button\" onclick=\"mirrorY(\''+ shapenum +'\');\" class=\"btn btn-secondary btn-sm\">Mirror about Y</button></td>' +
+                    '<td><button type=\"button\" onclick=\"mirrorX(\''+ shapenum +'\');\" class=\"btn btn-secondary btn-sm\">Mirror about X</button></td>' +
+                    '</tr>' +
+                    '</table>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>'
     return new_card;
 };
 
@@ -218,12 +428,12 @@ function addFirstVertexRow(shapestrg) {
         '<td><input name=\"'+ shapestrg +'x\" class=\"'+ shapestrg +'x input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0.0\" onchange=areaAndCentroid(\"'+ shapestrg +'\");></td>' +
         '<td><input name=\"'+ shapestrg +'y\" class=\"'+ shapestrg +'y input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0.0\" onchange=areaAndCentroid(\"'+ shapestrg +'\");></td>' +
         '<td>' +
-        '<button type=\"button\" onclick=addVertexRow(this,'+ shapestrg +'); class=\"btn btn-secondary btn-success btn-sm\">' +
+        '<button type=\"button\" onclick=addVertexRow(this,\''+ shapestrg +'\'); class=\"btn btn-secondary btn-success btn-sm\">' +
         '<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" class=\"bi bi-plus\" viewBox=\"0 0 16 16\">' +
         '<path d=\"M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z\"/>' +
         '</svg>' + 
         '</button>' +
-        '<a href=\"#\" onclick=\"removeVertexRow(this,'+ shapestrg +'); return false;\" class=\"badge badge-danger\" style=\"margin-left: 5px\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" class=\"bi bi-trash\" viewBox=\"0 0 16 16\">' +
+        '<a href=\"#\" onclick=\"removeVertexRow(this,\''+ shapestrg +'\'); return false;\" class=\"badge badge-danger\" style=\"margin-left: 5px\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" class=\"bi bi-trash\" viewBox=\"0 0 16 16\">' +
         '<path d=\"M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z\"/>' +
         '<path fill-rule=\"evenodd\" d=\"M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z\"/>' +
         '</svg></a></td>' +
@@ -345,6 +555,73 @@ function rotateVertices(shapestrg){
     areaAndCentroid(shapestrg);
 };
 
+//Function to mirror about local Y-Axis
+function mirrorY(shapestrg){
+
+    let xc = Number($('#'+shapestrg+'Xc').html());
+    let i = 0;
+
+    let x = [];
+
+    //Get all X coordinates
+    //Items are found in document order so X,Y pairs should be correct
+    $("."+shapestrg+"x").each(function(){
+        x.push(Number($(this).val()));
+    });
+
+    //Perform Mirror
+    let xr = [];
+
+    x.forEach(function(item, index){
+
+        let new_x = (-1*(x[index]-xc))+xc;
+        xr.push(new_x);
+
+    });
+
+    // Write Coords back to DOM
+    $("."+shapestrg+"x").each(function(){
+        $(this).val(xr[i]);
+        i++;
+    });
+
+    areaAndCentroid(shapestrg);
+};
+
+//Function to mirror about local X-Axis
+function mirrorX(shapestrg){
+
+    let yc = Number($('#'+shapestrg+'Yc').html());
+    let i = 0;
+
+    let y = [];
+
+    //Get all Y coordinates
+    $("."+shapestrg+"y").each(function(){
+        y.push(Number($(this).val()));
+    });
+
+    //Perform Mirror
+    let yr = [];
+
+    y.forEach(function(item, index){
+
+        let new_y = (-1*(y[index]-yc))+yc;
+
+        yr.push(new_y);
+    });
+
+    // Write Coords back to DOM
+    i=0;
+
+    $("."+shapestrg+"y").each(function(){
+        $(this).val(yr[i]);
+        i++;
+    });
+
+    areaAndCentroid(shapestrg);
+};
+
 function first_to_last(shapestrg){
 
     let x = $("#"+shapestrg+"firstX").val();
@@ -357,8 +634,34 @@ function first_to_last(shapestrg){
 
 };
 
-// Chart update
+//Populate Steel Shape Template List
+function steelShapeList(){
 
+    let shapeset = $('#templateSteelShapeSet').find(":selected").val();
+
+    $.ajax({
+        url: "/steel/steeldbapi",
+        type: "GET",
+        dataType: "json",
+        data:{"shapeset": shapeset, "shapelist": 1},
+
+        success: function(shapelist){
+
+            $('#templateSteelShapeList').empty();
+
+            for (let i=0; i< shapelist.length; i++) {
+                $('#templateSteelShapeList').append('<option value='+ shapelist[i] +'>'+shapelist[i]+'</option>');
+            };
+
+        },
+        error: function(error){
+            console.log("Error:");
+            console.log(error);
+        }
+    });
+};
+
+// Chart update
 function UpdateChart(){
 
     let graphDiv = document.getElementById('SectionPlot')
@@ -540,6 +843,9 @@ function UpdateChart(){
 // This function is used for event handlers after the HTML document loads
 function main() {
 
+    // Initial Populate Steel Shape List Template
+    steelShapeList();
+
     // set units
     units = $('input[name="units"]:checked').val();
 
@@ -561,9 +867,33 @@ function main() {
             t: 80,
             pad: 4
           },
+        xaxis: {
+            showgrid: true,
+            zeroline: true,
+            showline: true,
+            mirror: 'ticks',
+            gridcolor: 'rgba(0,0,0,0.1)',
+            gridwidth: 1,
+            zerolinecolor: 'rgba(0,0,0,0.2)',
+            zerolinewidth: 2,
+            linecolor:'rgba(0,0,0,0.1)',
+            linewidth: 1
+          },
         yaxis: {
+            showgrid: true,
+            zeroline: true,
+            showline: true,
+            mirror: 'ticks',
+            gridcolor: 'rgba(0,0,0,0.1)',
+            gridwidth: 1,
+            zerolinecolor: 'rgba(0,0,0,0.2)',
+            zerolinewidth: 2,
+            linecolor: 'rgba(0,0,0,0.1)',
+            linewidth: 1,
             scaleanchor: "x",
-        }
+        },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)'
     };
 
     var trace1 = {
@@ -696,6 +1026,29 @@ function main() {
         $("#accordion").append(new_card);
         modelRun = 0;
 
+        //add next shape to templating select
+        let option = "<option value='shape"+shape_count+"' > shape"+shape_count+"</option>";
+        $("#templateSelectedShape").append(option);
+
+        areaAndCentroid(shapestrg);
+
+    });
+
+    $("#copy_shape").click(function(){
+
+        shape_count += 1;
+        $("#numshapes").val(shape_count);
+        let shapestrg = "shape"+shape_count;
+        let prevstrg = "shape"+(shape_count-1);
+        let new_card = copyshapecard(shapestrg,prevstrg);
+        
+        $("#accordion").append(new_card);
+        modelRun = 0;
+
+        //add next shape to templating select
+        let option = "<option value='shape"+shape_count+"' > shape"+shape_count+"</option>";
+        $("#templateSelectedShape").append(option);
+
         areaAndCentroid(shapestrg);
 
     });
@@ -706,6 +1059,9 @@ function main() {
             let shapestrg = 'shape'+ shape_count;
 
             $("#"+shapestrg+"Card").remove();
+
+            //remove last shape from templating select
+            $("#templateSelectedShape option[value='shape"+shape_count+"']").remove();
 
             shape_count -= 1;
             $("#numshapes").val(shape_count);
