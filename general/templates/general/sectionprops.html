@@ -3,6 +3,7 @@
 
 {% block scripts %}
 <script src="{{ url_for('general_bp.static', filename='js/SectionProps.js') }}"></script>
+<script src="{{ url_for('general_bp.static', filename='js/ShapeTemplates.js') }}"></script>
 <script src="{{ url_for('static', filename='js/plotly-2.9.0.min.js') }}"></script>
 {% endblock scripts %}
 
@@ -19,6 +20,11 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
                 <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
                 </svg> Add Another Shape
+            </button>
+            <button type="button" class="btn btn-secondary btn-warning btn-sm" id="copy_shape">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                </svg> Copy Last Shape
             </button>
             <button type="button" class="btn btn-secondary btn-danger btn-sm" id="remove_shape">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
@@ -49,11 +55,179 @@
                 <h7>Shape Count: <input id="numshapes" name="numshapes" class="numshapes input-sm" style="width:95px" type="number" step="any" value="{{ inputs["ShapeCount"] }}" readonly></h7>
 
                 <!-- Begin Accordion -->
-                <div id="accordion">
+                <div id="accordion" class="my-3">
+                    <!-- Shape Templates -->
+                    <div class="card my-2" id="shapeTemplatesCard">
+                        <div class="card-header" id="shapeTemplatesHeading">
+                            <button id="shapeTemplatesHeadingButton" type="button" class="btn btn-link" data-toggle="collapse" data-target="#shapeTemplatesCollapse" aria-expanded="flase" aria-controls="shapeTemplatesCollapse">
+                                Shape Templates
+                            </button>
+                        </div>
+
+                        <div id="shapeTemplatesCollapse" class="collapse" aria-labelledby="shapeTemplatesHeading" data-parent="#accordion">
+                            <div class="container my-1">
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <label for="templateSelectedShape">Select the Shape for Template results:</label>
+                                        <select id="templateSelectedShape" name="templateSelectedShape">
+                                            {% for shape in inputs["ShapesIn"] %}
+                                            <option value="shape{{ loop.index }}">shape{{ loop.index }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- Rectangle -->
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <h5>Rectangle:</h5>
+                                        <table class="table table-sm w-auto">
+                                            <tr>
+                                                <td>B:</td>
+                                                <td><input id="templateRectangleB" name="templateRectangleB" class="input-sm" style="width:95px" type="number" step="any" value="1"></td>
+                                                <td>Width</td>
+                                            </tr>
+                                            <tr>
+                                                <td>H:</td>
+                                                <td><input id="templateRectangleH" name="templateRectangleH" class="input-sm" style="width:95px" type="number" step="any" value="1"></td>
+                                                <td>Height</td>
+                                            </tr>
+                                        </table>
+                                        <button type="button" onclick="rectangle();" class="btn btn-secondary btn-sm">Apply Rectangle</button>
+                                    </div>
+                                </div>
+                                <!-- Trapezoid -->
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <h5>Flat Base Trapezoid</h5>
+                                        <table class="table table-sm w-auto">
+                                            <tr>
+                                                <tr>
+                                                    <td>B:</td>
+                                                    <td><input id="templateTrapB" name="templateTrapB" class="input-sm" style="width:95px" type="number" step="any" value="1"></td>
+                                                    <td>Base Width</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>H<sub>0</sub>:</td>
+                                                    <td><input id="templateTrapH1" name="templateTrapH1" class="input-sm" style="width:95px" type="number" step="any" value="1"></td>
+                                                    <td>Height at (0,0)</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>H<sub>B</sub>:</td>
+                                                    <td><input id="templateTrapH2" name="templateTrapH2" class="input-sm" style="width:95px" type="number" step="any" value="0.5"></td>
+                                                    <td>Height at (B,0)</td>
+                                                </tr>
+                                            </tr>
+                                        </table>
+                                        <button type="button" onclick="flatbaseTrapezoid();" class="btn btn-secondary btn-sm">Apply Flat Base Trapezoid</button>
+                                    </div>
+                                </div>
+                                <!-- Right Triangle -->
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <h5>Right Triangle:</h5>
+                                        <table class="table table-sm w-auto">
+                                            <tr>
+                                                <td>B:</td>
+                                                <td><input id="templateRTriangleB" name="templateRTriangleB" class="input-sm" style="width:95px" type="number" step="any" value="1"></td>
+                                                <td>Width</td>
+                                            </tr>
+                                            <tr>
+                                                <td>H:</td>
+                                                <td><input id="templateRTriangleH" name="templateRTriangleH" class="input-sm" style="width:95px" type="number" step="any" value="1"></td>
+                                                <td>Height</td>
+                                            </tr>
+                                        </table>
+                                        <button type="button" onclick="rightTriangle();" class="btn btn-secondary btn-sm">Apply Right Triangle</button>
+                                    </div>
+                                </div>
+                                <!-- General Triangle -->
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <h5>General Triangle:</h5>
+                                        <table class="table table-sm w-auto">
+                                            <tr>
+                                                <td>S1:</td>
+                                                <td><input id="templateGTriangleS1" name="templateGTriangleS1" class="input-sm" style="width:95px" type="number" step="any" value="1"></td>
+                                                <td>Base Length</td>
+                                            </tr>
+                                            <tr>
+                                                <td>S2:</td>
+                                                <td><input id="templateGTriangleS2" name="templateGTriangleS2" class="input-sm" style="width:95px" type="number" step="any" value="1"></td>
+                                                <td>Side 2 Length</td>
+                                            </tr>
+                                            <tr>
+                                                <td>S3:</td>
+                                                <td><input id="templateGTriangleS3" name="templateGTriangleS3" class="input-sm" style="width:95px" type="number" step="any" value="1"></td>
+                                                <td>Side 3 Length</td>
+                                            </tr>
+                                        </table>
+                                        <button type="button" onclick="generalTriangle();" class="btn btn-secondary btn-sm">Apply General Triangle</button>
+                                    </div>
+                                </div>
+                                <!-- Bezier Fillet -->
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <h5>Bezier Fillet in Right Angle:</h5>
+                                        <table class="table table-sm w-auto">
+                                            <tr>
+                                                <td>B:</td>
+                                                <td><input id="templateParaFilletB" name="templateParaFilletB" class="input-sm" style="width:95px" type="number" step="any" value="1"></td>
+                                                <td>Fillet Width</td>
+                                            </tr>
+                                            <tr>
+                                                <td>H:</td>                                            
+                                                <td><input id="templateParaFilletH" name="templateParaFilletH" class="input-sm" style="width:95px" type="number" step="any" value="1"></td>
+                                                <td>Fillet Height</td>
+                                            </tr>
+                                        </table>
+                                        <button type="button" onclick="bezierFillet();" class="btn btn-secondary btn-sm">Apply Bezier Fillet</button>
+                                    </div>
+                                </div>
+                                <!-- Steel Shapes - Work in Progress -->
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <h5>Steel Shapes:</h5>
+                                        <table class="table table-sm w-auto">
+                                            <tr>
+                                                <td>Shape Set: </td>
+                                                <td>
+                                                    <select id="templateSteelShapeSet" class="templateSteelShapeSet input-sm" name="templateSteelShapeSet" style="width:150px" onchange="steelShapeList();">
+                                                        <option value="WF">W</option>
+                                                        <!-- <option value="S">S</option> -->
+                                                        <!-- <option value="M">M</option> --> 
+                                                        <!-- <option value="HP">HP</option> -->
+                                                        <option value="WT">WT</option>
+                                                        <!-- <option value="ST">ST</option> -->
+                                                        <!-- <option value="MT">MT</option> -->
+                                                        <!-- <option value="C">C</option> -->
+                                                       <!--  <option value="MC">MC</option> -->
+                                                        <option value="L">L</option>
+                                                        <!-- <option value="HSS_RECT">HSS Rectangular</option> -->
+                                                        <!-- <option value="HSS_SQR">HSS Square</option> -->
+                                                        <!-- <option value="HSS_RND">HSS Round</option> -->
+                                                        <!-- <option value="PIPE">Pipe</option> -->
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Shapes: </td>
+                                                <td>
+                                                    <select id="templateSteelShapeList" class="templateSteelShapeList input-sm" name="templateSteelShapeList" style="width:150px">
+                                                    <!-- Populate options with Javascript-->
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <button type="button" onclick="steelShapeTemplate();" class="btn btn-secondary btn-sm">Apply Steel Shape</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <!-- loop through input shapes -->
                     {% for shape in inputs["ShapesIn"] %}                    
                     <!-- Shape Card -->
-                    <div class="card" id="shape{{ loop.index }}Card">
+                    <div class="card my-2" id="shape{{ loop.index }}Card">
                         <div class="card-header" id="shape{{ loop.index }}Heading">
                             <h5 class="mb-0">
                                 <button id="shape{{ loop.index }}HeadingButton" type="button" class="btn btn-link" data-toggle="collapse" data-target="#shape{{ loop.index }}Collapse" aria-expanded="flase" aria-controls="shape{{ loop.index }}Collapse">
@@ -68,11 +242,11 @@
                                 <table id="shape{{ loop.index }}PropsTable" class="table table-sm w-auto">
                                     <tr>
                                         <td>Modulus of Elasticity, E</td>
-                                        <td><input name="shape{{ loop.index }}E" class="input-sm" style="width:95px" type="number" step="any" value="{{ shape["E"] }}"></td>
+                                        <td><input id="shape{{ loop.index }}E" name="shape{{ loop.index }}E" class="input-sm" style="width:95px" type="number" step="any" value="{{ shape["E"] }}"></td>
                                         <td class="stress_units">{{ "ksi" if inputs["units"] == "imperial" else "MPa" }}</td>
                                     <tr>
                                         <td>Yield Stress: </td>
-                                        <td><input name="shape{{ loop.index }}Fy" class="input-sm" style="width:95px" type="number" step="any" value="{{ shape["Fy"] }}"></td>
+                                        <td><input id="shape{{ loop.index }}Fy" name="shape{{ loop.index }}Fy" class="input-sm" style="width:95px" type="number" step="any" value="{{ shape["Fy"] }}"></td>
                                         <td class="stress_units">{{ "ksi" if inputs["units"] == "imperial" else "MPa" }}</td>
                                     <tr>
                                         <td>Void or Solid?</td>
@@ -97,7 +271,7 @@
                                         <th class="text-center yvertexheader"> y ({{ "in" if inputs["units"] == "imperial" else "mm" }}) </th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody id="shape{{ loop.index }}vertexTableBody">
                                     <!-- Persist Form Data from Input after POST -->
                                     {% set outer_loop = loop %}
                                     {% for x in shape["X"] %}
@@ -114,12 +288,12 @@
                                     <td><input name="shape{{ outer_loop.index }}x" class="shape{{ outer_loop.index }}x input-sm" style="width:95px" type="number" step="any" value="{{x}}" onchange="areaAndCentroid('shape{{ outer_loop.index }}');"></td>
                                     <td><input name="shape{{ outer_loop.index }}y" class="shape{{ outer_loop.index }}y input-sm" style="width:95px" type="number" step="any" value="{{shape["Y"][loop.index0]}}" onchange="areaAndCentroid('shape{{ outer_loop.index }}');"></td>
                                     <td>
-                                        <button type="button" onclick="addVertexRow(this);" class="btn btn-secondary btn-success btn-sm">
+                                        <button type="button" onclick="addVertexRow(this,'shape{{ outer_loop.index }}');" class="btn btn-secondary btn-success btn-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
                                         <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
                                         </svg>
                                         </button>
-                                        <a href="#" onclick="removeVertexRow(this); return false;" class="badge badge-danger" style="margin-left: 5px">
+                                        <a href="#" onclick="removeVertexRow(this,'shape{{ outer_loop.index }}'); return false;" class="badge badge-danger" style="margin-left: 5px">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
                                             <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
                                             <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
@@ -192,7 +366,13 @@
                                         <td><input id="rotate_shape{{ loop.index }}_theta" class="input-sm" style="width:95px" type="number" step="any" value="0"></td>
                                         <td><input id="rotate_shape{{ loop.index }}_x" class="input-sm" style="width:95px" type="number" step="any" value="0"></td>
                                         <td><input id="rotate_shape{{ loop.index }}_y" class="input-sm" style="width:95px" type="number" step="any" value="0"></td>
-                                        <td><button type="button" onclick="rotateVertices('shape{{ loop.index }}');;" class="btn btn-secondary btn-sm">Rotate</button></td>
+                                        <td><button type="button" onclick="rotateVertices('shape{{ loop.index }}');" class="btn btn-secondary btn-sm">Rotate</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td><button type="button" onclick="mirrorY('shape{{ loop.index }}');" class="btn btn-secondary btn-sm">Mirror about Y</button></td>
+                                        <td><button type="button" onclick="mirrorX('shape{{ loop.index }}');" class="btn btn-secondary btn-sm">Mirror about X</button></td>
                                     </tr>
                                 </table>
                             </div>
