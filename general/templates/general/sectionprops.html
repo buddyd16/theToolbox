@@ -407,6 +407,12 @@
         <tr><td class="text-right text-nowrap">r<sub>yy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].ryy)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the YY-axis</td></tr>
         <tr><td class="text-right text-nowrap">r<sub>zz</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].rzz)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the ZZ-axis</td></tr>
     </table>
+    <!-- Plastic Modulus -->
+    <table class="table table-striped table-hover table-sm table-dark">
+        <tr><td colspan="3" class="text-center text-nowrap"><strong><u>Plastic XX,YY Properties</u></strong></td></tr>
+        <tr><td class="text-right text-nowrap">Z<sub>xx</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Zxx["Zx"])}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Plastic Section Modulus Parallel to the XX-Axis</td></tr>
+        <tr><td class="text-right text-nowrap">Z<sub>yy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Zyy["Zy"])}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Plastic Section Modulus Parallel to the YY-Axis</td></tr>
+    </table>
     <!-- Principal Axis Properties -->
     <table class="table table-striped table-hover table-sm table-dark">
         <tr><td colspan="3" class="text-center text-nowrap"><strong><u>Principal Axis</u></strong></td></tr>
