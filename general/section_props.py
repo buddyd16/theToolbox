@@ -132,7 +132,33 @@ class Section:
     def change_n(self, n):
         self.n = n
         self.calc_props()
-            
+    
+    def segments(self):
+        '''
+        return ordered coordinate pairs defining the line segments
+        of each side of the section.
+        '''
+        segments = [[[self.x[i[0]],self.y[j[0]]],[self.x[i[0]+1],self.y[j[0]+1]]] for i,j in zip(enumerate(self.x[1:]),enumerate(self.y[1:]))]
+        
+        self.segments = segments
+
+        return segments
+
+    def transformed_segments(self, xo, yo, angle_degrees):
+        '''
+        given an angle in degrees
+        and coordinate to translate about
+        return the transformed vertices segment pairs
+        '''
+        theta = math.radians(angle_degrees)
+
+        x_tr = [(x-xo)*math.cos(theta)+(y-yo)*math.sin(theta) for x,y in zip(self.x, self.y)]
+        y_tr = [-1.0*(x-xo)*math.sin(theta)+(y-yo)*math.cos(theta) for x,y in zip(self.x, self.y)]
+
+        segments = [[[x_tr[i[0]],y_tr[j[0]]],[x_tr[i[0]+1],y_tr[j[0]+1]]] for i,j in zip(enumerate(x_tr[1:]),enumerate(y_tr[1:]))]
+
+        return segments
+
     def calc_props(self):
         x = self.x
         y = self.y
@@ -334,40 +360,46 @@ class Section:
             
             return [Ix, Iy, Ixy]
     
-    def transformed_vertices(self, xo, yo, angle):
+    def transformed_vertices_degrees(self, xo, yo, angle, commit=0):
         '''
         given an angle in degrees
         and coordinate to translate about
-        return the transformed values of the shape vertices       
+        return the transformed values of the shape vertices
         '''
         theta = math.radians(angle)
-        
-        x_t = [(x-xo)*math.cos(theta)+(y-yo)*math.sin(theta) for x,y in zip(self.x, self.y)]
-        y_t = [-1.0*(x-xo)*math.sin(theta)+(y-yo)*math.cos(theta) for x,y in zip(self.x, self.y)]
-        
-        x_t = [i+xo for i in x_t]
-        y_t = [j+yo for j in y_t]
-        
-        self.x = x_t
-        self.y = y_t
-        
-        self.calc_props()
-        
-        return [x_t, y_t]
+
+        x_tr = [(x-xo)*math.cos(theta)+(y-yo)*math.sin(theta) for x,y in zip(self.x, self.y)]
+        y_tr = [-1.0*(x-xo)*math.sin(theta)+(y-yo)*math.cos(theta) for x,y in zip(self.x, self.y)]
+
+        # Commit transformation to Section
+        if commit == 1:
+            self.x = x_tr
+            self.y = y_tr
+
+            self.calc_props()
+        else:
+            pass
+
+        return [x_tr, y_tr]
     
-    def translate_vertices(self, xo, yo):
+    def translate_vertices(self, xo, yo, commit=0):
         '''
         give an x and y translation
-        shift the shape vertices by the x and y amount
+        shift or return the shifted
+        shape vertices by the x and y amount
         '''
         x_t = [x+xo for x in self.x]
         y_t = [y+yo for y in self.y]
-        
-        self.x = x_t
-        self.y = y_t
-        
-        self.calc_props()
-        
+
+        # Commit the translation to the shape
+        if commit == 1:
+            self.x = x_t
+            self.y = y_t
+
+            self.calc_props()
+        else:
+            pass
+
         return [x_t, y_t]
         
     def transformed_properties(self, x, y, angle):
@@ -385,7 +417,7 @@ class Section:
             Ix, Iy, Ixy = self.parallel_axis_theorem(x,y)
             
             two_theta = 2*math.radians(angle)
-            # I on principle Axis
+            # I on principal Axis
             
             temp = (Ix+Iy)/2.0
             temp2 = (Ix-Iy)/2.0
@@ -540,6 +572,95 @@ class Composite_Section:
         v2 = coordinate_rotation(self.xx_axis[2],self.xx_axis[3],self.cx,self.cy,self.theta2)
         
         self.vv_axis = [v1[0],v1[1],v2[0],v2[1]]
+    
+    def bounding_box(self):
+        x = []
+        y = []
+
+        for section in self.sections:
+            x.extend(section.x)
+            y.extend(section.y)
+        
+        height = max(y)-min(y)
+        width = max(x)-min(x)
+        
+        return {"MinX":min(x),"MaxX":max(x),"MinY":min(y),"MaxY":max(y),"Height":height,"Width":width}
+      
+    def plastic_Zx(self, tol=1E-8, max_iters=100, baseFy = 36):
+        
+        bbox = self.bounding_box()
+        a = bbox["Height"]
+        b = 0
+        c = b
+        
+        plastic_a = plastic_forceandmoment(self.sections,a, 0, (self.cx,self.cy))
+        fa = plastic_a["C"]+plastic_a["T"]
+        
+        plastic_b = plastic_forceandmoment(self.sections,b, 0, (self.cx,self.cy))
+        fb = plastic_b["C"]+plastic_b["T"]
+        fc = fb
+        
+        i = 0
+        
+        while (abs(fc) > tol and i <= max_iters):
+            c = (a+b)/2
+            
+            plastic_c = plastic_forceandmoment(self.sections,c, 0, (self.cx,self.cy))
+            fc = plastic_c["C"]+plastic_c["T"]
+            print(fc)
+            
+            if fc < 0:
+                b = c
+            else:
+                a = c
+                
+            i += 1
+        
+        Zx = plastic_c["M"]/baseFy
+        err = plastic_c["C"]+plastic_c["T"]
+        axis = self.cy + (bbox["MaxY"]-c)
+        
+        self.Zxx = {"AxisY":axis,"Zx":Zx,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
+
+        return {"AxisY":axis,"Zx":Zx,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
+
+    def plastic_Zy(self, tol=1E-8, max_iters=100, baseFy = 36):
+        
+        bbox = self.bounding_box()
+        a = bbox["Width"]
+        b = 0
+        c = b
+        
+        plastic_a = plastic_forceandmoment(self.sections,a, 90, (self.cx,self.cy))
+        fa = plastic_a["C"]+plastic_a["T"]
+        
+        plastic_b = plastic_forceandmoment(self.sections,b, 90, (self.cx,self.cy))
+        plastic_c = plastic_b
+        fb = plastic_b["C"]+plastic_b["T"]
+        fc = fb
+        
+        i = 0
+        
+        while (abs(fc) > tol and i <= max_iters):
+            c = (a+b)/2
+            
+            plastic_c = plastic_forceandmoment(self.sections,c, 90, (self.cx,self.cy))
+            fc = plastic_c["C"]+plastic_c["T"]
+            print(fc)
+            
+            if fc < 0:
+                b = c
+            else:
+                a = c
+                
+            i += 1
+        
+        Zy = plastic_c["M"]/baseFy
+        err = plastic_c["C"]+plastic_c["T"]
+        axis = self.cx + (bbox["MaxX"]-c)
+        
+        self.Zyy = {"AxisX":axis,"Zy":Zy,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
+        return {"AxisX":axis,"Zy":Zy,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
 
 def circle_coordinates(x,y,r,start,end):
     '''
@@ -789,7 +910,7 @@ def split_shape_above_horizontal_line(shape, line_y, solid=True, n=1):
                     
     return sub_shapes       
 
-def stl_wf(d,bf,tf,tw,k):
+def stl_wf(d,bf,tf,tw,k, Fy=50, E=29000):
     '''
     given the defining geometric
     properties for a Wide Flange from
@@ -869,7 +990,7 @@ def stl_wf(d,bf,tf,tw,k):
     x.extend([0,0])
     y.extend([tf,0])
     
-    WF = Section(x,y)
+    WF = Section(x,y, Fy=Fy, E=E)
     
     return WF
     
@@ -933,8 +1054,123 @@ def stl_angle(vleg, hleg, thickness, k):
     
     return Angle
 
+def plastic_forceandmoment(shapes, axis_depth, rotation, rotation_point):
+    '''
+    shapes = list of cross sections, list
+    axis_depth = depth of plastic axis from maximum y coordinate of shapes, float
+    rotation = counterclockwise rotation to the axis considered, float
+    rotation_point = center point of the rotation, typically the centroid, tuple
+    '''
 
+    # Generate Segments
+    segments = []
+    fy = []
+    T = 0
+    C = 0
+    Maxis = 0
+    
+    x0 = rotation_point[0]
+    y0 = rotation_point[1]
 
+    for shape in shapes:
+        shape_segments = shape.transformed_segments(x0,y0,rotation)
+        shape_fy = [shape.Fy]*len(shape_segments)
+        segments.extend(shape_segments)
+        fy.extend(shape_fy)
+        
+    # Agregate Y coordinates
+    y = []
+
+    for segment in segments:
+        y.extend([segment[0][1],segment[1][1]])
+    
+    axis = max(y) - axis_depth
+    
+    for i,segment in enumerate(segments):
+        
+        x1 = segment[0][0]
+        y1 = segment[0][1]
+        x2 = segment[1][0]
+        y2 = segment[1][1]
+        f = fy[i]
+    
+        if y1 <= axis and y2<= axis:
+            # segment is below the axis
+            # Opposite sign for Axial and Moment
+            axial = -1*0.5*f*(x1+x2)*(y1-y2)
+            T += (-1*axial)
+            
+            moment = (1/6.0)*f*(y2-y1)*((x1*((2*y1)+y2))+(x2*(y1+(2*y2))))
+            Maxis += (-1*moment)
+        
+        elif y1 > axis and y2 > axis:
+            # Segment is entirely above the axis
+            # Standard sign for Axial and Moment
+            axial = -1*0.5*f*(x1+x2)*(y1-y2)
+            C += axial
+            
+            moment = (1/6.0)*f*(y2-y1)*((x1*((2*y1)+y2))+(x2*(y1+(2*y2))))
+            Maxis += moment
+        
+        else:
+            # Axis bisects the segment
+            # Using parametric formula generate two new segments
+            
+            # y(t) = y1 + t (y2 - y1)
+            # t = (axis - y1) / (y2-y1)
+            
+            t = (axis - y1)/(y2-y1)
+            
+            x3 = x1 + (t*(x2-x1))
+            y3 = axis
+            
+            if y1 < axis:
+                # First Segment is below axis
+                axial = -1*0.5*f*(x1+x3)*(y1-y3)
+                T += (-1*axial)
+                
+                moment = (1/6.0)*f*(y3-y1)*((x1*((2*y1)+y3))+(x3*(y1+(2*y3))))
+                Maxis += (-1*moment)
+                
+                # Second Segment is above axis
+                axial = -1*0.5*f*(x3+x2)*(y3-y2)
+                C += axial
+                
+                moment = (1/6.0)*f*(y2-y3)*((x3*((2*y3)+y2))+(x2*(y3+(2*y2))))
+                Maxis += moment
+            else:
+                # First Segment is above axis
+                axial = -1*0.5*f*(x1+x3)*(y1-y3)
+                C += axial
+                
+                moment = (1/6.0)*f*(y3-y1)*((x1*((2*y1)+y3))+(x3*(y1+(2*y3))))
+                Maxis += moment
+                
+                # Second Segment is below axis
+                axial = -1*0.5*f*(x3+x2)*(y3-y2)
+                T += (-1*axial)
+                
+                moment = (1/6.0)*f*(y2-y3)*((x3*((2*y3)+y2))+(x2*(y3+(2*y2))))
+                Maxis += (-1*moment)
+    
+    return {"C":C,"T":T,"M":Maxis}
+
+### TEST AREA ###
+if __name__ == "__main__":
+    
+    shape = stl_wf(12.1, 8.05, 0.575, 0.335, 1.08,Fy=50)
+    pl = Section([-0.975,9.025,9.025,-0.975,-0.975],[-0.5,-0.5,0,0,-0.5],Fy=36)
+    
+    #out = plastic_forceandmoment([shape], 4.025, 90, (shape.cx,shape.cy))
+    
+    composite = Composite_Section()
+    composite.add_section(shape)
+    composite.add_section(pl)
+    
+    composite.calculate_properties()
+    
+    Zx = composite.plastic_Zx(baseFy=50)
+    Zy = composite.plastic_Zy(baseFy=50)
 
 
 

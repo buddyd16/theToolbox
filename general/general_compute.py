@@ -52,9 +52,12 @@ def sectionProps(sections):
         composite.add_section(shapes[-1])
     
     composite.calculate_properties()
-
-    for k,output in enumerate(composite.output_strings):
-        print(f"{output}: {composite.output[k]}")
+    basefy = sections[0]["Fy"]
+    print(basefy)
+    Zx = composite.plastic_Zx(baseFy = basefy)
+    Zy = composite.plastic_Zy(baseFy = basefy)
+    print(Zx)
+    print(Zy)
 
     # END NEW STUFF
     
