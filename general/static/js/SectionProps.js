@@ -24,7 +24,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 // Compute the Shape Area and Centroid
 function areaAndCentroid(shapestrg){
-
+    let modstrg = $('#modificationsSelectedShape').val();
     let area = 0;
     let cx = 0;
     let cy = 0;
@@ -60,6 +60,11 @@ function areaAndCentroid(shapestrg){
     $('#'+shapestrg+'Area').html(area.toFixed(4).toString());
     $('#'+shapestrg+'Xc').html(cx.toFixed(4).toString());
     $('#'+shapestrg+'Yc').html(cy.toFixed(4).toString());
+
+    if (modstrg == shapestrg){
+        $('#mod_xc').html("Shape X<sub>c</sub>: "+cx.toFixed(4).toString());
+        $('#mod_yc').html("Shape Y<sub>c</sub>: "+cy.toFixed(4).toString());
+    }
 
     UpdateChart();
 
@@ -170,39 +175,6 @@ function newshapecard(shapenum){
                    '<td>y<sub>c</sub></td>' +
                    '<td id="'+ shapenum +'Yc"></td>' +
                    '<td class=\"length_units\">' + length +'</td>' +
-                   '</tr>' +
-                   '</table>' +
-                   '<h6>Shape Modifications</h6>'+
-                   '<table class=\"table table-sm\">' +
-                   '<tr>' +
-                   '<td rowspan=\"2\" class=\"text-right align-bottom\">Translation: </td>' +
-                   '<td class=\"text-center\">x</td>' +
-                   '<td class=\"text-center\">y</td>' +
-                   '</tr>' +
-                   '<tr>' +
-                   '<td><input id=\"translate_'+ shapenum +'_x\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"1\"></td>' +
-                   '<td><input id=\"translate_'+ shapenum +'_y\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"1\"></td>' +
-                   '<td><button type=\"button\" onclick=\"translateVertices(\''+ shapenum +'\');\" class=\"btn btn-secondary btn-sm\">Translate</button></td>' +
-                   '</tr>' +
-                   '<tr>' +
-                   '<td rowspan=\"2\" class=\"align-bottom\">Rotation (degrees)<br>Counter-Clockwise Positive</td>' +
-                   '<td colspan=\"2\" class=\"text-center\">Center of Rotation</td>' +
-                   '</tr>' +
-                   '<tr>' +
-                   '<td class=\"text-center\">x</td>' +
-                   '<td class=\"text-center\">y</td>' +
-                   '</tr>' +
-                   '<tr>' +
-                   '<td><input id=\"rotate_'+ shapenum +'_theta\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0\"></td>' +
-                   '<td><input id=\"rotate_'+ shapenum +'_x\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0\"></td>' +
-                   '<td><input id=\"rotate_'+ shapenum +'_y\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0\"></td>' +
-                   '<td><button type=\"button\" onclick=\"rotateVertices(\''+ shapenum +'\');\" class=\"btn btn-secondary btn-sm\">Rotate</button></td>' +
-                   '</tr>' +
-                   '<tr>' +
-                   '<td></td>' +
-                   '<td></td>' +
-                   '<td><button type=\"button\" onclick=\"mirrorY(\''+ shapenum +'\');\" class=\"btn btn-secondary btn-sm\">Mirror about Y</button></td>' +
-                   '<td><button type=\"button\" onclick=\"mirrorX(\''+ shapenum +'\');\" class=\"btn btn-secondary btn-sm\">Mirror about X</button></td>' +
                    '</tr>' +
                    '</table>' +
                    '</div>' +
@@ -376,40 +348,7 @@ function copyshapecard(shapenum, copyshapestrg){
                     '<td id="'+ shapenum +'Yc"></td>' +
                     '<td class=\"length_units\">' + length +'</td>' +
                     '</tr>' +
-                    '</table>' +
-                    '<h6>Shape Modifications</h6>'+
-                    '<table class=\"table table-sm\">' +
-                    '<tr>' +
-                    '<td rowspan=\"2\" class=\"text-right align-bottom\">Translation: </td>' +
-                    '<td class=\"text-center\">x</td>' +
-                    '<td class=\"text-center\">y</td>' +
-                    '</tr>' +
-                    '<tr>' +
-                    '<td><input id=\"translate_'+ shapenum +'_x\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"1\"></td>' +
-                    '<td><input id=\"translate_'+ shapenum +'_y\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"1\"></td>' +
-                    '<td><button type=\"button\" onclick=\"translateVertices(\''+ shapenum +'\');\" class=\"btn btn-secondary btn-sm\">Translate</button></td>' +
-                    '</tr>' +
-                    '<tr>' +
-                    '<td rowspan=\"2\" class=\"align-bottom\">Rotation (degrees)<br>Counter-Clockwise Positive</td>' +
-                    '<td colspan=\"2\" class=\"text-center\">Center of Rotation</td>' +
-                    '</tr>' +
-                    '<tr>' +
-                    '<td class=\"text-center\">x</td>' +
-                    '<td class=\"text-center\">y</td>' +
-                    '</tr>' +
-                    '<tr>' +
-                    '<td><input id=\"rotate_'+ shapenum +'_theta\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0\"></td>' +
-                    '<td><input id=\"rotate_'+ shapenum +'_x\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0\"></td>' +
-                    '<td><input id=\"rotate_'+ shapenum +'_y\" class=\"input-sm\" style=\"width:95px\" type=\"number\" step=\"any\" value=\"0\"></td>' +
-                    '<td><button type=\"button\" onclick=\"rotateVertices(\''+ shapenum +'\');\" class=\"btn btn-secondary btn-sm\">Rotate</button></td>' +
-                    '</tr>' +
-                    '<tr>' +
-                    '<td></td>' +
-                    '<td></td>' +
-                    '<td><button type=\"button\" onclick=\"mirrorY(\''+ shapenum +'\');\" class=\"btn btn-secondary btn-sm\">Mirror about Y</button></td>' +
-                    '<td><button type=\"button\" onclick=\"mirrorX(\''+ shapenum +'\');\" class=\"btn btn-secondary btn-sm\">Mirror about X</button></td>' +
-                    '</tr>' +
-                    '</table>' +
+                    '</table>' +                    
                     '</div>' +
                     '</div>' +
                     '</div>'
@@ -483,10 +422,10 @@ function removeVertexRow(btn, shapestrg){
 };
 
 //Function to translate a shapes vertices
-function translateVertices(shapestrg){
-
-    let xt = Number($("#translate_"+shapestrg+"_x").val());
-    let yt = Number($("#translate_"+shapestrg+"_y").val());
+function translateVertices(){
+    let shapestrg = $('#modificationsSelectedShape').val();
+    let xt = Number($("#translate_shape_x").val());
+    let yt = Number($("#translate_shape_y").val());
 
     $("."+shapestrg+"x").each(function(){
         let x = Number($(this).val()) + xt;
@@ -504,11 +443,11 @@ function translateVertices(shapestrg){
 };
 
 //Function to rotate shapes vertices around a defined center point
-function rotateVertices(shapestrg){
-
-    let rotation_degrees = Number($("#rotate_"+shapestrg+"_theta").val());
-    let xc = Number($("#rotate_"+shapestrg+"_x").val());
-    let yc = Number($("#rotate_"+shapestrg+"_y").val());
+function rotateVertices(){
+    let shapestrg = $('#modificationsSelectedShape').val();
+    let rotation_degrees = Number($("#rotate_shape_theta").val());
+    let xc = Number($("#rotate_shape_x").val());
+    let yc = Number($("#rotate_shape_y").val());
     let angle = degreesToRadians(rotation_degrees);
     let i = 0;
 
@@ -556,8 +495,8 @@ function rotateVertices(shapestrg){
 };
 
 //Function to mirror about local Y-Axis
-function mirrorY(shapestrg){
-
+function mirrorlocalY(){
+    let shapestrg = $('#modificationsSelectedShape').val();
     let xc = Number($('#'+shapestrg+'Xc').html());
     let i = 0;
 
@@ -588,9 +527,41 @@ function mirrorY(shapestrg){
     areaAndCentroid(shapestrg);
 };
 
-//Function to mirror about local X-Axis
-function mirrorX(shapestrg){
+//Function to mirror about global Y-Axis
+function mirrorY(){
+    let shapestrg = $('#modificationsSelectedShape').val();
+    let i = 0;
 
+    let x = [];
+
+    //Get all X coordinates
+    //Items are found in document order so X,Y pairs should be correct
+    $("."+shapestrg+"x").each(function(){
+        x.push(Number($(this).val()));
+    });
+
+    //Perform Mirror
+    let xr = [];
+
+    x.forEach(function(item, index){
+
+        let new_x = -1*(x[index]);
+        xr.push(new_x);
+
+    });
+
+    // Write Coords back to DOM
+    $("."+shapestrg+"x").each(function(){
+        $(this).val(xr[i]);
+        i++;
+    });
+
+    areaAndCentroid(shapestrg);
+};
+
+//Function to mirror about local X-Axis
+function mirrorlocalX(){
+    let shapestrg = $('#modificationsSelectedShape').val();
     let yc = Number($('#'+shapestrg+'Yc').html());
     let i = 0;
 
@@ -620,6 +591,323 @@ function mirrorX(shapestrg){
     });
 
     areaAndCentroid(shapestrg);
+};
+
+//Function to mirror about global X-Axis
+function mirrorX(){
+    let shapestrg = $('#modificationsSelectedShape').val();
+    let i = 0;
+
+    let y = [];
+
+    //Get all Y coordinates
+    $("."+shapestrg+"y").each(function(){
+        y.push(Number($(this).val()));
+    });
+
+    //Perform Mirror
+    let yr = [];
+
+    y.forEach(function(item, index){
+
+        let new_y = -1*(y[index]);
+
+        yr.push(new_y);
+    });
+
+    // Write Coords back to DOM
+    i=0;
+
+    $("."+shapestrg+"y").each(function(){
+        $(this).val(yr[i]);
+        i++;
+    });
+
+    areaAndCentroid(shapestrg);
+};
+
+function alignorigin(){
+    let shapestrg = $('#modificationsSelectedShape').val();
+    let yc = Number($('#'+shapestrg+'Yc').html());
+    let xc = Number($('#'+shapestrg+'Xc').html());
+
+    $("#translate_shape_x").val(-1*xc);
+    $("#translate_shape_y").val(-1*yc);
+
+    translateVertices();
+};
+
+function alignY(){
+    let shapestrg = $('#modificationsSelectedShape').val();
+    let xc = Number($('#'+shapestrg+'Xc').html());
+
+    $("#translate_shape_x").val(-1*xc);
+    $("#translate_shape_y").val(0);
+
+    translateVertices();
+};
+
+function alignX(){
+    let shapestrg = $('#modificationsSelectedShape').val();
+    let yc = Number($('#'+shapestrg+'Yc').html());
+
+    $("#translate_shape_y").val(-1*yc);
+
+    translateVertices();
+};
+
+function aligncenters(){
+    let shapestrg = $('#modificationsSelectedShape').val();
+    let yc = Number($('#'+shapestrg+'Yc').html());
+    let xc = Number($('#'+shapestrg+'Xc').html());
+    let alignstrg = $('#modificationsAlignShape').val();
+    let yc2 = Number($('#'+alignstrg+'Yc').html());
+    let xc2 = Number($('#'+alignstrg+'Xc').html());
+
+    $("#translate_shape_y").val(-1*(yc-yc2));
+    $("#translate_shape_x").val(-1*(xc-xc2));
+
+    translateVertices();
+};
+
+function alignvertical(){
+    let shapestrg = $('#modificationsSelectedShape').val();
+    let xc = Number($('#'+shapestrg+'Xc').html());
+    let alignstrg = $('#modificationsAlignShape').val();
+    let xc2 = Number($('#'+alignstrg+'Xc').html());
+
+    $("#translate_shape_y").val(0);
+    $("#translate_shape_x").val(-1*(xc-xc2));
+
+    translateVertices();
+};
+
+function alignhorizontal(){
+    let shapestrg = $('#modificationsSelectedShape').val();
+    let yc = Number($('#'+shapestrg+'Yc').html());
+    let alignstrg = $('#modificationsAlignShape').val();
+    let yc2 = Number($('#'+alignstrg+'Yc').html());
+
+    $("#translate_shape_y").val(-1*(yc-yc2));
+    $("#translate_shape_x").val(0);
+
+    translateVertices();
+};
+
+function aligntops(){
+    let shapestrg = $('#modificationsSelectedShape').val();
+    let alignstrg = $('#modificationsAlignShape').val();
+
+    let y = [];
+    let y1 = [];
+
+    //Get all Y coordinates
+    $("."+shapestrg+"y").each(function(){
+        y.push(Number($(this).val()));
+    });
+
+    $("."+alignstrg+"y").each(function(){
+        y1.push(Number($(this).val()));
+    });
+
+    ymax = Math.max(...y);
+    y1max = Math.max(...y1);
+
+    delta = ymax-y1max;
+
+    $("#translate_shape_y").val(-1*delta);
+    $("#translate_shape_x").val(0);
+
+    translateVertices();
+};
+
+function alignbases(){
+    let shapestrg = $('#modificationsSelectedShape').val();
+    let alignstrg = $('#modificationsAlignShape').val();
+
+    let y = [];
+    let y1 = [];
+
+    //Get all Y coordinates
+    $("."+shapestrg+"y").each(function(){
+        y.push(Number($(this).val()));
+    });
+
+    $("."+alignstrg+"y").each(function(){
+        y1.push(Number($(this).val()));
+    });
+
+    ymin = Math.min(...y);
+    y1min = Math.min(...y1);
+
+    delta = ymin-y1min;
+
+    $("#translate_shape_y").val(-1*delta);
+    $("#translate_shape_x").val(0);
+
+    translateVertices();
+};
+
+function stackover(){
+    let shapestrg = $('#modificationsSelectedShape').val();
+    let alignstrg = $('#modificationsAlignShape').val();
+
+    let y = [];
+    let y1 = [];
+
+    //Get all Y coordinates
+    $("."+shapestrg+"y").each(function(){
+        y.push(Number($(this).val()));
+    });
+
+    $("."+alignstrg+"y").each(function(){
+        y1.push(Number($(this).val()));
+    });
+
+    ymin = Math.min(...y);
+    y1max = Math.max(...y1);
+
+    delta = ymin-y1max;
+
+    $("#translate_shape_y").val(-1*delta);
+    $("#translate_shape_x").val(0);
+
+    translateVertices();
+};
+
+function stackunder(){
+    let shapestrg = $('#modificationsSelectedShape').val();
+    let alignstrg = $('#modificationsAlignShape').val();
+
+    let y = [];
+    let y1 = [];
+
+    //Get all Y coordinates
+    $("."+shapestrg+"y").each(function(){
+        y.push(Number($(this).val()));
+    });
+
+    $("."+alignstrg+"y").each(function(){
+        y1.push(Number($(this).val()));
+    });
+
+    ymax = Math.max(...y);
+    y1min = Math.min(...y1);
+
+    delta = ymax-y1min;
+
+    $("#translate_shape_y").val(-1*delta);
+    $("#translate_shape_x").val(0);
+
+    translateVertices();
+};
+
+function alignleft(){
+    let shapestrg = $('#modificationsSelectedShape').val();
+    let alignstrg = $('#modificationsAlignShape').val();
+
+    let x = [];
+    let x1 = [];
+
+    //Get all Y coordinates
+    $("."+shapestrg+"x").each(function(){
+        x.push(Number($(this).val()));
+    });
+
+    $("."+alignstrg+"x").each(function(){
+        x1.push(Number($(this).val()));
+    });
+
+    xmin = Math.min(...x);
+    x1min = Math.min(...x1);
+
+    delta = xmin-x1min;
+
+    $("#translate_shape_y").val(0);
+    $("#translate_shape_x").val(-1*delta);
+
+    translateVertices();
+};
+
+function alignright(){
+    let shapestrg = $('#modificationsSelectedShape').val();
+    let alignstrg = $('#modificationsAlignShape').val();
+
+    let x = [];
+    let x1 = [];
+
+    //Get all Y coordinates
+    $("."+shapestrg+"x").each(function(){
+        x.push(Number($(this).val()));
+    });
+
+    $("."+alignstrg+"x").each(function(){
+        x1.push(Number($(this).val()));
+    });
+
+    xmax = Math.max(...x);
+    x1max = Math.max(...x1);
+
+    delta = xmax-x1max;
+
+    $("#translate_shape_y").val(0);
+    $("#translate_shape_x").val(-1*delta);
+
+    translateVertices();
+};
+
+function stackleft(){
+    let shapestrg = $('#modificationsSelectedShape').val();
+    let alignstrg = $('#modificationsAlignShape').val();
+
+    let x = [];
+    let x1 = [];
+
+    //Get all Y coordinates
+    $("."+shapestrg+"x").each(function(){
+        x.push(Number($(this).val()));
+    });
+
+    $("."+alignstrg+"x").each(function(){
+        x1.push(Number($(this).val()));
+    });
+
+    xmax = Math.max(...x);
+    x1min = Math.min(...x1);
+
+    delta = xmax-x1min;
+
+    $("#translate_shape_y").val(0);
+    $("#translate_shape_x").val(-1*delta);
+
+    translateVertices();
+};
+
+function stackright(){
+    let shapestrg = $('#modificationsSelectedShape').val();
+    let alignstrg = $('#modificationsAlignShape').val();
+
+    let x = [];
+    let x1 = [];
+
+    //Get all Y coordinates
+    $("."+shapestrg+"x").each(function(){
+        x.push(Number($(this).val()));
+    });
+
+    $("."+alignstrg+"x").each(function(){
+        x1.push(Number($(this).val()));
+    });
+
+    xmin = Math.min(...x);
+    x1max = Math.max(...x1);
+
+    delta = xmin-x1max;
+
+    $("#translate_shape_y").val(0);
+    $("#translate_shape_x").val(-1*delta);
+
+    translateVertices();
 };
 
 function first_to_last(shapestrg){
@@ -840,6 +1128,15 @@ function UpdateChart(){
     Plotly.addTraces(graphDiv, trace_shapes);
 };
 
+function modshapecenter(){
+    let shapestrg = $('#modificationsSelectedShape').val();
+    let yc = Number($('#'+shapestrg+'Yc').html());
+    let xc = Number($('#'+shapestrg+'Xc').html());
+    $('#mod_xc').html("Shape X<sub>c</sub>: "+xc.toFixed(4).toString());
+    $('#mod_yc').html("Shape Y<sub>c</sub>: "+yc.toFixed(4).toString());
+
+};
+
 // This function is used for event handlers after the HTML document loads
 function main() {
 
@@ -1029,6 +1326,8 @@ function main() {
         //add next shape to templating select
         let option = "<option value='shape"+shape_count+"' > shape"+shape_count+"</option>";
         $("#templateSelectedShape").append(option);
+        $("#modificationsSelectedShape").append(option);
+        $("#modificationsAlignShape").append(option);
 
         areaAndCentroid(shapestrg);
 
@@ -1048,6 +1347,8 @@ function main() {
         //add next shape to templating select
         let option = "<option value='shape"+shape_count+"' > shape"+shape_count+"</option>";
         $("#templateSelectedShape").append(option);
+        $("#modificationsSelectedShape").append(option);
+        $("#modificationsAlignShape").append(option);
 
         areaAndCentroid(shapestrg);
 
@@ -1062,6 +1363,8 @@ function main() {
 
             //remove last shape from templating select
             $("#templateSelectedShape option[value='shape"+shape_count+"']").remove();
+            $("#modificationsSelectedShape option[value='shape"+shape_count+"']").remove();
+            $("#modificationsAlignShape option[value='shape"+shape_count+"']").remove();
 
             shape_count -= 1;
             $("#numshapes").val(shape_count);
