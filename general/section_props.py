@@ -626,7 +626,7 @@ class Composite_Section:
         err = plastic_c["C"]+plastic_c["T"]
         axis = c
         
-        self.Zxx = {"AxisY":axis,"Zx":Zx,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
+        self.Zxx = {"AxisY":axis,"Zx":Zx,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i,"Fy": baseFy}
 
         return {"AxisY":axis,"Zx":Zx,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
 
