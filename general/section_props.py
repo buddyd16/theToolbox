@@ -573,7 +573,7 @@ class Composite_Section:
         
         self.vv_axis = [v1[0],v1[1],v2[0],v2[1]]
     
-    def bounding_box(self):
+    def bounding_box(self, angle):
         x = []
         y = []
 
@@ -581,14 +581,21 @@ class Composite_Section:
             x.extend(section.x)
             y.extend(section.y)
         
-        height = max(y)-min(y)
-        width = max(x)-min(x)
+        theta = math.radians(angle)
+        xo = self.cx
+        yo = self.cy
+
+        xt = [(i-xo)*math.cos(theta)-(j-yo)*math.sin(theta) for i,j in zip(x,y)]
+        yt = [(i-xo)*math.sin(theta)+(j-yo)*math.cos(theta) for i,j in zip(x,y)]
+
+        height = max(yt)-min(yt)
+        width = max(xt)-min(xt)
         
-        return {"MinX":min(x),"MaxX":max(x),"MinY":min(y),"MaxY":max(y),"Height":height,"Width":width}
+        return {"MinX":min(xt),"MaxX":max(xt),"MinY":min(yt),"MaxY":max(yt),"Height":height,"Width":width}
       
     def plastic_Zx(self, tol=1E-8, max_iters=100, baseFy = 36):
         
-        bbox = self.bounding_box()
+        bbox = self.bounding_box(0)
         a = bbox["Height"]
         b = 0
         c = b
@@ -607,7 +614,6 @@ class Composite_Section:
             
             plastic_c = plastic_forceandmoment(self.sections,c, 0, (self.cx,self.cy))
             fc = plastic_c["C"]+plastic_c["T"]
-            print(fc)
             
             if fc < 0:
                 b = c
@@ -618,7 +624,7 @@ class Composite_Section:
         
         Zx = plastic_c["M"]/baseFy
         err = plastic_c["C"]+plastic_c["T"]
-        axis = self.cy + (bbox["MaxY"]-c)
+        axis = c
         
         self.Zxx = {"AxisY":axis,"Zx":Zx,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
 
@@ -626,8 +632,8 @@ class Composite_Section:
 
     def plastic_Zy(self, tol=1E-8, max_iters=100, baseFy = 36):
         
-        bbox = self.bounding_box()
-        a = bbox["Width"]
+        bbox = self.bounding_box(90)
+        a = bbox["Height"]
         b = 0
         c = b
         
@@ -646,7 +652,6 @@ class Composite_Section:
             
             plastic_c = plastic_forceandmoment(self.sections,c, 90, (self.cx,self.cy))
             fc = plastic_c["C"]+plastic_c["T"]
-            print(fc)
             
             if fc < 0:
                 b = c
@@ -657,10 +662,84 @@ class Composite_Section:
         
         Zy = plastic_c["M"]/baseFy
         err = plastic_c["C"]+plastic_c["T"]
-        axis = self.cx + (bbox["MaxX"]-c)
+        axis = c
         
         self.Zyy = {"AxisX":axis,"Zy":Zy,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
         return {"AxisX":axis,"Zy":Zy,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
+
+    def plastic_Zu(self, tol=1E-8, max_iters=100, baseFy = 36):
+        
+        bbox = self.bounding_box(self.theta1)
+        a = bbox["Height"]
+        b = 0
+        c = b
+        
+        plastic_a = plastic_forceandmoment(self.sections,a, self.theta1, (self.cx,self.cy))
+        fa = plastic_a["C"]+plastic_a["T"]
+        
+        plastic_b = plastic_forceandmoment(self.sections,b, self.theta1, (self.cx,self.cy))
+        plastic_c = plastic_b
+        fb = plastic_b["C"]+plastic_b["T"]
+        fc = fb
+        
+        i = 0
+        
+        while (abs(fc) > tol and i <= max_iters):
+            c = (a+b)/2
+            
+            plastic_c = plastic_forceandmoment(self.sections,c, self.theta1, (self.cx,self.cy))
+            fc = plastic_c["C"]+plastic_c["T"]
+            
+            if fc < 0:
+                b = c
+            else:
+                a = c
+                
+            i += 1
+        
+        Zu = plastic_c["M"]/baseFy
+        err = plastic_c["C"]+plastic_c["T"]
+        axis = c
+        
+        self.Zuu = {"AxisX":axis,"Zu":Zu,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
+        return {"AxisX":axis,"Zu":Zu,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
+
+    def plastic_Zv(self, tol=1E-8, max_iters=100, baseFy = 36):
+        
+        bbox = self.bounding_box(self.theta2)
+        a = bbox["Height"]
+        b = 0
+        c = b
+        
+        plastic_a = plastic_forceandmoment(self.sections,a, self.theta2, (self.cx,self.cy))
+        fa = plastic_a["C"]+plastic_a["T"]
+        
+        plastic_b = plastic_forceandmoment(self.sections,b, self.theta2, (self.cx,self.cy))
+        plastic_c = plastic_b
+        fb = plastic_b["C"]+plastic_b["T"]
+        fc = fb
+        
+        i = 0
+        
+        while (abs(fc) > tol and i <= max_iters):
+            c = (a+b)/2
+            
+            plastic_c = plastic_forceandmoment(self.sections,c, self.theta2, (self.cx,self.cy))
+            fc = plastic_c["C"]+plastic_c["T"]
+            
+            if fc < 0:
+                b = c
+            else:
+                a = c
+                
+            i += 1
+        
+        Zv = plastic_c["M"]/baseFy
+        err = plastic_c["C"]+plastic_c["T"]
+        axis = c
+        
+        self.Zvv = {"AxisX":axis,"Zv":Zv,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
+        return {"AxisX":axis,"Zv":Zv,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
 
 def circle_coordinates(x,y,r,start,end):
     '''
@@ -1156,21 +1235,6 @@ def plastic_forceandmoment(shapes, axis_depth, rotation, rotation_point):
     return {"C":C,"T":T,"M":Maxis}
 
 ### TEST AREA ###
-if __name__ == "__main__":
-    
-    shape = stl_wf(12.1, 8.05, 0.575, 0.335, 1.08,Fy=50)
-    pl = Section([-0.975,9.025,9.025,-0.975,-0.975],[-0.5,-0.5,0,0,-0.5],Fy=36)
-    
-    #out = plastic_forceandmoment([shape], 4.025, 90, (shape.cx,shape.cy))
-    
-    composite = Composite_Section()
-    composite.add_section(shape)
-    composite.add_section(pl)
-    
-    composite.calculate_properties()
-    
-    Zx = composite.plastic_Zx(baseFy=50)
-    Zy = composite.plastic_Zy(baseFy=50)
 
 
 

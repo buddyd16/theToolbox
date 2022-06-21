@@ -53,11 +53,11 @@ def sectionProps(sections):
     
     composite.calculate_properties()
     basefy = sections[0]["Fy"]
-    print(basefy)
+
     Zx = composite.plastic_Zx(baseFy = basefy)
     Zy = composite.plastic_Zy(baseFy = basefy)
-    print(Zx)
-    print(Zy)
+    Zu = composite.plastic_Zu(baseFy = basefy)
+    Zv = composite.plastic_Zv(baseFy = basefy)
 
     # END NEW STUFF
     

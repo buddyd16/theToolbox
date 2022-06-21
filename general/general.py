@@ -33,7 +33,7 @@ def web_section_props():
 
         Results = gen_calc.sectionProps(sections)
 
-        results = {"CompositeSection": Results[0], "Sections":Results[1]}
+        results = {"CompositeSection": Results[0], "Sections": Results[1]}
 
     else:
         
