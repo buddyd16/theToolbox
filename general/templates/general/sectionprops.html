@@ -224,6 +224,128 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Shape Modifications -->
+                    <div class="card my-2" id="shapeModificationsCard">
+                        <div class="card-header" id="shapeModificationsHeading">
+                            <button id="shapeModificationsHeadingButton" type="button" class="btn btn-link" data-toggle="collapse" data-target="#shapeModificationsCollapse" aria-expanded="flase" aria-controls="shapeModificationsCollapse">
+                                Shape Modifications
+                            </button>
+                        </div>
+
+                        <div id="shapeModificationsCollapse" class="collapse" aria-labelledby="shapeModificationsHeading" data-parent="#accordion">
+                            <div class="container my-1">
+                                <!-- Shape Selector -->
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <label for="modificationsSelectedShape">Select the Shape to Modify:</label>
+                                        <select id="modificationsSelectedShape" name="modificationsSelectedShape" onchange="modshapecenter();">
+                                            {% for shape in inputs["ShapesIn"] %}
+                                            <option value="shape{{ loop.index }}">shape{{ loop.index }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <p id="mod_xc"></p>
+                                        <p id="mod_yc"></p>
+                                    </div>
+                                </div>
+                                <!-- Translation -->
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <td rowspan="2" class="text-right align-bottom">Translation: </td>
+                                                <td class="text-center">x</td>
+                                                <td class="text-center">y</td>
+                                            </tr>
+                                            <tr>
+                                                <td><input id="translate_shape_x" class="input-sm" style="width:95px" type="number" step="any" value="1"></td>
+                                                <td><input id="translate_shape_y" class="input-sm" style="width:95px" type="number" step="any" value="1"></td>
+                                                <td><button type="button" onclick="translateVertices();" class="btn btn-secondary btn-sm">Translate</button></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <!-- Rotation -->
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <td rowspan="2" class="align-bottom">Rotation (degrees)<br>Counter-Clockwise Positive</td>
+                                                <td colspan="2" class="text-center">Center of Rotation</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-center">x</td>
+                                                <td class="text-center">y</td>
+                                            </tr>
+                                            <tr>
+                                                <td><input id="rotate_shape_theta" class="input-sm" style="width:95px" type="number" step="any" value="0"></td>
+                                                <td><input id="rotate_shape_x" class="input-sm" style="width:95px" type="number" step="any" value="0"></td>
+                                                <td><input id="rotate_shape_y" class="input-sm" style="width:95px" type="number" step="any" value="0"></td>
+                                                <td><button type="button" onclick="rotateVertices();" class="btn btn-secondary btn-sm">Rotate</button></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <!-- Mirror -->
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <td><button type="button" onclick="mirrorY();" class="btn btn-secondary btn-sm">Mirror about global Y</button></td>
+                                                <td><button type="button" onclick="mirrorX();" class="btn btn-secondary btn-sm">Mirror about global X</button></td>
+                                                <td><button type="button" onclick="mirrorlocalY();" class="btn btn-secondary btn-sm">Mirror about local Y</button></td>
+                                                <td><button type="button" onclick="mirrorlocalX();" class="btn btn-secondary btn-sm">Mirror about local X</button></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Align -->
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <td><button type="button" onclick="alignorigin();" class="btn btn-secondary btn-sm">Align to 0,0</button></td>
+                                                <td><button type="button" onclick="alignX();" class="btn btn-secondary btn-sm">Align to global X</button></td>
+                                                <td><button type="button" onclick="alignY();" class="btn btn-secondary btn-sm">Align to global Y</button></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Align To Shape -->
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <label for="modificationsAlignShape">Select the Shape to Align With:</label>
+                                        <select id="modificationsAlignShape" name="modificationsAlignShape">
+                                            {% for shape in inputs["ShapesIn"] %}
+                                            <option value="shape{{ loop.index }}">shape{{ loop.index }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <td><button type="button" onclick="aligncenters();" class="btn btn-secondary btn-sm">Align Centers</button></td>
+                                                <td><button type="button" onclick="aligntops();" class="btn btn-secondary btn-sm">Align Tops</button></td>
+                                                <td><button type="button" onclick="alignbases();" class="btn btn-secondary btn-sm">Align Bases</button></td>
+                                                <td><button type="button" onclick="alignvertical();" class="btn btn-secondary btn-sm">Align Vertical Axis</button></td>
+                                            </tr>
+                                            <tr>
+                                                <td><button type="button" onclick="alignhorizontal();" class="btn btn-secondary btn-sm">Align Horizontal Axis</button></td>
+                                                <td><button type="button" onclick="alignleft();" class="btn btn-secondary btn-sm">Align Left</button></td>
+                                                <td><button type="button" onclick="alignright();" class="btn btn-secondary btn-sm">Align Right</button></td>
+                                            </tr>
+                                            <tr>
+                                                <td><button type="button" onclick="stackover();" class="btn btn-secondary btn-sm">Stack Over</button></td>
+                                                <td><button type="button" onclick="stackunder();" class="btn btn-secondary btn-sm">Stack Under</button></td>
+                                                <td><button type="button" onclick="stackleft();" class="btn btn-secondary btn-sm">Stack Left</button></td>
+                                                <td><button type="button" onclick="stackright();" class="btn btn-secondary btn-sm">Stack Right</button></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <!-- loop through input shapes -->
                     {% for shape in inputs["ShapesIn"] %}                    
                     <!-- Shape Card -->
@@ -342,39 +464,6 @@
                                         <td class="length_units">{{ "in" if inputs["units"] == "imperial" else "mm" }}</td>
                                     </tr>
                                 </table>
-                                <h6>Shape Modifications:</h6>
-                                <table class="table table-sm">
-                                    <tr>
-                                        <td rowspan="2" class="text-right align-bottom">Translation: </td>
-                                        <td class="text-center">x</td>
-                                        <td class="text-center">y</td>
-                                    </tr>
-                                    <tr>
-                                        <td><input id="translate_shape{{ loop.index }}_x" class="input-sm" style="width:95px" type="number" step="any" value="1"></td>
-                                        <td><input id="translate_shape{{ loop.index }}_y" class="input-sm" style="width:95px" type="number" step="any" value="1"></td>
-                                        <td><button type="button" onclick="translateVertices('shape{{ loop.index }}');" class="btn btn-secondary btn-sm">Translate</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td rowspan="2" class="align-bottom">Rotation (degrees)<br>Counter-Clockwise Positive</td>
-                                        <td colspan="2" class="text-center">Center of Rotation</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center">x</td>
-                                        <td class="text-center">y</td>
-                                    </tr>
-                                    <tr>
-                                        <td><input id="rotate_shape{{ loop.index }}_theta" class="input-sm" style="width:95px" type="number" step="any" value="0"></td>
-                                        <td><input id="rotate_shape{{ loop.index }}_x" class="input-sm" style="width:95px" type="number" step="any" value="0"></td>
-                                        <td><input id="rotate_shape{{ loop.index }}_y" class="input-sm" style="width:95px" type="number" step="any" value="0"></td>
-                                        <td><button type="button" onclick="rotateVertices('shape{{ loop.index }}');" class="btn btn-secondary btn-sm">Rotate</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td></td>
-                                        <td><button type="button" onclick="mirrorY('shape{{ loop.index }}');" class="btn btn-secondary btn-sm">Mirror about Y</button></td>
-                                        <td><button type="button" onclick="mirrorX('shape{{ loop.index }}');" class="btn btn-secondary btn-sm">Mirror about X</button></td>
-                                    </tr>
-                                </table>
                             </div>
                         </div>
                     </div>
@@ -409,9 +498,11 @@
     </table>
     <!-- Plastic Modulus -->
     <table class="table table-striped table-hover table-sm table-dark">
-        <tr><td colspan="3" class="text-center text-nowrap"><strong><u>Plastic XX,YY Properties</u></strong></td></tr>
-        <tr><td class="text-right text-nowrap">Z<sub>xx</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Zxx["Zx"])}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Plastic Section Modulus Parallel to the XX-Axis</td></tr>
-        <tr><td class="text-right text-nowrap">Z<sub>yy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Zyy["Zy"])}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Plastic Section Modulus Parallel to the YY-Axis</td></tr>
+        <tr><td colspan="3" class="text-center text-nowrap"><strong><u>Plastic Section Modulii</u></strong></td></tr>
+        <tr><td class="text-right text-nowrap">Z<sub>xx</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Zxx["Zx"])}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Plastic Section Modulus for Moments about the XX-Axis</td></tr>
+        <tr><td class="text-right text-nowrap">Z<sub>yy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Zyy["Zy"])}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Plastic Section Modulus for Moments about the YY-Axis</td></tr>
+        <tr><td class="text-right text-nowrap">Z<sub>uu</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Zuu["Zu"])}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Plastic Section Modulus for Moments about the UU-Axis</td></tr>
+        <tr><td class="text-right text-nowrap">Z<sub>vv</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Zvv["Zv"])}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Plastic Section Modulus for Moments about the VV-Axis</td></tr>
     </table>
     <!-- Principal Axis Properties -->
     <table class="table table-striped table-hover table-sm table-dark">
@@ -440,7 +531,7 @@
         </table>
     <!-- Properties about the centroid -->
         <table class="table table-striped table-hover table-sm">
-        <tr><td colspan="3" class="text-center text-nowrap"><strong><u>Properties about the Centroidal XX,YY Axis</u></strong></td></tr>
+        <tr><td colspan="3" class="text-center text-nowrap"><strong><u>Properties about the Local Shape Centroidal XX,YY Axis</u></strong></td></tr>
         <tr><td class="text-right text-nowrap">I<sub>xx</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Ixx)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the XX-Axis</td></tr>
         <tr><td class="text-right text-nowrap">I<sub>yy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Iyy)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Moment of Inertia (Second Moment of Area) about the YY-Axis</td></tr>
         <tr><td class="text-right text-nowrap">I<sub>xxyy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.Ixxyy)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>4</sup></td><td>Product of Inertia</td></tr>
