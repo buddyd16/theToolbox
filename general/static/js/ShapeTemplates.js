@@ -76,6 +76,33 @@ function rectangle(){
     writeTemplateResults(x,y,shapestrg);
 };
 
+function threePointBezierCurve(p1,p2,p3,segments){
+    let x = [];
+    let y = [];
+    let p1x = p1[0];
+    let p1y = p1[1];
+    let p2x = p2[0];
+    let p2y = p2[1];
+    let p3x = p3[0];
+    let p3y = p3[1];
+
+    let t_step = 1/segments;
+    let t = 0;
+
+    while (t<1){
+
+        x.push(((1-t)*(((1-t)*p1x)+(t*p2x)))+(t*(((1-t)*p2x)+(t*p3x))));
+        y.push(((1-t)*(((1-t)*p1y)+(t*p2y)))+(t*(((1-t)*p2y)+(t*p3y))));
+
+        t += t_step;
+    };
+
+    x.push(p3x);
+    y.push(p3y);
+
+    return [x,y];
+};
+
 function bezierFillet(){
 
     let shapestrg = $('#templateSelectedShape').val();
@@ -91,19 +118,11 @@ function bezierFillet(){
     let p3x = 0;
     let p3y = H;
 
-    let t_step = 1/25;
-    let t = 0;
+    let bezier = threePointBezierCurve([p1x,p1y],[p2x,p2y],[p3x,p3y],50);
 
-    while (t<1){
+    x.push(...bezier[0]);
+    y.push(...bezier[1]);
 
-        x.push(((1-t)*(((1-t)*p1x)+(t*p2x)))+(t*(((1-t)*p2x)+(t*p3x))));
-        y.push(((1-t)*(((1-t)*p1y)+(t*p2y)))+(t*(((1-t)*p2y)+(t*p3y))));
-
-        t += t_step;
-    };
-
-    x.push(p3x);
-    y.push(p3y);
     x.push(0);
     y.push(0);
 
@@ -178,7 +197,8 @@ function steelShapeTemplate(){
                 let tw = Number(shapedata["tw"][0])*conversion;
                 let k = Number(shapedata["kdes"][0])*conversion;
 
-                coords = steelWF(d,bf,tf,tw,k);
+                //coords = steelWF(d,bf,tf,tw,k);
+                coords = steelWFbezierfillets(d,bf,tf,tw,k);
 
                 writeTemplateResults(coords[0],coords[1],shapestrg);
             } else if (shapeset == "WT"){
@@ -235,6 +255,86 @@ function circle_coordinates(x,y,r,start,end){
     };
 
     return [x_out,y_out];
+};
+
+function steelWFbezierfillets(d,bf,tf,tw,k){
+    let segs = 50;
+
+    // # Bottom flange
+    let x = [0,bf,bf];
+    let y = [0,0,tf];
+
+    // Bottom Right Fillet
+    let p1x = (bf/2)+(tw/2)+(k-tf);
+    let p1y = tf;
+    let p2x = (bf/2)+(tw/2);
+    let p2y = p1y;
+    let p3x = p2x;
+    let p3y = k;
+
+    let bezier = threePointBezierCurve([p1x,p1y],[p2x,p2y],[p3x,p3y],segs);
+
+    x.push(...bezier[0]);
+    y.push(...bezier[1]);
+
+    // Top Right Fillet
+    p1x = (bf/2)+(tw/2);
+    p1y = d-k;
+    p2x = p1x;
+    p2y = d-tf;
+    p3x = (bf/2)+(tw/2)+(k-tf);
+    p3y = p2y;
+
+    bezier = threePointBezierCurve([p1x,p1y],[p2x,p2y],[p3x,p3y],segs);
+
+    x.push(...bezier[0]);
+    y.push(...bezier[1]);
+
+    x.push(bf);
+    y.push(d-tf);
+    
+    x.push(bf);
+    y.push(d);
+    
+    x.push(0);
+    y.push(d);
+
+    x.push(0);
+    y.push(d-tf);
+
+    // Top Left Fillet
+    p1x = (bf/2)-(tw/2)-(k-tf);
+    p1y = d-tf;
+    p2x = (bf/2)-(tw/2);
+    p2y = p1y;
+    p3x = p2x;
+    p3y = d-k;
+
+    bezier = threePointBezierCurve([p1x,p1y],[p2x,p2y],[p3x,p3y],segs);
+
+    x.push(...bezier[0]);
+    y.push(...bezier[1]);
+
+    // Bottom Left Fillet
+    p1x = (bf/2)-(tw/2);
+    p1y = k;
+    p2x = (bf/2)-(tw/2);
+    p2y = tf;
+    p3x = (bf/2)-(tw/2)-(k-tf);
+    p3y = tf;
+
+    bezier = threePointBezierCurve([p1x,p1y],[p2x,p2y],[p3x,p3y],segs);
+
+    x.push(...bezier[0]);
+    y.push(...bezier[1]);
+
+    x.push(0);
+    y.push(tf);
+
+    x.push(0);
+    y.push(0);
+
+    return [x,y];
 };
 
 function steelWF(d,bf,tf,tw,k){
