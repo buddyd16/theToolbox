@@ -507,13 +507,13 @@ class Composite_Section:
         self.output_strings.append('Jzz')
         
         # radii of gyration - centroidal axis
-        self.rxx = math.sqrt(self.Ixx/self.area)
+        self.rxx = math.sqrt(self.Ixx/self.transformedarea)
         self.output.append(self.rxx)
         self.output_strings.append('rxx')
-        self.ryy = math.sqrt(self.Iyy/self.area)
+        self.ryy = math.sqrt(self.Iyy/self.transformedarea)
         self.output.append(self.ryy)
         self.output_strings.append('ryy')
-        self.rzz = math.sqrt(self.Jzz/self.area)
+        self.rzz = math.sqrt(self.Jzz/self.transformedarea)
         self.output.append(self.rzz)
         self.output_strings.append('rzz')
         
@@ -556,6 +556,20 @@ class Composite_Section:
         for section in self.sections:
             x.extend(section.x)
             y.extend(section.y)
+
+        # Section Moduli
+        self.sxx_top = self.Ixx / abs(max(y) - self.cy)
+        self.output.append(self.sxx_top)
+        self.output_strings.append('Sxx,top')
+        self.sxx_bottom = self.Ixx / abs(min(y) - self.cy)
+        self.output.append(self.sxx_bottom)
+        self.output_strings.append('Sxx,bottom')
+        self.syy_right = self.Iyy / abs(max(x) - self.cx)
+        self.output.append(self.syy_right)
+        self.output_strings.append('Syy,right')
+        self.syy_left = self.Iyy / abs(min(x) - self.cx)
+        self.output.append(self.syy_left)
+        self.output_strings.append('Syy,left')
 
         self.xx_axis=[min(x)-1,self.cy,max(x)+1,self.cy]
         self.yy_axis=[self.cx,min(y)-1,self.cx,max(y)+1]
@@ -701,8 +715,8 @@ class Composite_Section:
         err = plastic_c["C"]+plastic_c["T"]
         axis = c
         
-        self.Zuu = {"AxisX":axis,"Zu":Zu,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
-        return {"AxisX":axis,"Zu":Zu,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
+        self.Zuu = {"AxisV":axis,"Zu":Zu,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
+        return {"AxisV":axis,"Zu":Zu,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
 
     def plastic_Zv(self, tol=1E-8, max_iters=100, baseFy = 36):
         
@@ -738,8 +752,8 @@ class Composite_Section:
         err = plastic_c["C"]+plastic_c["T"]
         axis = c
         
-        self.Zvv = {"AxisX":axis,"Zv":Zv,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
-        return {"AxisX":axis,"Zv":Zv,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
+        self.Zvv = {"AxisU":axis,"Zv":Zv,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
+        return {"AxisU":axis,"Zv":Zv,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
 
 def circle_coordinates(x,y,r,start,end):
     '''
