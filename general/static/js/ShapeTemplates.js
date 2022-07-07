@@ -197,8 +197,8 @@ function steelShapeTemplate(){
                 let tw = Number(shapedata["tw"][0])*conversion;
                 let k = Number(shapedata["kdes"][0])*conversion;
 
-                //coords = steelWF(d,bf,tf,tw,k);
-                coords = steelWFbezierfillets(d,bf,tf,tw,k);
+                coords = steelWF(d,bf,tf,tw,k);
+                //coords = steelWFbezierfillets(d,bf,tf,tw,k);
 
                 writeTemplateResults(coords[0],coords[1],shapestrg);
             } else if (shapeset == "WT"){
@@ -244,7 +244,7 @@ function circle_coordinates(x,y,r,start,end){
     let a_step = degreesToRadians(1);
     
 
-    while (a1 <= a2){
+    while (a1 < a2){
         let x0 = r*Math.cos(a1);
         let y0 = r*Math.sin(a1);
         
@@ -254,8 +254,65 @@ function circle_coordinates(x,y,r,start,end){
         a1 += a_step;
     };
 
+    x0 = r*Math.cos(a2);
+    y0 = r*Math.sin(a2);
+    
+    x_out.push(x0+x);
+    y_out.push(y0+y);
+
     return [x_out,y_out];
 };
+
+function fullCircle(){
+    let shapestrg = $('#templateSelectedShape').val();
+    let r = Number($('#templateCircleRadius').val());
+    let x = [];
+    let y = [];
+
+    let circ = circle_coordinates(0,0,r,0,359);
+
+    x.push(...circ[0]);
+    y.push(...circ[1]);
+    x.push(circ[0][0]);
+    y.push(circ[1][0]);
+
+    writeTemplateResults(x,y,shapestrg);
+};
+
+function halfCircle(){
+    let shapestrg = $('#templateSelectedShape').val();
+    let r = Number($('#templateCircleRadius').val());
+    let x = [];
+    let y = [];
+
+    let circ = circle_coordinates(0,0,r,0,180);
+
+    x.push(...circ[0]);
+    y.push(...circ[1]);
+
+    x.push(circ[0][0]);
+    y.push(circ[1][0]);
+
+    writeTemplateResults(x,y,shapestrg);
+};
+
+function qtrCircle(){
+    let shapestrg = $('#templateSelectedShape').val();
+    let r = Number($('#templateCircleRadius').val());
+    let x = [];
+    let y = [];
+
+    let circ = circle_coordinates(0,0,r,0,90);
+
+    x.push(...circ[0]);
+    y.push(...circ[1]);
+    x.push(0);
+    y.push(0);
+    x.push(circ[0][0]);
+    y.push(circ[1][0]);
+
+    writeTemplateResults(x,y,shapestrg);
+}
 
 function steelWFbezierfillets(d,bf,tf,tw,k){
     let segs = 50;
