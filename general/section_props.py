@@ -613,14 +613,13 @@ class Composite_Section:
         a = bbox["Height"]
         b = 0
         c = b
-        
+
         plastic_a = plastic_forceandmoment(self.sections,a, 0, (self.cx,self.cy))
         fa = plastic_a["C"]+plastic_a["T"]
-        
+
         plastic_b = plastic_forceandmoment(self.sections,b, 0, (self.cx,self.cy))
         fb = plastic_b["C"]+plastic_b["T"]
         fc = fb
-        
         i = 0
         
         while (abs(fc) > tol and i <= max_iters):
@@ -628,7 +627,6 @@ class Composite_Section:
             
             plastic_c = plastic_forceandmoment(self.sections,c, 0, (self.cx,self.cy))
             fc = plastic_c["C"]+plastic_c["T"]
-            
             if fc < 0:
                 b = c
             else:
@@ -690,10 +688,11 @@ class Composite_Section:
         
         plastic_a = plastic_forceandmoment(self.sections,a, self.theta1, (self.cx,self.cy))
         fa = plastic_a["C"]+plastic_a["T"]
-        
+
         plastic_b = plastic_forceandmoment(self.sections,b, self.theta1, (self.cx,self.cy))
         plastic_c = plastic_b
         fb = plastic_b["C"]+plastic_b["T"]
+
         fc = fb
         
         i = 0
@@ -1147,13 +1146,18 @@ def stl_angle(vleg, hleg, thickness, k):
     
     return Angle
 
-def plastic_forceandmoment(shapes, axis_depth, rotation, rotation_point):
+def plastic_forceandmoment(shapes, axis_depth, rotation, rotation_point, log=False):
     '''
     shapes = list of cross sections, list
     axis_depth = depth of plastic axis from maximum y coordinate of shapes, float
     rotation = counterclockwise rotation to the axis considered, float
     rotation_point = center point of the rotation, typically the centroid, tuple
     '''
+    # Log
+    loglist = []
+
+    #if rotation == 0:
+        # log = True
 
     # Generate Segments
     segments = []
@@ -1178,7 +1182,7 @@ def plastic_forceandmoment(shapes, axis_depth, rotation, rotation_point):
         y.extend([segment[0][1],segment[1][1]])
     
     axis = max(y) - axis_depth
-    
+
     for i,segment in enumerate(segments):
         
         x1 = segment[0][0]
@@ -1187,7 +1191,7 @@ def plastic_forceandmoment(shapes, axis_depth, rotation, rotation_point):
         y2 = segment[1][1]
         f = fy[i]
     
-        if y1 <= axis and y2<= axis:
+        if y1 < axis and y2< axis:
             # segment is below the axis
             # Opposite sign for Axial and Moment
             axial = -1*0.5*f*(x1+x2)*(y1-y2)
@@ -1195,8 +1199,11 @@ def plastic_forceandmoment(shapes, axis_depth, rotation, rotation_point):
             
             moment = (1/6.0)*f*(y2-y1)*((x1*((2*y1)+y2))+(x2*(y1+(2*y2))))
             Maxis += (-1*moment)
+
+            if log:
+                loglist.append(['below axis -- T',f'Axial:{axial}',f'Moment:{moment}',f'({x1},{y1}) ({x2},{y2})',f'C:{C}',f'T:{T}'])
         
-        elif y1 > axis and y2 > axis:
+        elif y1 >= axis and y2 >= axis:
             # Segment is entirely above the axis
             # Standard sign for Axial and Moment
             axial = -1*0.5*f*(x1+x2)*(y1-y2)
@@ -1204,6 +1211,9 @@ def plastic_forceandmoment(shapes, axis_depth, rotation, rotation_point):
             
             moment = (1/6.0)*f*(y2-y1)*((x1*((2*y1)+y2))+(x2*(y1+(2*y2))))
             Maxis += moment
+
+            if log:
+                loglist.append(['above or on axis -- C',f'Axial:{axial}',f'Moment:{moment}',f'({x1},{y1}) ({x2},{y2})',f'C:{C}',f'T:{T}'])
         
         else:
             # Axis bisects the segment
@@ -1219,32 +1229,57 @@ def plastic_forceandmoment(shapes, axis_depth, rotation, rotation_point):
             
             if y1 < axis:
                 # First Segment is below axis
-                axial = -1*0.5*f*(x1+x3)*(y1-y3)
-                T += (-1*axial)
+                axialt = -1*0.5*f*(x1+x3)*(y1-y3)
+                T += (-1*axialt)
                 
-                moment = (1/6.0)*f*(y3-y1)*((x1*((2*y1)+y3))+(x3*(y1+(2*y3))))
-                Maxis += (-1*moment)
+                momentt = (1/6.0)*f*(y3-y1)*((x1*((2*y1)+y3))+(x3*(y1+(2*y3))))
+                Maxis += (-1*momentt)
                 
                 # Second Segment is above axis
-                axial = -1*0.5*f*(x3+x2)*(y3-y2)
-                C += axial
+                axialc = -1*0.5*f*(x3+x2)*(y3-y2)
+                C += axialc
                 
-                moment = (1/6.0)*f*(y2-y3)*((x3*((2*y3)+y2))+(x2*(y3+(2*y2))))
-                Maxis += moment
+                momentc = (1/6.0)*f*(y2-y3)*((x3*((2*y3)+y2))+(x2*(y3+(2*y2))))
+                Maxis += momentc
+
+                if log:
+                    loglist.append(['axis bisected -- y1 below axis'
+                                    ,f'Axial-T:{axialt}'
+                                    ,f'Moment-T:{momentt}'
+                                    ,f'Axial-C:{axialc}'
+                                    ,f'Moment-C:{momentc}'
+                                    ,f't:{t}'
+                                    ,f'({x1},{y1}) ({x2},{y2})'
+                                    ,f'point at t: ({x3},{y3})'
+                                    ,f'C:{C}',f'T:{T}'])
             else:
                 # First Segment is above axis
-                axial = -1*0.5*f*(x1+x3)*(y1-y3)
-                C += axial
+                axialc = -1*0.5*f*(x1+x3)*(y1-y3)
+                C += axialc
                 
-                moment = (1/6.0)*f*(y3-y1)*((x1*((2*y1)+y3))+(x3*(y1+(2*y3))))
-                Maxis += moment
+                momentt = (1/6.0)*f*(y3-y1)*((x1*((2*y1)+y3))+(x3*(y1+(2*y3))))
+                Maxis += momentt
                 
                 # Second Segment is below axis
-                axial = -1*0.5*f*(x3+x2)*(y3-y2)
-                T += (-1*axial)
+                axialt = -1*0.5*f*(x3+x2)*(y3-y2)
+                T += (-1*axialt)
                 
-                moment = (1/6.0)*f*(y2-y3)*((x3*((2*y3)+y2))+(x2*(y3+(2*y2))))
-                Maxis += (-1*moment)
+                momentc = (1/6.0)*f*(y2-y3)*((x3*((2*y3)+y2))+(x2*(y3+(2*y2))))
+                Maxis += (-1*momentc)
+
+                if log:
+                    loglist.append(['axis bisected -- y1 above or on axis'
+                                    ,f'Axial-T:{axialt}'
+                                    ,f'Moment-T:{momentt}'
+                                    ,f'Axial-C:{axialc}'
+                                    ,f'Moment-C:{momentc}'
+                                    ,f't:{t}'
+                                    ,f'({x1},{y1}) ({x2},{y2})'
+                                    ,f'point at t: ({x3},{y3})'
+                                    ,f'C:{C}',f'T:{T}'])
+    
+    if log:
+        print(loglist)
     
     return {"C":C,"T":T,"M":Maxis}
 
