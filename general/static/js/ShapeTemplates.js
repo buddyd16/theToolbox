@@ -220,6 +220,16 @@ function steelShapeTemplate(){
                 coords = steelL(d,b,t,k);
 
                 writeTemplateResults(coords[0],coords[1],shapestrg); 
+            } else if (shapeset == "HSS_RECT" || shapeset == "HSS_SQR"){
+                console.log(shapedata);
+                let b = Number(shapedata["B"][0])*conversion;
+                let h = Number(shapedata["Ht"][0])*conversion;
+                let t = Number(shapedata["tdes"][0])*conversion;
+                let ro = 2*t;
+                let ri = ro - t;
+
+                coords = steelHSS(h,b,t,ro,ri);
+                writeTemplateResults(coords[0],coords[1],shapestrg);
             };
 
         },
@@ -312,7 +322,100 @@ function qtrCircle(){
     y.push(circ[1][0]);
 
     writeTemplateResults(x,y,shapestrg);
-}
+};
+
+function steelHSS(H,B,tdes,ro,ri){
+    // Given the governing dimensions of an HSS
+    // Return the piecewise linear coordinates to 
+    // Build the shape inclusive of the central hole
+    // centered on [0,0]
+
+    let x = [0];
+    let y = [-H/2];
+
+    // center point for bottom right radius
+    // center point is the same for the inner and outer radius
+    let brrx = (B/2) - ro;
+    let brry = (-H/2) + ro;
+
+    // center point for the top right radius
+    let trrx = brrx;
+    let trry = (H/2) - ro;
+
+    // center point for top left radius
+    let tlrx = (-B/2) + ro;
+    let tlry = trry;
+
+    // center point for bottom left radius
+    let blrx = tlrx;
+    let blry = brry;
+
+    // bottom right outside fillet
+    let filletbro = circle_coordinates(brrx,brry,ro,270,360);
+
+    x.push(...filletbro[0]);
+    y.push(...filletbro[1]);
+
+    // top right outside fillet
+    let fillettro = circle_coordinates(trrx,trry,ro,0,90);
+
+    x.push(...fillettro[0]);
+    y.push(...fillettro[1]);
+
+    // top left outside fillet
+    let fillettlo = circle_coordinates(tlrx,tlry,ro,90,180);
+
+    x.push(...fillettlo[0]);
+    y.push(...fillettlo[1]);
+
+    // bottom left outside fillet
+    let filletblo = circle_coordinates(blrx,blry,ro,180,270);
+
+    x.push(...filletblo[0]);
+    y.push(...filletblo[1]);
+
+    // return to start and cut in for hole
+    // define hole clockwise
+    x.push(...[0,0]);
+    y.push(...[-H/2,(-H/2)+tdes]);
+ 
+
+    // bottom left hole fillet
+    // need to reverse coordinate order
+    let filletbli = circle_coordinates(blrx,blry,ri,180,270);
+
+    filletbli[0].reverse();
+    filletbli[1].reverse();
+    x.push(...filletbli[0]);
+    y.push(...filletbli[1]);
+
+    // top left hole fillet
+    let fillettli = circle_coordinates(tlrx,tlry,ri,90,180);
+    fillettli[0].reverse();
+    fillettli[1].reverse();
+    x.push(...fillettli[0]);
+    y.push(...fillettli[1]);
+
+    // top right hole fillet
+    let fillettri = circle_coordinates(trrx,trry,ri,0,90);
+    fillettri[0].reverse();
+    fillettri[1].reverse();
+    x.push(...fillettri[0]);
+    y.push(...fillettri[1]);
+
+    // bottom right hole fillet
+    let filletbri = circle_coordinates(brrx,brry,ri,270,360);
+    filletbri[0].reverse();
+    filletbri[1].reverse();
+    x.push(...filletbri[0]);
+    y.push(...filletbri[1]);
+
+    // close the shape
+    x.push(...[0,0]);
+    y.push(...[(-H/2)+tdes,-H/2]);
+
+    return [x,y];
+};
 
 function steelWFbezierfillets(d,bf,tf,tw,k){
     let segs = 50;
