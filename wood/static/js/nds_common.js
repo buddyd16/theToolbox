@@ -22,25 +22,22 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-function nds_actual_dimensions(b_nom,d_nom){
+function nds_actual_dimensions(b_nom,d_nom,num_plys){
     /*
     b_nom = String of nominal width
-    d_nom = String og nominal depth
+    d_nom = String of nominal depth
 
     returns an array [b,d]
+
+    b_nom is assumed to be the narrow edge
+    d_nom is assumed to be the long edge
     */
 
-    let b 
-    let d
+    let b; 
+    let d;
 
-    if (b_nom==="2" || b_nom==="3" || b_nom==="4"){
+    if (Number(b_nom)<= 4){
         b = Number(b_nom) - 0.5;
-    } else if(b_nom==="2_2"){
-        b = 2*1.5;
-    } else if(b_nom==="3_2"){
-        b = 3*1.5;
-    } else if(b_nom==="4_2"){
-        b = 4*1.5;
     };
 
     if (Number(d_nom)>6){
@@ -48,6 +45,9 @@ function nds_actual_dimensions(b_nom,d_nom){
     } else{
         d = Number(d_nom) - 0.5;
     };
+
+    // Account for Number of Plys, assuming narrow side is the built up dimension.
+    b = b*num_plys;
 
     return [b,d];
 
