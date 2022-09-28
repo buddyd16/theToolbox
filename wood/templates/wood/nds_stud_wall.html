@@ -27,9 +27,6 @@
                             <option value="2"> 2 </option>
                             <option value="3"> 3 </option>
                             <option value="4"> 4 </option>
-                            <option value="2_2"> (2)2 </option>
-                            <option value="3_2"> (3)2 </option>
-                            <option value="4_2"> (4)2 </option>
                         </select>
                         X
                         <select id="stud_d" class="stud_d input-sm user_param" name="stud_d" style="width:95px">
@@ -48,6 +45,17 @@
                     <td id="actual_stud_dims"></td>
                 </tr>
                 <tr>
+                    <td>Number of plys:</td>
+                    <td>
+                        <select id="stud_plys" class="stud_plys input-sm user_param" name="stud_plys" style="width:95px">
+                            <option value="1"> 1 </option>
+                            <option value="2"> 2 </option>
+                            <option value="3"> 3 </option>
+                            <option value="4"> 4 </option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
                     <td>Stud Spacing:</td>
                     <td>
                         <input id="stud_spacing" name="stud_spacing" class="stud_spacing input-sm user_param" style="width:95px" type="number" step="any" value="12.0"> in.
@@ -63,8 +71,8 @@
                         <label for="subtract_plates">Subtract Wall Plates from Height.</label>
                     </td>
                 </tr>
-                <tr id="subtraction_plates_row">
-                    <td>Number of 2x plates to consider:</td>
+                <tr>
+                    <td>Number of 2x plates to subtract:</td>
                     <td><input id="num_plates_subtract" name="num_plates_subtract" class="num_plates_subtract input-sm user_param" style="width:95px" type="number" step="any" value="3"></td>
                 </tr>
                 <tr>
@@ -72,6 +80,120 @@
                         <input type="checkbox" id="plate_crushing" name="plate_crushing" value="1">
                         <label for="plate_crushing">Consider plate crushing.</label>
                     </td>
+                </tr>
+                <tr>
+                    <td>In Service Moisture Content:</td>
+                    <td><input id="moisture_content" name="moisture_content" class="moisture_content input-sm user_param" style="width:95px" type="number" step="any" value="19"> %</td>
+                </tr>
+            </table>
+        </div>
+        <div class="row">
+            <h4>Stud Wood Material:</h4>
+        </div>
+        <div class="row">
+            <table class="table table-sm table-hover">
+                <tr>
+                    <td>NDS 2018 Supplement Table:</td>
+                    <td>
+                        <select id="nds_supp_table_select" class="nds_supp_table_select input-sm user_param" name="nds_supp_table_select" style="width:200px">
+                            <option value="4A"> NDS 2018 - Table 4A </option>
+                            <option value="4B"> NDS 2018 - Table 4B </option>
+                            <option value="USER"> USER </option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Wood Species:</td>
+                    <td>
+                        <select id="nds_species_select" class="nds_species_select input-sm user_param" name="nds_specied_select" style="width:300px">
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Wood Grade:</td>
+                    <td>
+                        <select id="nds_grade_select" class="nds_grade_select input-sm user_param" name="nds_grade_select" style="width:300px">
+                        </select>
+                    </td>
+                </tr>
+            </table>
+            <table class="table table-sm table-hover">
+                <tr>
+                    <th>F<sub>b</sub> (psi)</th>
+                    <th>F<sub>t</sub> (psi)</th>
+                    <th>F<sub>v</sub> (psi)</th>
+                    <th>F<sub>cp</sub> (psi)</th>
+                    <th>F<sub>c</sub> (psi)</th>
+                    <th>E (psi)</th>
+                    <th>E<sub>min</sub> (psi)</th>
+                    <th>G</th>
+                    <th>Grading Agency</th>
+                </tr>
+                <tr>
+                    <td><input readonly id="fb_input" name="fb_input" class="fb_input input-sm user_param" style="width:95px" type="number" step="any" value="0"></td>
+                    <td><input readonly id="ft_input" name="ft_input" class="ft_input input-sm user_param" style="width:95px" type="number" step="any" value="0"></td>
+                    <td><input readonly id="fv_input" name="fv_input" class="fv_input input-sm user_param" style="width:95px" type="number" step="any" value="0"></td>
+                    <td><input readonly id="fcp_input" name="fcp_input" class="fcp_input input-sm user_param" style="width:95px" type="number" step="any" value="0"></td>
+                    <td><input readonly id="fc_input" name="fc_input" class="fc_input input-sm user_param" style="width:95px" type="number" step="any" value="0"></td>
+                    <td><input readonly id="E_input" name="E_input" class="E_input input-sm user_param" style="width:95px" type="number" step="any" value="0"></td>
+                    <td><input readonly id="Emin_input" name="Emin_input" class="Emin_input input-sm user_param" style="width:95px" type="number" step="any" value="0"></td>
+                    <td><input readonly id="G_input" name="G_input" class="G_input input-sm user_param" style="width:95px" type="number" step="any" value="0"></td>
+                    <td><input readonly id="agency_input" name="agency_input" class="agency_input input-sm user_param" style="width:150px" type="text" ></td>
+                </tr>
+            </table>
+        </div>
+        <div class="row">
+            <h4>Plate Wood Material:</h4>
+        </div>
+        <div class="row">
+            <table class="table table-sm table-hover">
+                <tr>
+                    <td>NDS 2018 Supplement Table:</td>
+                    <td>
+                        <select id="nds_supp_table_select_plate" class="nds_supp_table_select_plate input-sm user_param" name="nds_supp_table_select_plate" style="width:200px">
+                            <option value="4A"> NDS 2018 - Table 4A </option>
+                            <option value="4B"> NDS 2018 - Table 4B </option>
+                            <option value="USER"> USER </option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Wood Species:</td>
+                    <td>
+                        <select id="nds_species_select_plate" class="nds_species_select_plate input-sm user_param" name="nds_specied_select_plate" style="width:300px">
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Wood Grade:</td>
+                    <td>
+                        <select id="nds_grade_select_plate" class="nds_grade_select_plate input-sm user_param" name="nds_grade_select_plate" style="width:300px">
+                        </select>
+                    </td>
+                </tr>
+            </table>
+            <table class="table table-sm table-hover">
+                <tr>
+                    <th>F<sub>b</sub> (psi)</th>
+                    <th>F<sub>t</sub> (psi)</th>
+                    <th>F<sub>v</sub> (psi)</th>
+                    <th>F<sub>cp</sub> (psi)</th>
+                    <th>F<sub>c</sub> (psi)</th>
+                    <th>E (psi)</th>
+                    <th>E<sub>min</sub> (psi)</th>
+                    <th>G</th>
+                    <th>Grading Agency</th>
+                </tr>
+                <tr>
+                    <td><input readonly id="fb_input_plate" name="fb_input_plate" class="fb_input_plate input-sm user_param" style="width:95px" type="number" step="any" value="0"></td>
+                    <td><input readonly id="ft_input_plate" name="ft_input_plate" class="ft_input_plate input-sm user_param" style="width:95px" type="number" step="any" value="0"></td>
+                    <td><input readonly id="fv_input" name="fv_input" class="fv_input_plate input-sm user_param" style="width:95px" type="number" step="any" value="0"></td>
+                    <td><input readonly id="fcp_input_plate" name="fcp_input_plate" class="fcp_input_plate input-sm user_param" style="width:95px" type="number" step="any" value="0"></td>
+                    <td><input readonly id="fc_input_plate" name="fc_input_plate" class="fc_input_plate input-sm user_param" style="width:95px" type="number" step="any" value="0"></td>
+                    <td><input readonly id="E_input_plate" name="E_input_plate" class="E_input_plate input-sm user_param" style="width:95px" type="number" step="any" value="0"></td>
+                    <td><input readonly id="Emin_input_plate" name="Emin_input_plate" class="Emin_input_plate input-sm user_param" style="width:95px" type="number" step="any" value="0"></td>
+                    <td><input readonly id="G_input_plate" name="G_input_plate" class="G_input_plate input-sm user_param" style="width:95px" type="number" step="any" value="0"></td>
+                    <td><input readonly id="agency_input_plate" name="agency_input_plate" class="agency_input_plate input-sm user_param" style="width:150px" type="text" ></td>
                 </tr>
             </table>
         </div>
