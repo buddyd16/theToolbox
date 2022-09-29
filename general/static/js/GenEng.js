@@ -61,4 +61,4 @@ function bilinear_interpolate(x1,y1,x2,y2,x,y,f11,f12,f21,f22){
 
         return ["(x,y) must be between (x1,y1) and (x2,y2)",[0,0,0,0],0]
     };
-}
+};

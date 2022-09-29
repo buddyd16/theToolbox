@@ -230,6 +230,14 @@ function steelShapeTemplate(){
 
                 coords = steelHSS(h,b,t,ro,ri);
                 writeTemplateResults(coords[0],coords[1],shapestrg);
+            } else if (shapeset == "HSS_RND" || shapeset == "PIPE"){
+                console.log(shapedata);
+
+                let od = Number(shapedata["OD"][0])*conversion;
+                let tdes = Number(shapedata["tdes"][0])*conversion;
+
+                coords = steelPipe(od,tdes);
+                writeTemplateResults(coords[0],coords[1],shapestrg);
             };
 
         },
@@ -240,7 +248,7 @@ function steelShapeTemplate(){
     });
 };
 
-function circle_coordinates(x,y,r,start,end){
+function circle_coordinates(x,y,r,start,end, numpoints=100){
 
     // given a center point x,y
     // and a radius
@@ -251,7 +259,7 @@ function circle_coordinates(x,y,r,start,end){
 
     let a1 = degreesToRadians(start);
     let a2 = degreesToRadians(end);
-    let a_step = degreesToRadians(1);
+    let a_step = (a2-a1)/numpoints;
     
 
     while (a1 < a2){
@@ -679,4 +687,34 @@ function steelL(vleg, hleg, thickness, k){
     y.push(0)
 
     return [x,y];
+};
+
+function steelPipe(OD,tdes){
+    // Given the governing dimensions of an HSS Round or Pipe
+    // Return the piecewise linear coordinates to 
+    // Build the shape inclusive of the central hole
+    // centered on [0,0]
+
+    let ro = OD/2;
+    let ri = ro - tdes;
+    let x = [];
+    let y = [];
+
+    let outside = circle_coordinates(0,0,ro,0,360,200);
+
+    x.push(...outside[0]);
+    y.push(...outside[1]);
+
+    let inside = circle_coordinates(0,0,ri,0,360,200);
+    inside[0].reverse();
+    inside[1].reverse();
+    
+    x.push(...inside[0]);
+    y.push(...inside[1]);
+
+    x.push(ro);
+    y.push(0);
+
+    return [x,y];
+
 };
