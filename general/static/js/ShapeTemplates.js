@@ -718,3 +718,36 @@ function steelPipe(OD,tdes){
     return [x,y];
 
 };
+
+function nSidePolygon(){
+
+    let shapestrg = $('#templateSelectedShape').val();
+    let start_angle = Number($('#templateNGonAngle').val());
+    let n_sides = Number($('#templateNGonN').val());
+    let radius = Number($('#templateNGonRadius').val());
+
+    n_sides = Math.max(3,n_sides);
+
+    let angle = degreesToRadians(start_angle);
+    let angle_step = degreesToRadians(360 / n_sides);
+
+    let x = []
+    let y = []
+    let i = 0;
+
+    while (i < n_sides){
+        let x0 = radius*Math.cos(angle);
+        let y0 = radius*Math.sin(angle);
+        
+        x.push(x0);
+        y.push(y0);
+
+        angle += angle_step;
+        i+=1
+    };
+
+    x.push(x[0]);
+    y.push(y[0]);
+
+    writeTemplateResults(x,y,shapestrg);
+};
