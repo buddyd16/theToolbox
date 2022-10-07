@@ -201,6 +201,30 @@
                                         <button type="button" onclick="bezierFillet();" class="btn btn-secondary btn-sm">Apply Bezier Fillet</button>
                                     </div>
                                 </div>
+                                <!-- N Side Polygon -->
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <h5>N Sided Polygon:</h5>
+                                        <table class="table table-sm w-auto">
+                                            <tr>
+                                                <td>N:</td>
+                                                <td><input id="templateNGonN" name="templateNGonN" class="input-sm" style="width:95px" type="number" step="any" value="3"></td>
+                                                <td>Number of Sides (3 minimum)</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Start Angle:</td>                                            
+                                                <td><input id="templateNGonAngle" name="templateNGonAngle" class="input-sm" style="width:95px" type="number" step="any" value="1"></td>
+                                                <td>Angle of the first vertex</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Radius:</td>                                            
+                                                <td><input id="templateNGonRadius" name="templateNGonRadius" class="input-sm" style="width:95px" type="number" step="any" value="1"></td>
+                                                <td>Radius from center to each vertex</td>
+                                            </tr>
+                                        </table>
+                                        <button type="button" onclick="nSidePolygon();" class="btn btn-secondary btn-sm">Apply N Sided Polygon</button>
+                                    </div>
+                                </div>
                                 <!-- Steel Shapes - Work in Progress -->
                                 <div class="row">
                                     <div class="col-sm">
