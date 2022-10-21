@@ -105,6 +105,13 @@ class Beam2D():
         
         self.analyzed = False
 
+        self.absMumax = {"Mu":0, "Combo":0, "Pattern":0, "Location":0, "Local Location":0}
+        self.absMumin = {"Mu":0, "Combo":0, "Pattern":0, "Location":0, "Local Location":0}
+        self.absMsmax = {"Ms":0, "Combo":0, "Pattern":0, "Location":0, "Local Location":0}
+        self.absMsmin = {"Ms":0, "Combo":0, "Pattern":0, "Location":0, "Local Location":0}
+        self.absDsmax = {"Ds":0, "Combo":0, "Pattern":0, "Location":0, "Local Location":0}
+        self.absDsmin = {"Ds":0, "Combo":0, "Pattern":0, "Location":0, "Local Location":0}
+
     @property
     def span(self):
         '''
@@ -302,7 +309,7 @@ class Beam2D():
                 eisfunc = {}
                 eidfunc = {}
                     
-                for pattern  in calc_patterns:
+                for pattern in calc_patterns:
                     
                     endSlopes = [0, 0]
                     intDelta = [0 for i in self.interiorSupports]
@@ -432,9 +439,68 @@ class Beam2D():
                     shear_roots = bmtools.roots_piecewise_function(vfunctemp)
                     slope_roots = bmtools.roots_piecewise_function(eisfunctemp)
                     
-                    self.rootstations.extend(shear_roots)
-                    self.rootstations.extend(slope_roots)
+                    shear_roots.append(0)
+                    shear_roots.append(self._span)
+
+                    # self.rootstations.extend(shear_roots)
+                    # self.rootstations.extend(slope_roots)
                     
+                    if combo.combo_type == 'ULS':
+                        for root in shear_roots:
+                            rootmoment = bmtools.eval_piece_function(mfunctemp,root)
+
+                            if rootmoment > self.absMumax["Mu"]:
+                                self.absMumax["Mu"] = rootmoment
+                                self.absMumax["Combo"] = combo_key
+                                self.absMumax["Pattern"] = pattern_key
+                                self.absMumax["Location"] = root+self.node_i.x
+                                self.absMumax["Local Location"] = root
+                            
+                            if rootmoment < self.absMumin["Mu"]:
+                                self.absMumin["Mu"] = rootmoment
+                                self.absMumin["Combo"] = combo_key
+                                self.absMumin["Pattern"] = pattern_key
+                                self.absMumin["Location"] = root+self.node_i.x
+                                self.absMumin["Local Location"] = root
+                    
+                    if combo.combo_type == 'SLS':
+                        for root in shear_roots:
+                            rootmoment = bmtools.eval_piece_function(mfunctemp,root)
+
+                            if rootmoment > self.absMsmax["Ms"]:
+                                self.absMsmax["Ms"] = rootmoment
+                                self.absMsmax["Combo"] = combo_key
+                                self.absMsmax["Pattern"] = pattern_key
+                                self.absMsmax["Location"] = root+self.node_i.x
+                                self.absMsmax["Local Location"] = root
+                            
+                            if rootmoment < self.absMsmin["Ms"]:
+                                self.absMsmin["Ms"] = rootmoment
+                                self.absMsmin["Combo"] = combo_key
+                                self.absMsmin["Pattern"] = pattern_key
+                                self.absMsmin["Location"] = root+self.node_i.x
+                                self.absMsmin["Local Location"] = root
+                        
+                        for root in slope_roots:
+                            rootEID = bmtools.eval_piece_function(eidfunctemp,root)
+                            
+                            rootEID = rootEID/(self.Em*self.Ixx)
+
+                            if rootEID > self.absDsmax["Ds"]:
+                                self.absDsmax["Ds"] = rootEID
+                                self.absDsmax["Combo"] = combo_key
+                                self.absDsmax["Pattern"] = pattern_key
+                                self.absDsmax["Location"] = root+self.node_i.x
+                                self.absDsmax["Local Location"] = root
+                            
+                            if rootEID < self.absDsmin["Ds"]:
+                                self.absDsmin["Ds"] = rootEID
+                                self.absDsmin["Combo"] = combo_key
+                                self.absDsmin["Pattern"] = pattern_key
+                                self.absDsmin["Location"] = root+self.node_i.x
+                                self.absDsmin["Local Location"] = root
+                    
+
                 if combo.combo_type == None:
                     self.reactions_basic[combo_key] = rdict
                     self.v_functions_basic[combo_key] = vfunc
@@ -450,7 +516,7 @@ class Beam2D():
                     self.eis_functions_uls[combo_key] = eisfunc
                     self.eid_functions_uls[combo_key] = eidfunc
                     self.FEF_uls[combo_key] = fefdict
-                
+
                 elif combo.combo_type == 'SLS':
                     self.reactions_sls[combo_key] = rdict
                     self.v_functions_sls[combo_key] = vfunc
@@ -466,20 +532,28 @@ class Beam2D():
                 # 0.01 mm if using metric, where the length basis is
                 # feet for imperial and meters for metric
                 
-                self.rootstations = [round(i,4) for i in self.rootstations]
+                # self.rootstations = [round(i,4) for i in self.rootstations]
                 
-                self.rootstations = sorted(set(self.rootstations))
+                # self.rootstations = sorted(set(self.rootstations))
                 # print(self.rootstations)
                 # because we rounded the roots there is a chance that the last value ends up
                 # off of the beam, catch that here and reset the last station to the beam span.
                 
-                if self.rootstations != []:
-                    if self.rootstations[-1] > self.span:
-                        self.rootstations[-1] = self.span
+                # if self.rootstations != []:
+                    # if self.rootstations[-1] > self.span:
+                        # self.rootstations[-1] = self.span
                 
                 self.printstations.extend(self.calcstations)
-                self.printstations.extend(self.rootstations)
+                # self.printstations.extend(self.rootstations)
                 
+                # Add the max/min locations to the print stations
+                self.printstations.extend([self.absMumin["Local Location"],
+                                            self.absMumax["Local Location"],
+                                            self.absMsmax["Local Location"],
+                                            self.absMsmin["Local Location"],
+                                            self.absDsmax["Local Location"],
+                                            self.absDsmin["Local Location"]])
+
                 self.printstations = sorted(set(self.printstations))
                 self.chartstations = [i+self.node_i.x for i in self.printstations]
                 
@@ -925,6 +999,20 @@ class Beam2D():
                     output_loads.append(ebl.cant_right_slope(slope, other_beam.span,load_type, self.id))
         
         for combo, pat_dict in self.eis_functions_sls.items():
+            combo_key = combo
+
+            for pat, eis_func in pat_dict.items():
+                pat_key = pat
+                load_type = f'{combo_key}{pat_key}'
+
+                slope = bmtools.eval_piece_function(eis_func,x)
+
+                if left:
+                    output_loads.append(ebl.cant_left_slope(slope, other_beam.span,load_type, self.id))
+                else:
+                    output_loads.append(ebl.cant_right_slope(slope, other_beam.span,load_type, self.id))
+        
+        for combo, pat_dict in self.eis_functions_uls.items():
             combo_key = combo
 
             for pat, eis_func in pat_dict.items():

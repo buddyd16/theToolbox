@@ -14,8 +14,6 @@ def web_simplebeam():
         # Get Units
         units = request.form.get("units")
         
-        print(units)
-        
         # Get Geometry Inputs
         span = float(request.form.get('span'))
         em = float(request.form.get('spanE'))
@@ -225,6 +223,7 @@ def web_simplebeam():
 
             # store the results for use by the Jinja templating
             results = computation
+            results["calclog"] = True
         else:
             # store the results for use by the Jinja templating
             results = None
@@ -241,7 +240,8 @@ def web_simplebeam():
                   "f2": 0.2,
                   "latReverse": 1,
                   "uls": [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-                  "sls": [[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+                  "sls": [[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                          [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1]],
                   "distLoads": [[0, 1, 0, 1, 0, 1, "D"]],
                   "pointLoads": [[0, 0, "D"]],
                   "pointMoments": [[0, 0, "D"]],

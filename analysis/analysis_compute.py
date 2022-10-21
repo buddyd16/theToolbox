@@ -622,8 +622,8 @@ def SimpleBeam(inputs, log=True):
                         
                         # test 2-1aa
                         if cantLeft is not None:
-                            print("test 2-1aa -- w/cantLeft")
-                            print(f"w1:{w1},w2:{w2},a:{a},b:{b},{kind},id:{spanIDs[i]}")
+                            # print("test 2-1aa -- w/cantLeft")
+                            # print(f"w1:{w1},w2:{w2},a:{a},b:{b},{kind},id:{spanIDs[i]}")
                             if log:
                                 computation_log.append("test 2-1aa -- w/cantLeft")
                                 computation_log.append(f"w1:{w1},w2:{w2},a:{a},b:{b},{kind},id:{spanIDs[i]}")
@@ -641,8 +641,8 @@ def SimpleBeam(inputs, log=True):
                         
                         #test 2-1ab
                         else:
-                            print("test 2-1ab -- no cantLeft")
-                            print(f"w1:{w1},w2:{w2},a:{a},b:{b},{kind},id:{spanIDs[i]}")
+                            # print("test 2-1ab -- no cantLeft")
+                            # print(f"w1:{w1},w2:{w2},a:{a},b:{b},{kind},id:{spanIDs[i]}")
                             if log:
                                 computation_log.append("test 2-1ab -- no cantLeft")
                                 computation_log.append(f"w1:{w1},w2:{w2},a:{a},b:{b},{kind},id:{spanIDs[i]}")
@@ -664,27 +664,32 @@ def SimpleBeam(inputs, log=True):
                         
                         # test 2-1ba
                         if cantLeft is not None:
-                            print("test 2-1ba -- w/ cantLeft")
-                            print(f"w1:{w1},w2:{wc},a:{a},b:{c},{kind},id:{spanIDs[i]}")
+                            # print("test 2-1ba -- w/ cantLeft")
+                            # print(f"w1:{w1},w2:{wc},a:{a},b:{c},{kind},id:{spanIDs[i]}")
                             if log:
                                 computation_log.append("test 2-1ba -- w/ cantLeft")
                                 computation_log.append(f"w1:{w1},w2:{wc},a:{a},b:{c},{kind},id:{spanIDs[i]}")
-                            # load applies to the cantilever
-                            cantLeftLoads.append(
-                                ebl.cant_left_trap(w1,wc,a,c,cantLeft.span,0,kind,spanIDs[i]))
-                            # Catch the loads at the support from the cantilever
-                            # here and apply them to the ebam
-                            p = cantLeftLoads[-1].rr
-                            m = cantLeftLoads[-1].mr
-                            mainbeamLoads.append(
-                                ebl.pl(p,0,mainBeam.span,kind,spanIDs[i]))
-                            mainbeamLoads.append(
-                                ebl.point_moment(m,0,mainBeam.span,kind,spanIDs[i]))
+                            
+                            if a == c:
+                                # print("a=c, catch div/0")
+                                pass
+                            else:
+                                # load applies to the cantilever
+                                cantLeftLoads.append(
+                                    ebl.cant_left_trap(w1,wc,a,c,cantLeft.span,0,kind,spanIDs[i]))
+                                # Catch the loads at the support from the cantilever
+                                # here and apply them to the ebam
+                                p = cantLeftLoads[-1].rr
+                                m = cantLeftLoads[-1].mr
+                                mainbeamLoads.append(
+                                    ebl.pl(p,0,mainBeam.span,kind,spanIDs[i]))
+                                mainbeamLoads.append(
+                                    ebl.point_moment(m,0,mainBeam.span,kind,spanIDs[i]))
                         
                         # test 2-1bb
                         else:
-                            print("test 2-1bb -- no cantLeft")
-                            print(f"w1:{w1},w2:{wc},a:{a},b:{c},{kind},id:{spanIDs[i]}")
+                            # print("test 2-1bb -- no cantLeft")
+                            # print(f"w1:{w1},w2:{wc},a:{a},b:{c},{kind},id:{spanIDs[i]}")
 
                             if log:
                                 computation_log.append("test 2-1bb -- no cantLeft")
@@ -697,8 +702,8 @@ def SimpleBeam(inputs, log=True):
                             # the mainbeam and in the mainbeams local coordinates.
 
                             if a == c:
-                                print("test 2-1bb -- no cantLeft")
-                                print("a=c, catch div/0")
+                                # print("test 2-1bb -- no cantLeft")
+                                # print("a=c, catch div/0")
                                 pass
                             else:
                                 mainbeamLoads.append(
@@ -736,8 +741,8 @@ def SimpleBeam(inputs, log=True):
                             # left support x to get it to local
                             xc = c - mainBeam.node_i.x
 
-                            print("test 2-2aa")
-                            print(f"w1:{w1},w2:{wc},a:{xa},b:{xc},{kind},id:{spanIDs[i]}")
+                            # print("test 2-2aa")
+                            # print(f"w1:{w1},w2:{wc},a:{xa},b:{xc},{kind},id:{spanIDs[i]}")
 
                             if log:
                                 computation_log.append("test 2-2aa")
@@ -755,8 +760,8 @@ def SimpleBeam(inputs, log=True):
                             # left support x to get it to local
                             xb = b - mainBeam.node_i.x
 
-                            print("test 2-2ab")
-                            print(f"w1:{w1},w2:{w2},a:{xa},b:{xb},{kind},id:{spanIDs[i]}")
+                            # print("test 2-2ab")
+                            # print(f"w1:{w1},w2:{w2},a:{xa},b:{xb},{kind},id:{spanIDs[i]}")
 
                             if log:
                                 computation_log.append("test 2-2ab")
@@ -782,8 +787,8 @@ def SimpleBeam(inputs, log=True):
 
                             xd = d - mainBeam.node_i.x
                             
-                            print("test 2-2ba")
-                            print(f"w1:{wc},w2:{wd},a:{xc},b:{xd},{kind},id:{spanIDs[i]}")
+                            # print("test 2-2ba")
+                            # print(f"w1:{wc},w2:{wd},a:{xc},b:{xd},{kind},id:{spanIDs[i]}")
 
                             if log:
                                 computation_log.append("test 2-2ba")
@@ -795,8 +800,8 @@ def SimpleBeam(inputs, log=True):
                         # test 2-2bb
                         elif t>1 and tp>=1:
                             # Loads ends at the beginning of this span
-                            print("test 2-2bb")
-                            print("pass")
+                            # print("test 2-2bb")
+                            # print("pass")
                             if log:
                                 computation_log.append("test 2-2bb")
                                 computation_log.append("pass")
@@ -809,8 +814,8 @@ def SimpleBeam(inputs, log=True):
 
                             xb = b - mainBeam.node_i.x
 
-                            print("test 2-2bc")
-                            print(f"w1:{wc},w2:{w2},a:{xc},b:{xb},{kind},id:{spanIDs[i]}")
+                            # print("test 2-2bc")
+                            # print(f"w1:{wc},w2:{w2},a:{xc},b:{xb},{kind},id:{spanIDs[i]}")
 
                             if log:
                                 computation_log.append("test 2-2bc")
@@ -842,8 +847,8 @@ def SimpleBeam(inputs, log=True):
                             # to go off the beam end
                             xb = b - mainBeam.node_j.x
 
-                            print("test 2-3aa -- w/ cantRight")
-                            print(f"w1:{w1},w2:{w2},a:{xa},b:{xb},{kind},id:{spanIDs[i]}")
+                            # print("test 2-3aa -- w/ cantRight")
+                            # print(f"w1:{w1},w2:{w2},a:{xa},b:{xb},{kind},id:{spanIDs[i]}")
 
                             if log:
                                 computation_log.append("test 2-3aa -- w/ cantRight")
@@ -866,8 +871,8 @@ def SimpleBeam(inputs, log=True):
                             xa = a - mainBeam.node_i.x
                             xb = b - mainBeam.node_i.x
 
-                            print("test 2-3ab -- no cantRight")
-                            print(f"w1:{w1},w2:{w2},a:{xa},b:{xb},{kind},id:{spanIDs[i]}")
+                            # print("test 2-3ab -- no cantRight")
+                            # print(f"w1:{w1},w2:{w2},a:{xa},b:{xb},{kind},id:{spanIDs[i]}")
 
                             if log:
                                 computation_log.append("test 2-3ab -- no cantRight")
@@ -893,8 +898,8 @@ def SimpleBeam(inputs, log=True):
 
                             # test 2-3baa
                             if xc == xb:
-                                print("test 2-3baa")
-                                print("pass -- xc == xb")
+                                # print("test 2-3baa")
+                                # print("pass -- xc == xb")
                                 if log:
                                     computation_log.append("test 2-3baa")
                                     computation_log.append("pass -- xc == xb")
@@ -902,8 +907,8 @@ def SimpleBeam(inputs, log=True):
                             
                             # test 2-3bab
                             elif xb < xc:
-                                print("test 2-3bab")
-                                print("pass -- xb < xc, load not in this span")
+                                # print("test 2-3bab")
+                                # print("pass -- xb < xc, load not in this span")
                                 if log:
                                     computation_log.append("test 2-3bab")
                                     computation_log.append("pass -- xb < xc, load not in this span")
@@ -911,8 +916,8 @@ def SimpleBeam(inputs, log=True):
                             
                             # test 2-3bac
                             else:
-                                print("test 2-3bac -- w/ cantRight")
-                                print(f"w1:{wc},w2:{w2},a:{xc},b:{xb},{kind},id:{spanIDs[i]}")
+                                # print("test 2-3bac -- w/ cantRight")
+                                # print(f"w1:{wc},w2:{w2},a:{xc},b:{xb},{kind},id:{spanIDs[i]}")
 
                                 if log:
                                     computation_log.append("test 2-3bac -- w/ cantRight")
@@ -940,8 +945,8 @@ def SimpleBeam(inputs, log=True):
                             # test 2-3bba
                             if xc == xb:
 
-                                print("test 2-3bba")
-                                print("pass -- xc == xb")
+                                # print("test 2-3bba")
+                                # print("pass -- xc == xb")
 
                                 if log:
                                     computation_log.append("test 2-3bba")
@@ -951,8 +956,8 @@ def SimpleBeam(inputs, log=True):
                             
                             # test 2-3bbb
                             elif xb < xc:
-                                print("test 2-3bbb")
-                                print("pass -- xb < xc, load not in this span")
+                                # print("test 2-3bbb")
+                                # print("pass -- xb < xc, load not in this span")
                                 if log:
                                     computation_log.append("test 2-3bbb")
                                     computation_log.append("pass -- xb < xc, load not in this span")
@@ -960,8 +965,8 @@ def SimpleBeam(inputs, log=True):
                             # test 2-3bbc
                             else:
 
-                                print("test 2-3bbc")
-                                print(f"w1:{wc},w2:{w2},a:{xc},b:{xb},{kind},id:{spanIDs[i]}")
+                                # print("test 2-3bbc")
+                                # print(f"w1:{wc},w2:{w2},a:{xc},b:{xb},{kind},id:{spanIDs[i]}")
 
                                 if log:
                                     computation_log.append("test 2-3bbc")
@@ -971,8 +976,8 @@ def SimpleBeam(inputs, log=True):
                                     ebl.trap(wc,w2,xc,xb,mainBeam.span,kind,spanIDs[i]))
                 # test 2-4
                 else:
-                    print("test 2-4")
-                    print("something wrong with load data")
+                    # print("test 2-4")
+                    # print("something wrong with load data")
 
                     if log:
                         computation_log.append("test 2-4")
@@ -1023,6 +1028,8 @@ def SimpleBeam(inputs, log=True):
 
     mainBeam.ULS_envelopes()
     mainBeam.SLS_envelopes(conv=delta_conv)
+    mainBeam.absDsmax["Ds"] = mainBeam.absDsmax["Ds"]*delta_conv
+    mainBeam.absDsmin["Ds"] = mainBeam.absDsmin["Ds"]*delta_conv
     mainBeam.basic_reaction_envelope()
 
     if cantLeft is not None:
@@ -1063,4 +1070,12 @@ def SimpleBeam(inputs, log=True):
     # End Analyze the beams
     ###########################################################################
 
-    return {"mainbeam": mainBeam, "cantleft": cantLeft, "cantright": cantRight, "log": computation_log, "resunits":res_units}
+    return {"mainbeam": mainBeam, 
+            "cantleft": cantLeft,
+            "cantright": cantRight,
+            "log": computation_log,
+            "resunits": res_units,
+            "patterns": patterns,
+            "ulscombos": uls_combos,
+            "slscombos": sls_combos,
+            "basiccombos": basic_combos}
