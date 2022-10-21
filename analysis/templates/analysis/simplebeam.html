@@ -36,7 +36,7 @@
         <strong>"Calculating please wait..."</strong>
     </div>
     <!-- Main Beam Chart/Canvas-->
-    <form method=post action="" onsubmit="ShowLoading()">
+    <form method=post action="" onsubmit="ShowLoading()" onkeydown="return event.key != 'Enter';">
 
 
     <div class="row">
@@ -90,6 +90,11 @@
                 <li class="nav-item">
                     <a class="nav-link" data-toggle="tab" href="#basicResults">Basic Results</a>
                 </li>
+                {% if results['calclog'] %}
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#calclog">Calc Log</a>
+                </li>
+                {% endif %}
                 {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" data-toggle="tab" href="#HELP">Help</a>
@@ -779,7 +784,7 @@
                             {% endfor %}
                         </table>
 
-                        <br><br><strong><u>Ultimate Reactions Envelope:</u></strong>
+                        <br><strong><u>Ultimate Reactions Envelope:</u></strong>
                         <table class="table table-striped w-auto small">
                             <tr>
                                 <th scope="col" class="text-center"></th>
@@ -848,7 +853,7 @@
 
                         </table>
 
-                        <br><br><strong><u>Service Reactions Envelope:</u></strong>
+                        <br><strong><u>Service Reactions Envelope:</u></strong>
                         <table class="table table-striped w-auto small">
                             <tr>
                                 <th scope="col" class="text-center"></th>
@@ -915,13 +920,125 @@
                                 {% endif %}
                             </tr>
                         </table>
-                        
-                        <br><br>
-                        <h4>Calculation Log:</h4>
-                        <table class="table table-sm w-auto">
-                            {% for item in results['log'] %}
+
+                        <br><strong><u>Main Span:</u></strong>
+                        <br><strong><u>Absolute Max/Min Ultimate Moments:</u></strong>
+                        <table class="table table-striped w-auto small">
                             <tr>
-                            <td>{{item}}</td>
+                            <th scope="col" class="text-center">Moment ({{results["resunits"]["moment"]}})</th>
+                            <th scope="col" class="text-center">Location ({{ "ft" if inputs["units"]=="imperial" else "m"}})</th>
+                            <th scope="col" class="text-center">Combination</th>
+                            <th scope="col" class="text-center">Pattern</th>
+                            </tr>
+                            <tr>
+                                <td>{{"%.4f"|format(results['mainbeam'].absMumax["Mu"])}}</td>
+                                <td>{{"%.4f"|format(results['mainbeam'].absMumax["Location"])}}</td>
+                                <td>{{results['mainbeam'].absMumax["Combo"]}}</td>
+                                <td>{{results['mainbeam'].absMumax["Pattern"]}}</td>
+                            </tr>
+                            <tr>
+                                <td>{{"%.4f"|format(results['mainbeam'].absMumin["Mu"])}}</td>
+                                <td>{{"%.4f"|format(results['mainbeam'].absMumin["Location"])}}</td>
+                                <td>{{results['mainbeam'].absMumin["Combo"]}}</td>
+                                <td>{{results['mainbeam'].absMumin["Pattern"]}}</td>
+                            </tr>
+                        </table>
+                        <strong><u>Absolute Max/Min Service Moments:</u></strong>
+                        <table class="table table-striped w-auto small">
+                            <tr>
+                            <th scope="col" class="text-center">Moment ({{results["resunits"]["moment"]}})</th>
+                            <th scope="col" class="text-center">Location ({{ "ft" if inputs["units"]=="imperial" else "m"}})</th>
+                            <th scope="col" class="text-center">Combination</th>
+                            <th scope="col" class="text-center">Pattern</th>
+                            </tr>
+                            <tr>
+                                <td>{{"%.4f"|format(results['mainbeam'].absMsmax["Ms"])}}</td>
+                                <td>{{"%.4f"|format(results['mainbeam'].absMsmax["Location"])}}</td>
+                                <td>{{results['mainbeam'].absMsmax["Combo"]}}</td>
+                                <td>{{results['mainbeam'].absMsmax["Pattern"]}}</td>
+                            </tr>
+                            <tr>
+                                <td>{{"%.4f"|format(results['mainbeam'].absMsmin["Ms"])}}</td>
+                                <td>{{"%.4f"|format(results['mainbeam'].absMsmin["Location"])}}</td>
+                                <td>{{results['mainbeam'].absMsmin["Combo"]}}</td>
+                                <td>{{results['mainbeam'].absMsmin["Pattern"]}}</td>
+                            </tr>
+                        </table>
+                        <strong><u>Absolute Max/Min Service Deflections:</u></strong>
+                        <table class="table table-striped w-auto small">
+                            <tr>
+                            <th scope="col" class="text-center">Deflection ({{results["resunits"]["delta"]}})</th>
+                            <th scope="col" class="text-center">Location ({{ "ft" if inputs["units"]=="imperial" else "m"}})</th>
+                            <th scope="col" class="text-center">Combination</th>
+                            <th scope="col" class="text-center">Pattern</th>
+                            </tr>
+                            <tr>
+                                <td>{{"%.4f"|format(results['mainbeam'].absDsmax["Ds"])}}</td>
+                                <td>{{"%.4f"|format(results['mainbeam'].absDsmax["Location"])}}</td>
+                                <td>{{results['mainbeam'].absDsmax["Combo"]}}</td>
+                                <td>{{results['mainbeam'].absDsmax["Pattern"]}}</td>
+                            </tr>
+                            <tr>
+                                <td>{{"%.4f"|format(results['mainbeam'].absDsmin["Ds"])}}</td>
+                                <td>{{"%.4f"|format(results['mainbeam'].absDsmin["Location"])}}</td>
+                                <td>{{results['mainbeam'].absDsmin["Combo"]}}</td>
+                                <td>{{results['mainbeam'].absDsmin["Pattern"]}}</td>
+                            </tr>
+                        </table>
+
+                        <br><strong><u>Ultimate Combinations:</u></strong>
+                        <table class="table table-striped w-auto small">
+                            <tr>
+                                <th class="text-center">Name</th>
+                                <th class="text-center">Formula</th>
+                                <th class="text-center">Patterned</th>
+                            </tr>
+                            {% for combo in results['ulscombos'] %}
+                            <tr>
+                                <td class="text-center">{{combo.name}}</td>
+                                <td class="text-center">{{combo.FormulaString()}}</td>
+                                <td class="text-center">{{ "Yes" if combo.patterned else "No" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+
+                        <br><strong><u>Service Combinations:</u></strong>
+                        <table class="table table-striped w-auto small">
+                            <tr>
+                                <th class="text-center">Name</th>
+                                <th class="text-center">Formula</th>
+                                <th class="text-center">Patterned</th>
+                            </tr>
+                            {% for combo in results['slscombos'] %}
+                            <tr>
+                                <td class="text-center">{{combo.name}}</td>
+                                <td class="text-center">{{combo.FormulaString()}}</td>
+                                <td class="text-center">{{ "Yes" if combo.patterned else "No" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+
+                        <br><strong><u>Basic Combinations:</u></strong>
+                        <table class="table table-striped w-auto small">
+                            <tr>
+                                <th class="text-center">Name</th>
+                                <th class="text-center">Formula</th>
+                                <th class="text-center">Patterned</th>
+                            </tr>
+                            {% for combo in results['basiccombos'] %}
+                            <tr>
+                                <td class="text-center">{{combo.name}}</td>
+                                <td class="text-center">{{combo.FormulaString()}}</td>
+                                <td class="text-center">{{ "Yes" if combo.patterned else "No" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+
+                        <br><strong><u>Load Patterns:</u></strong>
+                        <table class="table table-striped w-auto small">
+                            {% for pattern in results['patterns'] %}
+                            <tr>
+                                <td class="text-center">{{pattern}}</td>
                             </tr>
                             {% endfor %}
                         </table>
@@ -936,6 +1053,112 @@
                         <div id="VuEnvelopePlot" class="w-100 plot"></div>
                     </div>
                     <div class="container-sm py-3">
+                        <!-- Left Overhange Results-->
+                        {% if results['cantleft'] != None %}
+                        <h5>Detailed Left Overhang Results:</h5>
+                        <div class="accordion" id="leftULS">
+                            {% for combo in results['mainbeam'].reactions_uls %}
+                            <div class="card">
+                                <div class="card-header" id="uls{{combo}}_header_left">
+                                  <h5 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#uls{{combo}}_left" aria-expanded="false" aria-controls="uls{{combo}}_left">
+                                      ULS Load Combination: {{combo}} -- {{results['mainbeam'].appliedcombos[combo]['comboformula']}}
+                                    </button>
+                                  </h5>
+                                </div>
+                            
+                                <div id="uls{{combo}}_left" class="collapse" aria-labelledby="uls{{combo}}_header_left" data-parent="#leftULS">
+                                    <div class="card-body">
+                                            {% for pattern in results['mainbeam'].reactions_uls[combo] %}
+                                            <div class="card">
+                                                <div class="card-header" id="uls{{combo}}{{pattern}}_header_left">
+                                                    <h5>
+                                                        <strong>Pattern: {{pattern}}</strong> 
+                                                    </h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <h5>Shear Function  ({{results["resunits"]["force"]}}):</h5>
+                                                    {% for function in results['cantleft'].v_functions_uls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>Moment Function ({{results["resunits"]["moment"]}}):</h5>
+                                                    {% for function in results['cantleft'].m_functions_uls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    +{{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>                                                                    
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>E*I*Slope Function (rad):</h5>
+                                                    {% for function in results['cantleft'].eis_functions_uls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>E*I*Deflection Function ({{results["resunits"]["length"]}}):</h5>
+                                                    {% for function in results['cantleft'].eid_functions_uls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <!-- Main Span Results -->
                         <h5>Detailed Main Span Results:</h5>
                         <div class="accordion" id="mainULS">
                             {% for combo in results['mainbeam'].reactions_uls %}
@@ -1051,6 +1274,111 @@
                             </div>
                             {% endfor %}
                         </div>
+                        <!-- Right Overhang Results-->
+                        {% if results['cantright'] != None %}
+                        <h5>Detailed Right Overhang Results:</h5>
+                        <div class="accordion" id="rightULS">
+                            {% for combo in results['mainbeam'].reactions_uls %}
+                            <div class="card">
+                                <div class="card-header" id="uls{{combo}}_header_right">
+                                  <h5 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#uls{{combo}}_right" aria-expanded="false" aria-controls="uls{{combo}}_right">
+                                      ULS Load Combination: {{combo}} -- {{results['mainbeam'].appliedcombos[combo]['comboformula']}}
+                                    </button>
+                                  </h5>
+                                </div>
+                            
+                                <div id="uls{{combo}}_right" class="collapse" aria-labelledby="uls{{combo}}_header_right" data-parent="#rightULS">
+                                    <div class="card-body">
+                                            {% for pattern in results['mainbeam'].reactions_uls[combo] %}
+                                            <div class="card">
+                                                <div class="card-header" id="uls{{combo}}{{pattern}}_header_right">
+                                                    <h5>
+                                                        <strong>Pattern: {{pattern}}</strong> 
+                                                    </h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <h5>Shear Function  ({{results["resunits"]["force"]}}):</h5>
+                                                    {% for function in results['cantright'].v_functions_uls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>Moment Function ({{results["resunits"]["moment"]}}):</h5>
+                                                    {% for function in results['cantright'].m_functions_uls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    +{{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>                                                                    
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>E*I*Slope Function (rad):</h5>
+                                                    {% for function in results['cantright'].eis_functions_uls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>E*I*Deflection Function ({{results["resunits"]["length"]}}):</h5>
+                                                    {% for function in results['cantright'].eid_functions_uls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
                 <!-- SLS DATA -->
@@ -1069,6 +1397,112 @@
                     </div>
 
                     <div class="container-sm py-3">
+                        <!-- Left Overhange Results SLS-->
+                        {% if results['cantleft'] != None %}
+                        <h5>Detailed Left Overhang Results:</h5>
+                        <div class="accordion" id="leftSLS">
+                            {% for combo in results['mainbeam'].reactions_sls %}
+                            <div class="card">
+                                <div class="card-header" id="sls{{combo}}_header_left">
+                                    <h5 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#sls{{combo}}_left" aria-expanded="false" aria-controls="sls{{combo}}_left">
+                                    SLS Load Combination: {{combo}} -- {{results['mainbeam'].appliedcombos[combo]['comboformula']}}
+                                    </button>
+                                    </h5>
+                                </div>
+                            
+                                <div id="sls{{combo}}_left" class="collapse" aria-labelledby="sls{{combo}}_header_left" data-parent="#leftSLS">
+                                    <div class="card-body">
+                                            {% for pattern in results['mainbeam'].reactions_sls[combo] %}
+                                            <div class="card">
+                                                <div class="card-header" id="sls{{combo}}{{pattern}}_header_left">
+                                                    <h5>
+                                                        <strong>Pattern: {{pattern}}</strong> 
+                                                    </h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <h5>Shear Function  ({{results["resunits"]["force"]}}):</h5>
+                                                    {% for function in results['cantleft'].v_functions_sls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>Moment Function ({{results["resunits"]["moment"]}}):</h5>
+                                                    {% for function in results['cantleft'].m_functions_sls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    +{{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>                                                                    
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>E*I*Slope Function (rad):</h5>
+                                                    {% for function in results['cantleft'].eis_functions_sls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>E*I*Deflection Function ({{results["resunits"]["length"]}}):</h5>
+                                                    {% for function in results['cantleft'].eid_functions_sls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <!-- Main Results SLS -->
                         <h5>Detailed Main Span Results:</h5>
                         <div class="accordion" id="mainSLS">
                             {% for combo in results['mainbeam'].reactions_sls %}
@@ -1184,12 +1618,224 @@
                             </div>
                             {% endfor %}
                         </div>
+                        <!-- Right Overhang Results SLS-->
+                        {% if results['cantright'] != None %}
+                        <h5>Detailed Right Overhang Results:</h5>
+                        <div class="accordion" id="rightSLS">
+                            {% for combo in results['mainbeam'].reactions_sls %}
+                            <div class="card">
+                                <div class="card-header" id="sls{{combo}}_header_right">
+                                    <h5 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#sls{{combo}}_right" aria-expanded="false" aria-controls="sls{{combo}}_right">
+                                    SLS Load Combination: {{combo}} -- {{results['mainbeam'].appliedcombos[combo]['comboformula']}}
+                                    </button>
+                                    </h5>
+                                </div>
+                            
+                                <div id="sls{{combo}}_right" class="collapse" aria-labelledby="sls{{combo}}_header_right" data-parent="#rightSLS">
+                                    <div class="card-body">
+                                            {% for pattern in results['mainbeam'].reactions_sls[combo] %}
+                                            <div class="card">
+                                                <div class="card-header" id="sls{{combo}}{{pattern}}_header_right">
+                                                    <h5>
+                                                        <strong>Pattern: {{pattern}}</strong> 
+                                                    </h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <h5>Shear Function  ({{results["resunits"]["force"]}}):</h5>
+                                                    {% for function in results['cantright'].v_functions_sls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>Moment Function ({{results["resunits"]["moment"]}}):</h5>
+                                                    {% for function in results['cantright'].m_functions_sls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    +{{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>                                                                    
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>E*I*Slope Function (rad):</h5>
+                                                    {% for function in results['cantright'].eis_functions_sls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>E*I*Deflection Function ({{results["resunits"]["length"]}}):</h5>
+                                                    {% for function in results['cantright'].eid_functions_sls[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
                 <!-- Basic DATA -->
                 <div class="tab-pane container fade" id="basicResults">
-                    <h5>Detailed Main Span Results:</h5>
+                    
                     <div class="container-sm py-3">
+                        <!-- Left Overhang Results Basic -->
+                        {% if results['cantleft'] != None %}
+                        <h5>Detailed Left Overhang Results:</h5>
+                        <div class="accordion" id="leftBASIC">
+                            {% for combo in results['mainbeam'].reactions_basic %}
+                            <div class="card">
+                                <div class="card-header" id="basic{{combo}}_header_left">
+                                    <h5 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#basic{{combo}}_left" aria-expanded="false" aria-controls="basic{{combo}}_left">
+                                    Basic Load Combination: {{combo}} -- {{results['mainbeam'].appliedcombos[combo]['comboformula']}}
+                                    </button>
+                                    </h5>
+                                </div>
+                            
+                                <div id="basic{{combo}}_left" class="collapse" aria-labelledby="basic{{combo}}_header_left" data-parent="#leftBASIC">
+                                    <div class="card-body">
+                                            {% for pattern in results['mainbeam'].reactions_basic[combo] %}
+                                            <div class="card">
+                                                <div class="card-header" id="basic{{combo}}{{pattern}}_header_left">
+                                                    <h5>
+                                                        <strong>Pattern: {{pattern}}</strong> 
+                                                    </h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <h5>Shear Function  ({{results["resunits"]["force"]}}):</h5>
+                                                    {% for function in results['cantleft'].v_functions_basic[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>Moment Function ({{results["resunits"]["moment"]}}):</h5>
+                                                    {% for function in results['cantleft'].m_functions_basic[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    +{{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>                                                                    
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>E*I*Slope Function (rad):</h5>
+                                                    {% for function in results['cantleft'].eis_functions_basic[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>E*I*Deflection Function ({{results["resunits"]["length"]}}):</h5>
+                                                    {% for function in results['cantleft'].eid_functions_basic[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <!-- Main Overhang Results Basic -->
+                        <h5>Detailed Main Span Results:</h5>
                         <div class="accordion" id="mainBASIC">
                             {% for combo in results['mainbeam'].reactions_basic %}
                             <div class="card">
@@ -1304,8 +1950,125 @@
                             </div>
                             {% endfor %}
                         </div>
+                        <!-- Right Overhang Results Basic -->
+                        {% if results['cantright'] != None %}
+                        <h5>Detailed Right Overhang Results:</h5>
+                        <div class="accordion" id="rightBASIC">
+                            {% for combo in results['mainbeam'].reactions_basic %}
+                            <div class="card">
+                                <div class="card-header" id="basic{{combo}}_header_right">
+                                    <h5 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#basic{{combo}}_right" aria-expanded="false" aria-controls="basic{{combo}}_right">
+                                    Basic Load Combination: {{combo}} -- {{results['mainbeam'].appliedcombos[combo]['comboformula']}}
+                                    </button>
+                                    </h5>
+                                </div>
+                            
+                                <div id="basic{{combo}}_right" class="collapse" aria-labelledby="basic{{combo}}_header_right" data-parent="#rightBASIC">
+                                    <div class="card-body">
+                                            {% for pattern in results['mainbeam'].reactions_basic[combo] %}
+                                            <div class="card">
+                                                <div class="card-header" id="basic{{combo}}{{pattern}}_header_right">
+                                                    <h5>
+                                                        <strong>Pattern: {{pattern}}</strong> 
+                                                    </h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <h5>Shear Function  ({{results["resunits"]["force"]}}):</h5>
+                                                    {% for function in results['cantright'].v_functions_basic[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>Moment Function ({{results["resunits"]["moment"]}}):</h5>
+                                                    {% for function in results['cantright'].m_functions_basic[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    +{{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>                                                                    
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>E*I*Slope Function (rad):</h5>
+                                                    {% for function in results['cantright'].eis_functions_basic[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                    <h5>E*I*Deflection Function ({{results["resunits"]["length"]}}):</h5>
+                                                    {% for function in results['cantright'].eid_functions_basic[combo][pattern] %}
+                                                    <p>
+                                                    {% for piecef in function %}
+                                                        {% if loop.index0 == 0 %}
+                                                            {% for coef in piecef %}
+                                                                {% if loop.index0 == 0 %}
+                                                                    {{"%.4f"|format(coef|float)}}
+                                                                {% else %}
+                                                                    + {{"%.4f"|format(coef|float)}} x<sup>{{loop.index0}}</sup>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            for {{function[1][0]}} < x <{{function[1][1]}}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </p>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
+                {% if results['calclog'] %}
+                <div class="tab-pane container fade" id="calclog">
+                    <h4>Calculation Log:</h4>
+                    <table class="table table-sm w-auto">
+                        {% for item in results['log'] %}
+                        <tr>
+                        <td>{{item}}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                {% endif %}
                 {% endif %}
 
                 <!-- HELP Data -->
