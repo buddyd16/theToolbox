@@ -268,7 +268,7 @@ class Section:
         
         # Cross section principal Axis
         
-        two_theta = math.atan2((-1*2.0*self.Ixxyy),(1E-16+(self.Ixx - self.Iyy)))
+        two_theta = math.atan2((-1*2.0*self.Ixxyy),((self.Ixx - self.Iyy)))
         A = (self.Ixx+self.Iyy)/2.0
         B = (self.Ixx-self.Iyy)/2.0
         I1 = A+math.sqrt((B*B)+(self.Ixxyy*self.Ixxyy))
@@ -519,7 +519,7 @@ class Composite_Section:
         
         # composite section principal Axis
         
-        two_theta = math.atan2((-1*2.0*self.Ixxyy),(1E-16+(self.Ixx - self.Iyy)))
+        two_theta = math.atan2((-1*2.0*self.Ixxyy),((self.Ixx - self.Iyy)))
         A = (self.Ixx+self.Iyy)/2.0
         B = (self.Ixx-self.Iyy)/2.0
         I1 = A+math.sqrt((B*B)+(self.Ixxyy*self.Ixxyy))
@@ -556,6 +556,9 @@ class Composite_Section:
         for section in self.sections:
             x.extend(section.x)
             y.extend(section.y)
+        
+        self.x = x
+        self.y = y
 
         # Section Moduli
         self.sxx_top = self.Ixx / abs(max(y) - self.cy)
@@ -639,6 +642,7 @@ class Composite_Section:
         axis = c
         
         self.Zxx = {"AxisY":axis,"Zx":Zx,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i,"Fy": baseFy}
+        self.pnaxx = [min(self.x)-1,max(self.y)-axis,max(self.x)+1,max(self.y)-axis]
 
         return {"AxisY":axis,"Zx":Zx,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
 
@@ -677,6 +681,8 @@ class Composite_Section:
         axis = c
         
         self.Zyy = {"AxisX":axis,"Zy":Zy,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
+        self.pnayy=[min(self.x)+axis,min(self.y)-1,min(self.x)+axis,max(self.y)+1]
+
         return {"AxisX":axis,"Zy":Zy,"C":plastic_c["C"],"T":plastic_c["T"],"Error":err,"Iterations":i}
 
     def plastic_Zu(self, tol=1E-8, max_iters=100, baseFy = 36):
