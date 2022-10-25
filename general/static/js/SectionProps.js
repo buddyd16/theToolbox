@@ -1068,6 +1068,21 @@ function UpdateChart(){
         });
 
         trace_shapes.push({
+            x: pnaxx_x,
+            y: pnaxx_y,
+            mode: 'lines+markers',
+            name: "PNA XX",
+            marker: {
+                size: 6,
+                color: 'rgb(255, 0, 0)'
+            },
+            line: {
+                color: 'rgb(255, 0, 0)',
+                dash: 'dashdot'
+            },
+        });
+
+        trace_shapes.push({
             x: yy_axis_x,
             y: yy_axis_y,
             mode: 'lines+markers',
@@ -1079,6 +1094,21 @@ function UpdateChart(){
             line: {
                 color: 'rgb(0, 0, 255)',
                 dash: 'dash'
+            },
+        });
+
+        trace_shapes.push({
+            x: pnayy_x,
+            y: pnayy_y,
+            mode: 'lines+markers',
+            name: "PNA YY",
+            marker: {
+                size: 6,
+                color: 'rgb(0, 0, 255)'
+            },
+            line: {
+                color: 'rgb(0, 0, 255)',
+                dash: 'dashdot'
             },
         });
 
