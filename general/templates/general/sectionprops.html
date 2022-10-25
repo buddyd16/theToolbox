@@ -550,10 +550,10 @@
     <!-- Plastic Modulus -->
     <table class="table table-striped table-hover table-sm table-dark">
         <tr><td colspan="3" class="text-center text-nowrap"><strong><u>Plastic Section Moduli, Fy={{"%.3f"|format(results["CompositeSection"].Zxx["Fy"])}} {{ "ksi" if inputs["units"] == "imperial" else "Mpa" }}</u></strong></td></tr>
-        <tr><td class="text-right text-nowrap">Z<sub>xx</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Zxx["Zx"])}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Plastic Section Modulus for Moments about the XX-Axis</td></tr>
-        <tr><td class="text-right text-nowrap">Z<sub>yy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Zyy["Zy"])}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Plastic Section Modulus for Moments about the YY-Axis</td></tr>
-        <tr><td class="text-right text-nowrap">Z<sub>uu</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Zuu["Zu"])}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Plastic Section Modulus for Moments about the UU-Axis</td></tr>
-        <tr><td class="text-right text-nowrap">Z<sub>vv</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Zvv["Zv"])}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Plastic Section Modulus for Moments about the VV-Axis</td></tr>
+        <tr><td class="text-right text-nowrap">Z<sub>xx</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Zxx["Zx"])}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Plastic Section Modulus for Moments about the XX-Axis ( Error: {{"%.3e"|format(results["CompositeSection"].Zxx["Error"])}}, Iterations: {{results["CompositeSection"].Zxx["Iterations"]}} )</td></tr>
+        <tr><td class="text-right text-nowrap">Z<sub>yy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Zyy["Zy"])}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Plastic Section Modulus for Moments about the YY-Axis ( Error: {{"%.3e"|format(results["CompositeSection"].Zyy["Error"])}}, Iterations: {{results["CompositeSection"].Zyy["Iterations"]}} )</td></tr>
+        <tr><td class="text-right text-nowrap">Z<sub>uu</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Zuu["Zu"])}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Plastic Section Modulus for Moments about the UU-Axis ( Error: {{"%.3e"|format(results["CompositeSection"].Zuu["Error"])}}, Iterations: {{results["CompositeSection"].Zuu["Iterations"]}} )</td></tr>
+        <tr><td class="text-right text-nowrap">Z<sub>vv</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].Zvv["Zv"])}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Plastic Section Modulus for Moments about the VV-Axis ( Error: {{"%.3e"|format(results["CompositeSection"].Zvv["Error"])}}, Iterations: {{results["CompositeSection"].Zvv["Iterations"]}} )</td></tr>
     </table>
     <!-- Principal Axis Properties -->
     <table class="table table-striped table-hover table-sm table-dark">
@@ -644,6 +644,10 @@ let uu_axis_x = [ {{results["CompositeSection"].uu_axis[0]}}, {{results["Composi
 let uu_axis_y = [ {{results["CompositeSection"].uu_axis[1]}}, {{results["CompositeSection"].uu_axis[3]}} ];
 let vv_axis_x = [ {{results["CompositeSection"].vv_axis[0]}}, {{results["CompositeSection"].vv_axis[2]}} ];
 let vv_axis_y = [ {{results["CompositeSection"].vv_axis[1]}}, {{results["CompositeSection"].vv_axis[3]}} ];
+let pnaxx_x = [ {{results["CompositeSection"].pnaxx[0]}}, {{results["CompositeSection"].pnaxx[2]}} ];
+let pnaxx_y = [ {{results["CompositeSection"].pnaxx[1]}}, {{results["CompositeSection"].pnaxx[3]}} ];
+let pnayy_x = [ {{results["CompositeSection"].pnayy[0]}}, {{results["CompositeSection"].pnayy[2]}} ];
+let pnayy_y = [ {{results["CompositeSection"].pnayy[1]}}, {{results["CompositeSection"].pnayy[3]}} ];
 {% else %}
 let modelRun = 0;
 let centroid_x = 0;
@@ -656,6 +660,10 @@ let uu_axis_x = 0;
 let uu_axis_y = 0;
 let vv_axis_x = 0
 let vv_axis_y = 0;
+let pnaxx_x = 0;
+let pnaxx_y = 0;
+let pnayy_x = 0;
+let pnayy_y = 0;
 {% endif %}
 </script>
 
