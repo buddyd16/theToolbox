@@ -36,7 +36,9 @@ function nds_actual_dimensions(b_nom,d_nom,num_plys){
     let b; 
     let d;
 
-    if (Number(b_nom)<= 4){
+    if (Number(b_nom)> 6){
+        b = Number(b_nom) - 0.75;
+    } else {
         b = Number(b_nom) - 0.5;
     };
 

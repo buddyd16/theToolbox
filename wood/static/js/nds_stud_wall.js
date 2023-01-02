@@ -24,13 +24,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 //Function to update the Species selection
 function updateSpecies(stud){
-  
-  console.log(stud);
 
   var ndsTable = 0;
   var ndsSelect = 0;
 
-  if (stud == true){
+  if (stud){
     ndsTable = $('#nds_supp_table_select').find(":selected").val();
     ndsSelect = '#nds_species_select';
   } else {
@@ -40,7 +38,28 @@ function updateSpecies(stud){
 
   if (ndsTable == 0){
     return 1;
+  } else if (ndsTable == "USER"){
+    if (stud){
+      $('.stud_ref_values').prop("readonly",false);
+      $('#nds_grade_select').empty();
+      $('#nds_grade_select').append('<option value=\"USER\"> USER </option>');
+    } else {
+      $('.plate_ref_values').prop("readonly",false);
+      $('#nds_grade_select_plate').empty();
+      $('#nds_grade_select_plate').append('<option value=\"USER\"> USER </option>');
+    }
+
+    $(ndsSelect).empty();
+    $(ndsSelect).append('<option value=\"USER\"> USER </option>');
+
   } else {
+
+    if (stud){
+      $('.stud_ref_values').prop("readonly",true);
+    } else {
+      $('.plate_ref_values').prop("readonly",true);
+    }
+
     $.ajax({
       url: "/wood/ndsdb_api",
       type: "GET",
@@ -79,44 +98,58 @@ function updateGrades(stud){
 
   if (stud == true){
     ndsTable = $('#nds_supp_table_select').find(":selected").val();
-    ndsSpecies = $('#nds_species_select').find(":selected").val().replaceAll('_',' ');
-    ndsGradeSelect = '#nds_grade_select';
   } else {
     ndsTable = $('#nds_supp_table_select_plate').find(":selected").val();
-    ndsSpecies = $('#nds_species_select_plate').find(":selected").val().replaceAll('_',' ');
-    ndsGradeSelect = '#nds_grade_select_plate';
   }
 
-  if (ndsTable == 0 && ndsSpecies == 0){
-    return 1;
+  console.log(ndsTable);
+
+  if (ndsTable == "USER"){
+    console.log(ndsTable);
+    return 0;
   } else {
-    $.ajax({
-      url: "/wood/ndsdb_api",
-      type: "GET",
-      dataType: "json",
-      data:{"table": ndsTable, "keys": true, "species": ndsSpecies, "depth":shapeD},
+    if (stud == true){
+      ndsSpecies = $('#nds_species_select').find(":selected").val().replaceAll('_',' ');
+      ndsGradeSelect = '#nds_grade_select';
+    } else {
+      ndsSpecies = $('#nds_species_select_plate').find(":selected").val().replaceAll('_',' ');
+      ndsGradeSelect = '#nds_grade_select_plate';
+    }
 
-      success: function(ndsGrade){
+    console.log(ndsTable);
 
-          $(ndsGradeSelect).empty();
-          console.log(ndsGrade);
+    if (ndsTable == 0 && ndsSpecies == 0){
+      return 1;
+    } else {
+      $.ajax({
+        url: "/wood/ndsdb_api",
+        type: "GET",
+        dataType: "json",
+        data:{"table": ndsTable, "keys": true, "species": ndsSpecies, "depth":shapeD},
 
-          for (let i=0; i< ndsGrade.length; i++) {
-              $(ndsGradeSelect).append('<option value='+ ndsGrade[i].replaceAll(' ','_') +'>'+ndsGrade[i]+'</option>');
-          };
+        success: function(ndsGrade){
 
-          //trigger a change event on the grade list
-          $(ndsGradeSelect).trigger("change");
-          return 0;
-      },
-      error: function(error){
-          console.log("Error:");
-          console.log(error);
-          return 2;
-      }
-    });
+            $(ndsGradeSelect).empty();
+            console.log(ndsGrade);
+
+            for (let i=0; i< ndsGrade.length; i++) {
+                $(ndsGradeSelect).append('<option value='+ ndsGrade[i].replaceAll(' ','_') +'>'+ndsGrade[i]+'</option>');
+            };
+
+            //trigger a change event on the grade list
+            $(ndsGradeSelect).trigger("change");
+            return 0;
+        },
+        error: function(error){
+            console.log("Error:");
+            console.log(error);
+            return 2;
+        }
+      });
+    }
   }
 };
+
 
 // function to update reference values
 function updateReferenceValues(stud){
@@ -186,8 +219,8 @@ function main() {
     // trigger initial on change actions
     $(function () {
       $("#stud_b").change();
-      $("#nds_supp_table_select").change();
-      $("#nds_supp_table_select_plate").change();
+      //$("#nds_supp_table_select").change();
+      //$("#nds_supp_table_select_plate").change();
     });
 
     $("#stud_b,#stud_d,#stud_plys").on("change",function(){
