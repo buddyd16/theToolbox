@@ -220,6 +220,8 @@ def tbl_4a_factors(nomwidth,
                 cfu = 1.1
             else:
                 cfu = 1.2
+    else:
+        cfu = 1.0
 
     adjustment_factors = {"Cf": cf,
                             "Cm": cm,
@@ -320,6 +322,8 @@ def tbl_4b_factors(nomwidth,
                 cfu = 1.1
             else:
                 cfu = 1.2
+    else:
+        cfu = 1.0
     
     # Wet Service Factor, Cm
     if moisture_content <= 19:
@@ -552,8 +556,8 @@ class wood_stud_wall:
         self.plys = self.geometry.get("plys",1)
 
         self.sdsdims = nominal_to_sds(self.bnom, self.dnom)
-        self.bdes = self.sdsdims.get("sdsb",1)*self.plys
-        self.ddes = self.sdsdims.get("sdsd",1)
+        self.bdes = self.sdsdims.get("sdsb", 1)*self.plys
+        self.ddes = self.sdsdims.get("sdsd", 1)
         
         #Stud Section Properties
         self.I_in4 = (self.bdes * self.ddes**3)/12.0
@@ -573,6 +577,12 @@ class wood_stud_wall:
             self.height_in = self.height_in - (num_plates * 1.5)
             self.assumptions.append(f'Design Stud Height = Wall Height - ({num_plates})*1.5 in. wall plates')
 
+        # Stud Bracing
+        self.sheathing = self.loadbracing.get("sheathing", 1)
+        self.no_sheathing = True if self.sheathing == 4 else False
+        self.blocking_in = self.loadbracing.get("blocking spacing", 48)
+        self.compression_face = True if self.sheathing <= 2 else False
+
         # Stud Design Properties
         self.fb_psi = self.stud.get("Fb", 1)
         self.fv_psi = self.stud.get("Fv", 1)
@@ -582,7 +592,7 @@ class wood_stud_wall:
 
         # Wall Plate  - Fc,perp
         # Needed to check stud bearing 
-        self.fc_perp_pl_psi = self.plate.get("Fcp", 1)
+        self.fcp_pl_psi = self.plate.get("Fcp", 1)
         
         # Compute Stud Adjustment Factors
         # Factors computed from Table 4A or 4B of the NDS 2018 Supplement
@@ -696,7 +706,7 @@ class wood_stud_wall:
         self.assumptions.append('Buckling Stiffness Factor CT - Not Applicable for stud walls')
         
         #Bearing Area Factor, Cb
-        self.cb_fc_perp = bearing_area_factor_cb(self.bdes, 4)
+        self.cb_fcp = bearing_area_factor_cb(self.bdes, 4)
         self.assumptions.append('Bearing Area Factor Cb - Stud greater than 3" from bottom plate end')
 
         # Compute F_ primes
@@ -715,19 +725,35 @@ class wood_stud_wall:
     def compute_primes(self):
         #Fv' = Fv * Cm * Ct * Ci - apply Cd in Fc and Fb functions
         self.cm_fv = self.stud_factors["Cm"].get("Cm_fv", 0.01)
-        self.fv_prime_psi = self.fv_psi * self.cm_fv * self.ct_fv * self.ci_fv* self.c_frt[1]
+        self.ct_fv = self.ct.get("Ct_fv", 1)
+        self.ci_fv = self.ci.get("Ci_fv", 1)
+        self.cfrt_fv = self.environment["Cfrt"].get("Cfrt_fv", 1)
+
+        self.fv_prime_psi = self.fv_psi * self.cm_fv * self.ct_fv * self.ci_fv * self.cfrt_fv
 
         #Emin' = Emin * Cm * Ct * Ci * CT - NDS 2005 Table 4.3.1
-        self.Emin_prime_psi = self.Emin_psi * self.cm_E * self.ct_E * self.ci_E * self.cT * self.c_frt[5]
+        self.cm_Emin = self.stud_factors["Cm"].get("Cm_Emin", 1)
+        self.ct_Emin = self.ct.get("Ct_Emin", 1)
+        self.ci_Emin = self.ci.get("Ci_Emin", 1)
+        self.cfrt_Emin = self.environment["Cfrt"].get("Cfrt_Emin", 1)
+        self.Emin_prime_psi = self.Emin_psi * self.cm_Emin * self.ct_Emin * self.ci_Emin * self.cT * self.cfrt_Emin
  
         #E' = E * Cm * Ct * Ci - NDS 2005 Table 4.3.1
-        self.E_prime_psi = self.E_psi * self.cm_E * self.ct_E * self.ci_E * self.c_frt[4]
+        self.cm_E = self.stud_factors["Cm"].get("Cm_E", 1)
+        self.ct_E = self.ct.get("Ct_E", 1)
+        self.ci_E = self.ci.get("Ci_E", 1)
+        self.cfrt_E = self.environment["Cfrt"].get("Cfrt_E", 1)
+        self.E_prime_psi = self.E_psi * self.cm_E * self.ct_E * self.ci_E * self.cfrt_E
         
         #Fc,perp' = Fc,perp * Cm * Ct * Ci * Cb- NDS 2005 Table 4.3.1
-        self.fc_perp_pl_prime_psi = self.fc_perp_pl_psi * self.cm_fc_perp * self.ct_fc_perp * self.ci_fc_perp * self.cb_fc_perp * self.c_frt[3]
+        self.cm_fcp = self.plate_factors["Cm"].get("Cm_fcp", 1)
+        self.ct_fcp = self.ct.get("Ct_fcp", 1)
+        self.ci_fcp = self.ci.get("Ci_fcp", 1)
+        self.cfrt_fcp = self.environment["Cfrt"].get("Cfrt_fcp", 1)
+        self.fcp_pl_prime_psi = self.fcp_pl_psi * self.cm_fcp * self.ct_fcp * self.ci_fcp * self.cb_fcp * self.cfrt_fcp
 
-        self.crushing_limit_lbs = self.area_in2 * self.fc_perp_pl_prime_psi
-        self.crushing_limit_lbs_no_cb = self.area_in2 * (self.fc_perp_pl_prime_psi/self.cb_fc_perp)
+        self.crushing_limit_lbs = self.area_in2 * self.fcp_pl_prime_psi
+        self.crushing_limit_lbs_no_cb = self.area_in2 * (self.fcp_pl_prime_psi/self.cb_fcp)
 
 
     def compute_pressure_for_deflection_limits(self):
@@ -746,7 +772,12 @@ class wood_stud_wall:
         #apply cd to Fv'
         self.fv_prime_psi_cd = self.fv_prime_psi * cd
         #Fc* = reference compression design value parallel to grain multiplied by all applicable adjusment factors except Cp
-        self.fc_star_psi = self.fc_psi * cd * self.cm_fc * self.ct_fc * self.cf_fc * self.ci_fc * self.c_frt[2]
+        self.cm_fc = self.stud_factors["Cm"].get("Cm_fc", 1)
+        self.ct_fc = self.ct.get("Ct_fc", 1)
+        self.cf_fc = self.stud_factors["Cf"].get("Cf_fc", 1)
+        self.ci_fc = self.ci.get("Ci_fc", 1)
+        self.cfrt_fc = self.environment["Cfrt"].get("Cfrt_fc", 1)
+        self.fc_star_psi = self.fc_psi * cd * self.cm_fc * self.ct_fc * self.cf_fc * self.ci_fc * self.cfrt_fc
         
         self.c_cp = 0.8
         self.assumptions_c = 'c for Cp calculation based on sawn lumber - NDS 2005 3.7.1\n'
@@ -754,28 +785,33 @@ class wood_stud_wall:
         #Slenderness Ratio check per NDS 2005 sections 3.7.1.2 thru 3.7.1.4
         kb = 1.0
         kd = 1.0
+
         self.assumptions_ke = '\nKe = 1.0 for both depth and breadth of studs - Ref NDS 2005 appendix G pin top and bottom\n'
-        if self.no_sheathing == 1 and self.blocking_in > 0:
+
+        if self.no_sheathing and self.blocking_in > 0:
             leb = self.blocking_in
             self.assumptions_leb = 'Le_b = {0:.2f} in. - no sheathing weak axis only braced by blocking\n Confirm load path exists for bracing force.\n'.format(leb)
-        elif self.no_sheathing == 1 and self.blocking_in <= 0:
+        
+        elif self.no_sheathing and self.blocking_in <= 0:
             leb = self.height_in
             self.assumptions_leb = 'Le_b = {0:.2f} in. - no sheathing and no blocking - weak axis unbraced.\n'.format(leb)
+        
         else:
             leb = 12 * kb
             self.assumptions_leb = 'Le_b = 12.0 in. - continuously braced by sheathing 12" field nailing assumed\n'
+        
         led = self.height_in * kd
         self.le_b = leb
         
         #Check Le/d,b ratios less than 50 - NDS 2005 Section 3.7.1.4
-        if leb / self.b_in > 50 or led/self.d_in > 50:
+        if leb / self.bdes > 50 or led/self.ddes > 50:
             ratio_status = 0
         else:
             ratio_status = 1.0
         
         if ratio_status == 1.0:
             #FcE = 0.822 * Emin' / (Le/d)^2 - NDS 2005 Section 3.7.1
-            self.fcE_psi = (0.822 * self.Emin_prime_psi)/(max(leb/self.b_in,led/self.d_in))**2
+            self.fcE_psi = (0.822 * self.Emin_prime_psi)/(max(leb/self.bdes,led/self.ddes))**2
             
             #Cp = ([1 + (FcE / Fc*)] / 2c ) - sqrt[ [1 + (FcE / Fc*) / 2c]^2 - (FcE / Fc*) / c] - NDS 2005 Section 3.7.1
             self.cp = ((1+(self.fcE_psi/self.fc_star_psi))/(2*self.c_cp))-((((1+(self.fcE_psi/self.fc_star_psi))/(2*self.c_cp))**2)-((self.fcE_psi/self.fc_star_psi)/self.c_cp))**0.5
@@ -786,7 +822,7 @@ class wood_stud_wall:
             self.fc_prime_psi = 1
             self.fcE_psi = 1
             self.cp = 0.001
-            self.warning=self.warning + 'Slenderness ratio greater than 50, suggest increase stud size or reducing wall height\n'
+            self.warning.append('Slenderness ratio greater than 50, suggest increase stud size or reducing wall height')
             self.assumptions_cp = ''
     
         return self.fc_prime_psi
@@ -798,34 +834,42 @@ class wood_stud_wall:
         
         #Beam Stability Factor, CL
         #NDS 2005 section 4.3.5
-        if self.compression_face == 1.0:
+        if self.compression_face:
             self.cl = 1.0 #Assumes stud walls are sheathed on the compression face
-            self.assumptions = self.assumptions + 'Beam Stability Factor_CL - Wall studs are continuously sheathed on the compression face\n'
+            self.assumptions.append('Beam Stability Factor_CL - Wall studs are continuously sheathed on the compression face')
         else:
             if self.blocking_in == 0 or self.blocking_in > self.height_in:
                 self.lu_bending_in = self.height_in
             else:
                 self.lu_bending_in = self.blocking_in
                 
-            if self.height_in/self.d_in < 7.0:
+            if self.height_in/self.ddes < 7.0:
                 self.cl_le = 2.06 * self.lu_bending_in
-            elif self.height_in/self.d_in <= 14.3:
-                self.cl_le = (1.63 * self.lu_bending_in)+(3*self.d_in)
+            elif self.height_in/self.ddes <= 14.3:
+                self.cl_le = (1.63 * self.lu_bending_in)+(3*self.ddes)
             else:
                 self.cl_le = 1.84 * self.lu_bending_in   
             
-            self.Rb_cl = (self.cl_le*self.d_in/self.b_in**2)**0.5
+            self.Rb_cl = (self.cl_le*self.ddes/self.bdes**2)**0.5
             self.Fbe_cl = (1.20 * self.Emin_prime_psi)/self.Rb_cl**2
-            self.assumptions = self.assumptions + 'Beam Stability Factor_CL - Wall studs are not braced on compression face - CL per design stud height\n'
+            self.assumptions.append('Beam Stability Factor CL - Wall studs are not braced on compression face - CL per design stud/blocking height')
 
-        if self.compression_face == 1.0:
-            self.fb_prime_psi = self.fb_psi * cd * self.cm_fb * self.ct_fb * self.cl * self.cf_fb * self.cfu * self.ci_fb * self.cr * self.c_frt[0]
+        self.cm_fb = self.stud_factors["Cm"].get("Cm_fb", 1)
+        self.ct_fb = self.ct.get("Ct_fb", 1)
+        self.cf_fb = self.stud_factors["Cf"].get("Cf_fb", 1)
+        self.cfu = self.stud_factors.get("Cfu", 1)
+        self.ci_fb = self.ci.get("Ci_fb", 1)
+        self.cr = self.stud_factors.get("Cr", 1)
+        self.cfrt_fb = self.environment["Cfrt"].get("Cfrt_fb", 1)
+
+        if self.compression_face:
+            self.fb_prime_psi = self.fb_psi * cd * self.cm_fb * self.ct_fb * self.cl * self.cf_fb * self.cfu * self.ci_fb * self.cr * self.cfrt_fb
         else:
-            self.fb_star_psi = self.fb_psi * cd * self.cm_fb * self.ct_fb * self.cf_fb * self.cfu * self.ci_fb * self.cr * self.c_frt[0]
+            self.fb_star_psi = self.fb_psi * cd * self.cm_fb * self.ct_fb * self.cf_fb * self.cfu * self.ci_fb * self.cr * self.cfrt_fb
             self.fbe_fbstar = self.Fbe_cl / self.fb_star_psi
             #NDS equation 3.3-6
             self.cl = ((1+self.fbe_fbstar)/1.9) - ((((1+self.fbe_fbstar)/1.9)**2) - (self.fbe_fbstar)/0.95)**0.5
-            self.fb_prime_psi = self.fb_psi * cd * self.cm_fb * self.ct_fb * self.cl * self.cf_fb * self.cfu * self.ci_fb * self.cr * self.c_frt[0]
+            self.fb_prime_psi = self.fb_psi * cd * self.cm_fb * self.ct_fb * self.cl * self.cf_fb * self.cfu * self.ci_fb * self.cr * self.cfrt_fb
             self.cl_calc_text = "\n\n--Calculation of CL--\nLe = {0:.3f} in - per NDS Table 3.3.3 footnote 1 \nRb = sqrt(Le*d / b^2) = {1:.3f}\nFbE = 1.20 * Emin' /Rb^2 = {2:.3f} psi\nFb* = reference bending design value multiplied by all applicable adjustment factors except Cfu, Cv, and CL\nFb* = {3:.3f} psi\nFbE/Fb* = {4:.3f}\nNDS Eq. 3.3-6\nCL = [1 + (FbE / Fb*)] / 1.9 - ( [ [1 + (FbE / Fb*)] / 1.9 ]^2 - (FbE / Fb*) / 0.95 ) ^ 1/2 = {5:.3f}".format(self.cl_le, self.Rb_cl, self.Fbe_cl, self.fb_star_psi, self.fbe_fbstar, self.cl)
             
         return self.fb_prime_psi
@@ -883,7 +927,7 @@ class wood_stud_wall:
                     else:
                         #Combined Ratio per NDS 2005 equation 15.4-1
                         #[fc/Fc']^2 + (fb + fc(6e/d)[1 + 0.234 (fc / FcE)])/ Fb' [ 1- (fc / FcE)] <= 1.0
-                        ratio = (fc_psi/fc_prime)**2 + ((fb_psi+(fc_psi*(6*e_in/self.d_in)*(1+(0.234*(fc_psi/self.fcE_psi)))))/ (fb_prime*(1-(fc_psi/self.fcE_psi))))
+                        ratio = (fc_psi/fc_prime)**2 + ((fb_psi+(fc_psi*(6*e_in/self.ddes)*(1+(0.234*(fc_psi/self.fcE_psi)))))/ (fb_prime*(1-(fc_psi/self.fcE_psi))))
                 else:
                     ratio = 2.0
                 
