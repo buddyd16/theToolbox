@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>The Structural Toolbox {% if title != None %}- {{title}}{% endif %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" type="text/css" media="print" href="{{ url_for('static', filename='css/Print.css') }}"/>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+    
+    <!-- Cookie Consent Style -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
+    <!-- Cookie Consent Style -->
+
+    <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js"></script>
+    <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.js') }}"></script>
+
+    <!-- Analytics -->
+    
+      <!-- Global site tag (gtag.js) - Google Analytics -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-7P2P015MPW"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-7P2P015MPW');
+      </script>
+
+    <!-- End Analytics -->
+
+    <!-- Google Adsense -->
+    
+    <!-- End Ads-->
+     
+    {% block scripts %}
+    {% endblock %}
+    
+    <style>
+      .alert   {font-size: 9px; width:50%;}
+
+      body {
+              /* Margin bottom by footer height */
+              margin-bottom: 82px;
+            }
+
+      .footer {
+              /* Set the fixed height of the footer here */
+              height: 80px;
+              }
+    {% block style %}
+    {% endblock %}
+    </style>
+</head>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="/">
+                <img style="max-width: 50px; margin-top: -7px;"src="{{ url_for('static', filename='images/favicon.ico')}}">
+            </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/home">Home <span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Concrete Calcs
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="/concrete/aci_reference">ACI Quick Reference</a>
+              <a class="dropdown-item" href="/concrete/tbeam">Concrete T Beam</a>
+              <a class="dropdown-item" href="/concrete/pt_profile">PT Mid Point Calculator</a>
+              <a class="dropdown-item" href="/concrete/aci_unit_width">Reinforcement for Unit Width Section</a>
+              <a class="dropdown-item" href="/concrete/aci_development">Development of Reinforcement</a>
+              <a class="dropdown-item" href="/concrete/aci_corbel">Corbel</a>
+            </div>
+          </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Steel Calcs
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="/steel/steeldb">Steel Shape Database</a>
+              <a class="dropdown-item" href="/steel/elastic_weld_group">Weld Group - Elastic</a>
+            </div>
+          </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Wood Calcs
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="/wood/nds_stud_wall">Wood Wall</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              General Calcs
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="/general/interpolate">Interpolation</a>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="/general/sectionprops">Section Properties</a>
+            </div>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Analysis Calcs
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="/analysis/simplebeam">Simple Beam Analysis</a>
+            </div>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Foundation Calcs
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="/foundations//ibc_unconstrained_pole_fnd">IBC Unconstrained Pole Foundation</a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </nav>
+</header>
+
+<!-- Cookie Consent -->
+<script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
+<script>
+window.cookieconsent.initialise({
+  "palette": {
+    "popup": {
+      "background": "#3c404d",
+      "text": "#d6d6d6"
+    },
+    "button": {
+      "background": "#8bed4f"
+    }
+  },
+  "theme": "classic",
+  "position": "bottom-right",
+  "content": {
+    "message": "This website uses cookies to ensure you get the best experience on our website. This includes usage metrics such as location of access, technology used, screen resolution, etc. A cookie will also be stored signifying your acceptance of this dialog with an expiry of 1 year.",
+    "dismiss": "Accept",
+    "link": "Learn more"
+  }
+});
+</script>
+<!-- Cookie Consent -->
+
+<body>    
+    <main role="main" class="container">
+    
+    <div class="jumbotron jumbotron-fluid">
+    <div class="container">
+    {% block content %}
+    {% endblock %}
+    </div>
+    </div>
+
+    <footer class="footer fixed-bottom">
+      <div class="çontainer">
+        <div class="row bg-dark px-2 py-2">
+          <div class="col">
+            <div class="text-warning text-left">
+              <a href="/termsandconditions">Terms & Conditions</a><br><a href="/privacy-policy">Privacy Policy</a>
+            </div>
+          </div>
+          <div class="col-6 text-center text-warning">
+            <div class="çontainer">
+              <div class="">
+                A work in progress.
+              </div>
+              <div class="">
+                <a class="nav-link" href="https://github.com/buddyd16/theToolbox" target="_blank" rel="noopener noreferrer">Enter the Black Box</a>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <p class="text-warning text-right">&copy; 2022 </p>
+          </div>
+        </div>
+      </div >
+    </footer>
+    </main>
+
+</body>
+</html>
