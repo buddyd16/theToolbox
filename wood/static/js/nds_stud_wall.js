@@ -239,6 +239,9 @@ function main() {
     $("#stud_d").on("change",function(){
       $('#nds_species_select').trigger("change");
       $('#nds_species_select_plate').trigger("change");
+
+      // Alert user that grade selection needs to be done again
+      alert("Changing Depth requires reselecting material grade as they vary with depth.");
     });
 
     // On Supplement Table Selection update the Species selection
