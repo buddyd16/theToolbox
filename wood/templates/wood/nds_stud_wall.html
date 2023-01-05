@@ -7,294 +7,658 @@
 </script>
 <script src="{{ url_for('wood_bp.static', filename='js/nds_common.js') }}"></script>
 <script src="{{ url_for('wood_bp.static', filename='js/nds_stud_wall.js') }}"></script>
+<script src="{{ url_for('static', filename='js/plotly-2.9.0.min.js') }}"></script>
 {% endblock scripts %}
 
 {% block content %}
-
-
 <div class="container">
+
+<form method=post action="" onsubmit="" onkeydown="return event.key != 'Enter';">
+
+    <input class="btn btn-dark btn-lg my-1" type=submit value="Calculate Stud Wall">
+
+    <ul class="nav nav-tabs" id="WoodWallTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="NavGeometry" data-toggle="tab" href="#inputGeometry" role="tab" aria-controls="Geometry" aria-selected="true">
+                Wall Stud Geometry
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="NavMaterial" data-toggle="tab" href="#inputMaterial" role="tab" aria-controls="Material" aria-selected="false">
+                Wood Material
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="NavEnvironment" data-toggle="tab" href="#inputEnvironment" role="tab" aria-controls="Environment" aria-selected="false">
+                Environment
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="NavLoadBracing" data-toggle="tab" href="#inputLoadBracing" role="tab" aria-controls="LoadBracing" aria-selected="false">
+                Load and Bracing
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="NavResults" data-toggle="tab" href="#dataResults" role="tab" aria-controls="Results" aria-selected="false">
+                Results
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="WoodWallNavContent">
     <!-- Inputs -->
-    <form method=post action="" onsubmit="" onkeydown="return event.key != 'Enter';">
-    <div class="container">
-        <div class="row">
-            <h4>Wall Stud Geometry:</h4>
+        <div class="tab-pane container fade show active" id="inputGeometry" role="tabpanel" aria-labelledby="NavGeometry">
+            <div class="container">
+                <div>
+                    <h4>Wall Stud Geometry:</h4>
+                </div>
+                <div>
+                    <table class="table table-sm table-hover">
+                        <tr>
+                            <td>Nominal Stud Size:</td>
+                            <td>                                 
+                                <select id="stud_b" class="stud_b input-sm user_param" name="stud_b" style="width:95px">
+                                    <option value="2" {{ "selected=""selected""" if inputs["geometry"]["b"] == 2}}> 2 </option>
+                                    <option value="3" {{ "selected=""selected""" if inputs["geometry"]["b"] == 3}}> 3 </option>
+                                    <option value="4" {{ "selected=""selected""" if inputs["geometry"]["b"] == 4}}> 4 </option>
+                                </select>
+                                X
+                                <select id="stud_d" class="stud_d input-sm user_param" name="stud_d" style="width:95px">
+                                    <option value="3" {{ "selected=""selected""" if inputs["geometry"]["d"] == 3}}> 3 </option>
+                                    <option value="4" {{ "selected=""selected""" if inputs["geometry"]["d"] == 4}}> 4 </option>
+                                    <option value="5" {{ "selected=""selected""" if inputs["geometry"]["d"] == 5}}> 5 </option>
+                                    <option value="6" {{ "selected=""selected""" if inputs["geometry"]["d"] == 6}}> 6 </option>
+                                    <option value="8" {{ "selected=""selected""" if inputs["geometry"]["d"] == 8}}> 8 </option>
+                                    <option value="10" {{ "selected=""selected""" if inputs["geometry"]["d"] == 10}}> 10 </option>
+                                    <option value="12" {{ "selected=""selected""" if inputs["geometry"]["d"] == 12}}> 12 </option>
+                                    <option value="14" {{ "selected=""selected""" if inputs["geometry"]["d"] == 14}}> 14 </option>
+                                    <option value="16" {{ "selected=""selected""" if inputs["geometry"]["d"] == 16}}> 16 </option>
+                                </select>
+                            </td>
+                            <td>Actual Stud Geometry:</td>
+                            <td id="actual_stud_dims"></td>
+                        </tr>
+                        <tr>
+                            <td>Number of plys:</td>
+                            <td>
+                                <select id="stud_plys" class="stud_plys input-sm user_param" name="stud_plys" style="width:95px">
+                                    <option value="1" {{ "selected=""selected""" if inputs["geometry"]["plys"] == 1}}> 1 </option>
+                                    <option value="2" {{ "selected=""selected""" if inputs["geometry"]["plys"] == 2}}> 2 </option>
+                                    <option value="3" {{ "selected=""selected""" if inputs["geometry"]["plys"] == 3}}> 3 </option>
+                                    <option value="4" {{ "selected=""selected""" if inputs["geometry"]["plys"] == 4}}> 4 </option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Stud Spacing:</td>
+                            <td>
+                                <input id="stud_spacing" name="stud_spacing" class="stud_spacing input-sm user_param" style="width:95px" type="number" step="any" value="{{inputs["geometry"]["spacing"]}}"> in.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Wall Height:</td>
+                            <td><input id="wall_height" name="wall_height" class="wall_height input-sm user_param" style="width:95px" type="number" step="any" value="{{inputs["geometry"]["height"]}}"> ft.</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="checkbox" id="subtract_plates" name="subtract_plates" value="1" {{ "checked" if inputs["geometry"]["subtract plates"] == 1}}>
+                                <label for="subtract_plates">Subtract Wall Plates from Height.</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Number of 2x plates to subtract:</td>
+                            <td><input id="num_plates_subtract" name="num_plates_subtract" class="num_plates_subtract input-sm user_param" style="width:95px" type="number" step="any" value="{{inputs["geometry"]["number of plates"]}}"></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="checkbox" id="plate_crushing" name="plate_crushing" value="1" {{ "checked" if inputs["geometry"]["plate crushing"] == 1}}>
+                                <label for="plate_crushing">Consider plate crushing.</label>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="row">
-            <table class="table table-sm table-hover">
-                <tr>
-                    <td>Nominal Stud Size:</td>
-                    <td>                                 
-                        <select id="stud_b" class="stud_b input-sm user_param" name="stud_b" style="width:95px">
-                            <option value="2" {{ "selected=""selected""" if inputs["geometry"]["b"] == 2}}> 2 </option>
-                            <option value="3" {{ "selected=""selected""" if inputs["geometry"]["b"] == 3}}> 3 </option>
-                            <option value="4" {{ "selected=""selected""" if inputs["geometry"]["b"] == 4}}> 4 </option>
-                        </select>
-                        X
-                        <select id="stud_d" class="stud_d input-sm user_param" name="stud_d" style="width:95px">
-                            <option value="3" {{ "selected=""selected""" if inputs["geometry"]["d"] == 3}}> 3 </option>
-                            <option value="4" {{ "selected=""selected""" if inputs["geometry"]["d"] == 4}}> 4 </option>
-                            <option value="5" {{ "selected=""selected""" if inputs["geometry"]["d"] == 5}}> 5 </option>
-                            <option value="6" {{ "selected=""selected""" if inputs["geometry"]["d"] == 6}}> 6 </option>
-                            <option value="8" {{ "selected=""selected""" if inputs["geometry"]["d"] == 8}}> 8 </option>
-                            <option value="10" {{ "selected=""selected""" if inputs["geometry"]["d"] == 10}}> 10 </option>
-                            <option value="12" {{ "selected=""selected""" if inputs["geometry"]["d"] == 12}}> 12 </option>
-                            <option value="14" {{ "selected=""selected""" if inputs["geometry"]["d"] == 14}}> 14 </option>
-                            <option value="16" {{ "selected=""selected""" if inputs["geometry"]["d"] == 16}}> 16 </option>
-                        </select>
-                    </td>
-                    <td>Actual Stud Geometry:</td>
-                    <td id="actual_stud_dims"></td>
-                </tr>
-                <tr>
-                    <td>Number of plys:</td>
-                    <td>
-                        <select id="stud_plys" class="stud_plys input-sm user_param" name="stud_plys" style="width:95px">
-                            <option value="1" {{ "selected=""selected""" if inputs["geometry"]["plys"] == 1}}> 1 </option>
-                            <option value="2" {{ "selected=""selected""" if inputs["geometry"]["plys"] == 2}}> 2 </option>
-                            <option value="3" {{ "selected=""selected""" if inputs["geometry"]["plys"] == 3}}> 3 </option>
-                            <option value="4" {{ "selected=""selected""" if inputs["geometry"]["plys"] == 4}}> 4 </option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Stud Spacing:</td>
-                    <td>
-                        <input id="stud_spacing" name="stud_spacing" class="stud_spacing input-sm user_param" style="width:95px" type="number" step="any" value="{{inputs["geometry"]["spacing"]}}"> in.
-                    </td>
-                </tr>
-                <tr>
-                    <td>Wall Height:</td>
-                    <td><input id="wall_height" name="wall_height" class="wall_height input-sm user_param" style="width:95px" type="number" step="any" value="{{inputs["geometry"]["height"]}}"> ft.</td>
-                </tr>
-                <tr>
-                    <td>
-                        <input type="checkbox" id="subtract_plates" name="subtract_plates" value="1" {{ "checked" if inputs["geometry"]["subtract plates"] == 1}}>
-                        <label for="subtract_plates">Subtract Wall Plates from Height.</label>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Number of 2x plates to subtract:</td>
-                    <td><input id="num_plates_subtract" name="num_plates_subtract" class="num_plates_subtract input-sm user_param" style="width:95px" type="number" step="any" value="{{inputs["geometry"]["number of plates"]}}"></td>
-                </tr>
-                <tr>
-                    <td>
-                        <input type="checkbox" id="plate_crushing" name="plate_crushing" value="1" {{ "checked" if inputs["geometry"]["plate crushing"] == 1}}>
-                        <label for="plate_crushing">Consider plate crushing.</label>
-                    </td>
-                </tr>
-            </table>
+
+        <div class="tab-pane container fade" id="inputMaterial" role="tabpanel" aria-labelledby="NavMaterial">
+            <div class="container">
+                <div>
+                    <h4>Stud Wood Material:</h4>
+                </div>
+                <div>
+                    <table class="table table-sm table-hover">
+                        <tr>
+                            <td>NDS 2018 Supplement Table:</td>
+                            <td>
+                                <select id="nds_supp_table_select" class="nds_supp_table_select input-sm user_param" name="nds_supp_table_select" style="width:200px">
+                                    <option value="USER" {{ "selected=""selected""" if inputs["stud"]["ndstable"] == "USER"}}> USER </option>
+                                    <option value="4A" {{ "selected=""selected""" if inputs["stud"]["ndstable"] == "4A"}}> NDS 2018 - Table 4A </option>
+                                    <option value="4B" {{ "selected=""selected""" if inputs["stud"]["ndstable"] == "4B"}}> NDS 2018 - Table 4B </option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Wood Species:</td>
+                            <td>
+                                <select id="nds_species_select" class="nds_species_select input-sm user_param" name="nds_species_select" style="width:300px">
+                                    <option value="{{inputs["stud"]["species"]}}"> {{inputs["stud"]["species"] | replace("_"," ")}} </option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Wood Grade:</td>
+                            <td>
+                                <select id="nds_grade_select" class="nds_grade_select input-sm user_param" name="nds_grade_select" style="width:300px">
+                                    <option value="{{inputs["stud"]["grade"]}}"> {{inputs["stud"]["grade"] | replace("_"," ")}} </option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                    <table class="table table-sm table-hover">
+                        <tr>
+                            <th>F<sub>b</sub> (psi)</th>
+                            <th>F<sub>t</sub> (psi)</th>
+                            <th>F<sub>v</sub> (psi)</th>
+                            <th>F<sub>cp</sub> (psi)</th>
+                            <th>F<sub>c</sub> (psi)</th>
+                            <th>E (psi)</th>
+                            <th>E<sub>min</sub> (psi)</th>
+                            <th>G</th>
+                            <th>Grading Agency</th>
+                        </tr>
+                        <tr>
+                            <td><input id="fb_input" name="fb_input" class="fb_input input-sm stud_ref_values" style="width:95px" type="number" step="any" value="{{inputs["stud"]["Fb"]}}"></td>
+                            <td><input id="ft_input" name="ft_input" class="ft_input input-sm stud_ref_values" style="width:95px" type="number" step="any" value="{{inputs["stud"]["Ft"]}}"></td>
+                            <td><input id="fv_input" name="fv_input" class="fv_input input-sm stud_ref_values" style="width:95px" type="number" step="any" value="{{inputs["stud"]["Fv"]}}"></td>
+                            <td><input id="fcp_input" name="fcp_input" class="fcp_input input-sm stud_ref_values" style="width:95px" type="number" step="any" value="{{inputs["stud"]["Fcp"]}}"></td>
+                            <td><input id="fc_input" name="fc_input" class="fc_input input-sm stud_ref_values" style="width:95px" type="number" step="any" value="{{inputs["stud"]["Fc"]}}"></td>
+                            <td><input id="E_input" name="E_input" class="E_input input-sm stud_ref_values" style="width:95px" type="number" step="any" value="{{inputs["stud"]["E"]}}"></td>
+                            <td><input id="Emin_input" name="Emin_input" class="Emin_input input-sm stud_ref_values" style="width:95px" type="number" step="any" value="{{inputs["stud"]["Emin"]}}"></td>
+                            <td><input id="G_input" name="G_input" class="G_input input-sm stud_ref_values" style="width:95px" type="number" step="any" value="{{inputs["stud"]["G"]}}"></td>
+                            <td><input id="agency_input" name="agency_input" class="agency_input input-sm stud_ref_values" style="width:150px" type="text" value="{{inputs["stud"]["Grading Agency"]}}"></td>
+                        </tr>
+                    </table>
+                </div>
+                <div>
+                    <h4>Plate Wood Material:</h4>
+                </div>
+                <div>
+                    <table class="table table-sm table-hover">
+                        <tr>
+                            <td>NDS 2018 Supplement Table:</td>
+                            <td>
+                                <select id="nds_supp_table_select_plate" class="nds_supp_table_select_plate input-sm user_param" name="nds_supp_table_select_plate" style="width:200px">
+                                    <option value="USER" {{ "selected=""selected""" if inputs["plate"]["ndstable"] == "USER"}}> USER </option>
+                                    <option value="4A" {{ "selected=""selected""" if inputs["plate"]["ndstable"] == "4A"}}> NDS 2018 - Table 4A </option>
+                                    <option value="4B" {{ "selected=""selected""" if inputs["plate"]["ndstable"] == "4B"}}> NDS 2018 - Table 4B </option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Wood Species:</td>
+                            <td>
+                                <select id="nds_species_select_plate" class="nds_species_select_plate input-sm user_param" name="nds_species_select_plate" style="width:300px">
+                                    <option value="{{inputs["plate"]["species"]}}"> {{inputs["plate"]["species"] | replace("_", " ")}} </option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Wood Grade:</td>
+                            <td>
+                                <select id="nds_grade_select_plate" class="nds_grade_select_plate input-sm user_param" name="nds_grade_select_plate" style="width:300px">
+                                    <option value="{{inputs["plate"]["grade"]}}"> {{inputs["plate"]["grade"] | replace("_"," ")}} </option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                    <table class="table table-sm table-hover">
+                        <tr>
+                            <th>F<sub>b</sub> (psi)</th>
+                            <th>F<sub>t</sub> (psi)</th>
+                            <th>F<sub>v</sub> (psi)</th>
+                            <th>F<sub>cp</sub> (psi)</th>
+                            <th>F<sub>c</sub> (psi)</th>
+                            <th>E (psi)</th>
+                            <th>E<sub>min</sub> (psi)</th>
+                            <th>G</th>
+                            <th>Grading Agency</th>
+                        </tr>
+                        <tr>
+                            <td><input id="fb_input_plate" name="fb_input_plate" class="fb_input_plate input-sm plate_ref_values" style="width:95px" type="number" step="any" value="{{inputs["plate"]["Fb"]}}"></td>
+                            <td><input id="ft_input_plate" name="ft_input_plate" class="ft_input_plate input-sm plate_ref_values" style="width:95px" type="number" step="any" value="{{inputs["plate"]["Ft"]}}"></td>
+                            <td><input id="fv_input_plate" name="fv_input_plate" class="fv_input_plate input-sm plate_ref_values" style="width:95px" type="number" step="any" value="{{inputs["plate"]["Fv"]}}"></td>
+                            <td><input id="fcp_input_plate" name="fcp_input_plate" class="fcp_input_plate input-sm plate_ref_values" style="width:95px" type="number" step="any" value="{{inputs["plate"]["Fcp"]}}"></td>
+                            <td><input id="fc_input_plate" name="fc_input_plate" class="fc_input_plate input-sm plate_ref_values" style="width:95px" type="number" step="any" value="{{inputs["plate"]["Fc"]}}"></td>
+                            <td><input id="E_input_plate" name="E_input_plate" class="E_input_plate input-sm plate_ref_values" style="width:95px" type="number" step="any" value="{{inputs["plate"]["E"]}}"></td>
+                            <td><input id="Emin_input_plate" name="Emin_input_plate" class="Emin_input_plate input-sm plate_ref_values" style="width:95px" type="number" step="any" value="{{inputs["plate"]["Emin"]}}"></td>
+                            <td><input id="G_input_plate" name="G_input_plate" class="G_input_plate input-sm plate_ref_values" style="width:95px" type="number" step="any" value="{{inputs["plate"]["G"]}}"></td>
+                            <td><input id="agency_input_plate" name="agency_input_plate" class="agency_input_plate input-sm plate_ref_values" style="width:150px" type="text" value="{{inputs["plate"]["Grading Agency"]}}"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="row">
-            <h4>Stud Wood Material:</h4>
+
+        <div class="tab-pane container fade" id="inputEnvironment" role="tabpanel" aria-labelledby="NavEnvironment">
+            <div class="container">
+                <div>
+                    <h4>Environment:</h4>
+                </div>
+                <div>
+                    <table class="table table-sm table-hover">
+                        <tr>
+                            <td>In Service Moisture Content:</td>
+                            <td><input id="moisture_content" name="moisture_content" class="moisture_content input-sm user_param" style="width:95px" type="number" step="any" value="{{inputs["environment"]["moisture content"]}}"> %</td>
+                        </tr>
+                        <tr>
+                            <td>In Service Temperature (F):</td>
+                            <td><input id="service_temperature" name="service_temperature" class="service_temperature input-sm user_param" style="width:95px" type="number" step="any" value="{{inputs["environment"]["temperature"]}}"> F</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="checkbox" id="incised_yn" name="incised_yn" value="1" {{ "checked" if inputs["environment"]["incised"] == 1}}>
+                                <label for="incised_yn">Incised Lumber</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="checkbox" id="frt_yn" name="frt_yn" value="1" {{ "checked" if inputs["environment"]["frt"] == 1}}>
+                                <label for="frt_yn">Fire Retardant Treated Lumber</label>
+                            </td>
+                        </tr>
+                    </table>
+                    <table id="frt_reduction_table" class="table table-sm table-hover">
+                        <tr>
+                            <th>C<sub>frt,Fb</sub></th>
+                            <th>C<sub>frt,Ft</sub></th>
+                            <th>C<sub>frt,Fv</sub></th>
+                            <th>C<sub>frt,Fcp</sub></th>
+                            <th>C<sub>frt,Fc</sub></th>
+                            <th>C<sub>frt,E</sub></th>
+                            <th>C<sub>frt,Emin</sub></th>
+                            <th>C<sub>frt,G</sub></th>
+                        </tr>
+                        <tr>
+                            <td><input id="c_frt_fb" name="c_frt_fb" class="c_frt_fb input-sm" style="width:95px" type="number" step="any" value="{{inputs["environment"]["Cfrt"]["Cfrt_fb"]}}"></td>
+                            <td><input id="c_frt_ft" name="c_frt_ft" class="c_frt_ft input-sm" style="width:95px" type="number" step="any" value="{{inputs["environment"]["Cfrt"]["Cfrt_ft"]}}"></td>
+                            <td><input id="c_frt_fv" name="c_frt_fv" class="c_frt_fv input-sm" style="width:95px" type="number" step="any" value="{{inputs["environment"]["Cfrt"]["Cfrt_fv"]}}"></td>
+                            <td><input id="c_frt_fcp" name="c_frt_fcp" class="c_frt_fcp input-sm" style="width:95px" type="number" step="any" value="{{inputs["environment"]["Cfrt"]["Cfrt_fcp"]}}"></td>
+                            <td><input id="c_frt_fc" name="c_frt_fc" class="c_frt_fc input-sm" style="width:95px" type="number" step="any" value="{{inputs["environment"]["Cfrt"]["Cfrt_fc"]}}"></td>
+                            <td><input id="c_frt_e" name="c_frt_e" class="c_frt_e input-sm" style="width:95px" type="number" step="any" value="{{inputs["environment"]["Cfrt"]["Cfrt_E"]}}"></td>
+                            <td><input id="c_frt_emin" name="c_frt_emin" class="c_frt_emin input-sm" style="width:95px" type="number" step="any" value="{{inputs["environment"]["Cfrt"]["Cfrt_Emin"]}}"></td>
+                            <td><input id="c_frt_g" name="c_frt_g" class="c_frt_g input-sm" style="width:95px" type="number" step="any" value="{{inputs["environment"]["Cfrt"]["Cfrt_G"]}}"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="row">
-            <table class="table table-sm table-hover">
-                <tr>
-                    <td>NDS 2018 Supplement Table:</td>
-                    <td>
-                        <select id="nds_supp_table_select" class="nds_supp_table_select input-sm user_param" name="nds_supp_table_select" style="width:200px">
-                            <option value="USER" {{ "selected=""selected""" if inputs["stud"]["ndstable"] == "USER"}}> USER </option>
-                            <option value="4A" {{ "selected=""selected""" if inputs["stud"]["ndstable"] == "4A"}}> NDS 2018 - Table 4A </option>
-                            <option value="4B" {{ "selected=""selected""" if inputs["stud"]["ndstable"] == "4B"}}> NDS 2018 - Table 4B </option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Wood Species:</td>
-                    <td>
-                        <select id="nds_species_select" class="nds_species_select input-sm user_param" name="nds_species_select" style="width:300px">
-                            <option value="{{inputs["stud"]["species"]}}"> {{inputs["stud"]["species"] | replace("_"," ")}} </option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Wood Grade:</td>
-                    <td>
-                        <select id="nds_grade_select" class="nds_grade_select input-sm user_param" name="nds_grade_select" style="width:300px">
-                            <option value="{{inputs["stud"]["grade"]}}"> {{inputs["stud"]["grade"] | replace("_"," ")}} </option>
-                        </select>
-                    </td>
-                </tr>
-            </table>
-            <table class="table table-sm table-hover">
-                <tr>
-                    <th>F<sub>b</sub> (psi)</th>
-                    <th>F<sub>t</sub> (psi)</th>
-                    <th>F<sub>v</sub> (psi)</th>
-                    <th>F<sub>cp</sub> (psi)</th>
-                    <th>F<sub>c</sub> (psi)</th>
-                    <th>E (psi)</th>
-                    <th>E<sub>min</sub> (psi)</th>
-                    <th>G</th>
-                    <th>Grading Agency</th>
-                </tr>
-                <tr>
-                    <td><input id="fb_input" name="fb_input" class="fb_input input-sm stud_ref_values" style="width:95px" type="number" step="any" value="{{inputs["stud"]["Fb"]}}"></td>
-                    <td><input id="ft_input" name="ft_input" class="ft_input input-sm stud_ref_values" style="width:95px" type="number" step="any" value="{{inputs["stud"]["Ft"]}}"></td>
-                    <td><input id="fv_input" name="fv_input" class="fv_input input-sm stud_ref_values" style="width:95px" type="number" step="any" value="{{inputs["stud"]["Fv"]}}"></td>
-                    <td><input id="fcp_input" name="fcp_input" class="fcp_input input-sm stud_ref_values" style="width:95px" type="number" step="any" value="{{inputs["stud"]["Fcp"]}}"></td>
-                    <td><input id="fc_input" name="fc_input" class="fc_input input-sm stud_ref_values" style="width:95px" type="number" step="any" value="{{inputs["stud"]["Fc"]}}"></td>
-                    <td><input id="E_input" name="E_input" class="E_input input-sm stud_ref_values" style="width:95px" type="number" step="any" value="{{inputs["stud"]["E"]}}"></td>
-                    <td><input id="Emin_input" name="Emin_input" class="Emin_input input-sm stud_ref_values" style="width:95px" type="number" step="any" value="{{inputs["stud"]["Emin"]}}"></td>
-                    <td><input id="G_input" name="G_input" class="G_input input-sm stud_ref_values" style="width:95px" type="number" step="any" value="{{inputs["stud"]["G"]}}"></td>
-                    <td><input id="agency_input" name="agency_input" class="agency_input input-sm stud_ref_values" style="width:150px" type="text" value="{{inputs["stud"]["Grading Agency"]}}"></td>
-                </tr>
-            </table>
+
+        <div class="tab-pane container fade" id="inputLoadBracing" role="tabpanel" aria-labelledby="NavLoadBracing">
+            <div class="container">
+                <div>
+                    <h4>Load and Bracing:</h4>
+                </div>
+                <div>
+                    <table class="table table-sm table-hover">
+                        <tr>
+                            <td>Lateral Pressure:</td>
+                            <td><input id="lateral_pressure" name="lateral_pressure" class="lateral_pressure input-sm user_param" style="width:95px" type="number" step="any" value="{{inputs["loadbracing"]["pressure"]}}"> psf</td>
+                        </tr>
+                        <tr>
+                            <td>Load Duration, C<sub>d</sub>:</td>
+                            <td>
+                                <select id="cd_select" class="cd_select input-sm user_param" name="cd_select" style="width:300px">
+                                    <option value="0.9" {{ "selected=""selected""" if inputs["loadbracing"]["Cd"] == 0.9}}> Permanent (0.9) </option>
+                                    <option value="1.0" {{ "selected=""selected""" if inputs["loadbracing"]["Cd"] == 1.0}}> Ten years (1.0) </option>
+                                    <option value="1.15" {{ "selected=""selected""" if inputs["loadbracing"]["Cd"] == 1.15}}> Two months (1.15) </option>
+                                    <option value="1.25" {{ "selected=""selected""" if inputs["loadbracing"]["Cd"] == 1.25}}> Seven days (1.25) </option>
+                                    <option value="1.6" {{ "selected=""selected""" if inputs["loadbracing"]["Cd"] == 1.6}}> Ten minutes (1.6) </option>
+                                    <option value="2.0" {{ "selected=""selected""" if inputs["loadbracing"]["Cd"] == 2.0}}> Impact (2.0) </option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="checkbox" id="min_e_yn" name="min_e_yn" value="1" {{ "checked" if inputs["loadbracing"]["min ecc"] == 1}}>
+                                <label for="min_e_yn">Consider Minimum Eccentricity of d/6</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Sheathing:</td>
+                            <td>
+                                <select id="sheathing_select" class="sheathing_select input-sm user_param" name="sheathing_select" style="width:300px">
+                                    <option value="1" {{ "selected=""selected""" if inputs["loadbracing"]["sheathing"] == 1}}> Sheathed on Both Faces </option>
+                                    <option value="2" {{ "selected=""selected""" if inputs["loadbracing"]["sheathing"] == 2}}> Sheathed on Stud Bending Compression Face </option>
+                                    <option value="3" {{ "selected=""selected""" if inputs["loadbracing"]["sheathing"] == 3}}> Sheathed on Stud Bending Tension Face </option>
+                                    <option value="4" {{ "selected=""selected""" if inputs["loadbracing"]["sheathing"] == 4}}> No Sheathing </option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Maximum Distance Between Blocking:</td>
+                            <td><input id="blocking_input" name="blocking_input" class="blocking_input input-sm user_param" style="width:95px" type="number" step="any" value="{{inputs["loadbracing"]["blocking spacing"]}}"> ft</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="row">
-            <h4>Plate Wood Material:</h4>
+        
+        <div class="tab-pane container fade" id="dataResults" role="tabpanel" aria-labelledby="NavResults">
+            {% if wall != None %}
+                <h2><u>Results:</u></h2>
+                <h3>Wall Capacity: {{"%.2f"|format(wall.wmax)}} plf</h3>
+                <h5>Stud Capacity: {{"%.2f"|format(wall.pmax)}} lbs</h5>
+
+                <!-- Geometry and Section Properties -->
+                <table class="table table-striped table-hover table-sm table-dark">
+                    <thead>
+                        <tr>
+                            <th colspan="2">Design Parameters</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Wall  Stud Design Height</td>
+                            <td>{{"%.2f"|format(wall.height_in)}} in.</td>
+                        </tr>
+                        <tr>
+                            <td>Stud Spacing</td>
+                            <td>{{"%.2f"|format(wall.spacing_in)}} in.</td>
+                        </tr>
+                        <tr>
+                            <td>Blocking Spacing</td>
+                            <td>{{"%.2f"|format(wall.blocking_in)}}</td>
+                        </tr>
+                        <tr>
+                            <td>B<sub>nom</sub></td>
+                            <td>({{wall.plys}}){{wall.bnom}} in.</td>
+                        </tr>
+                        <tr>
+                            <td>D<sub>nom</sub></td>
+                            <td>{{wall.dnom}} in.</td>
+                        </tr>
+                        <tr>
+                            <td>B<sub>design</sub></td>
+                            <td>{{"%.2f"|format(wall.bdes)}} in.</td>
+                        </tr>
+                        <tr>
+                            <td>D<sub>design</sub></td>
+                            <td>{{"%.2f"|format(wall.ddes)}} in.</td>
+                        </tr>
+                        <tr>
+                            <td>Area, A</td>
+                            <td>{{"%.2f"|format(wall.area_in2)}} in.<sup>2</sup></td>
+                        </tr>
+                        <tr>
+                            <td>Section Modulus, S</td>
+                            <td>{{"%.2f"|format(wall.s_in3)}} in.<sup>3</sup></td>
+                        </tr>
+                        <tr>
+                            <td>Moment of Inertia, I</td>
+                            <td>{{"%.2f"|format(wall.I_in4)}} in.<sup>4</sup></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- NDS 2018 - Table 4.3.1 -->
+                <table class="table table-striped table-hover table-sm table-dark">
+                    <thead>
+                        <tr>
+                            <th class="text-center" colspan="15">NDS 2018 Table 4.3.1 Adjustment Factors for Sawn Lumber </th>
+                        </tr>
+                        <tr>
+                            <th class="text-center"></th>
+                            <th class="text-center">Reference Value</th>
+                            <th class="text-center">C<sub>D</sub></th>
+                            <th class="text-center">C<sub>M</sub></th>
+                            <th class="text-center">C<sub>t</sub></th>
+                            <th class="text-center">C<sub>L</sub></th>
+                            <th class="text-center">C<sub>F</sub></th>
+                            <th class="text-center">C<sub>fu</sub></th>
+                            <th class="text-center">C<sub>i</sub></th>
+                            <th class="text-center">C<sub>r</sub></th>
+                            <th class="text-center">C<sub>P</sub></th>
+                            <th class="text-center">C<sub>T</sub></th>
+                            <th class="text-center">C<sub>b</sub></th>
+                            <th class="text-center">C<sub>frt</sub></th>
+                            <th class="text-center"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-center">F<sub>b</sub>'</td>
+                            <td class="text-center">{{wall.fb_psi}} psi</td>
+                            <td class="text-center">{{wall.loadbracing.get("Cd")}}</td>
+                            <td class="text-center">{{wall.cm_fb}}</td>
+                            <td class="text-center">{{wall.ct_fb}}</td>
+                            <td class="text-center">{{"%.4f"|format(wall.cl)}}</td>
+                            <td class="text-center">{{wall.cf_fb}}</td>
+                            <td class="text-center">{{wall.cfu}}</td>
+                            <td class="text-center">{{wall.ci_fb}}</td>
+                            <td class="text-center">{{wall.cr}}</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{wall.cfrt_fb}}</td>
+                            <td class="text-center">{{"%.2f"|format(wall.fb_prime_psi)}} psi</td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">F<sub>t</sub>'</td>
+                            <td class="text-center">{{wall.ft_psi}} psi</td>
+                            <td class="text-center">{{wall.loadbracing.get("Cd")}}</td>
+                            <td class="text-center">{{wall.cm_ft}}</td>
+                            <td class="text-center">{{wall.ct_ft}}</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{wall.cf_ft}}</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{wall.ci_ft}}</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{wall.cfrt_ft}}</td>
+                            <td class="text-center">{{"%.2f"|format(wall.ft_prime_psi_cd)}} psi</td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">F<sub>v</sub>'</td>
+                            <td class="text-center">{{wall.fv_psi}} psi</td>
+                            <td class="text-center">{{wall.loadbracing.get("Cd")}}</td>
+                            <td class="text-center">{{wall.cm_fv}}</td>
+                            <td class="text-center">{{wall.ct_fv}}</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{wall.ci_fv}}</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{wall.cfrt_fv}}</td>
+                            <td class="text-center">{{"%.2f"|format(wall.fv_prime_psi_cd)}} psi</td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">F<sub>c</sub>'</td>
+                            <td class="text-center">{{wall.fc_psi}} psi</td>
+                            <td class="text-center">{{wall.loadbracing.get("Cd")}}</td>
+                            <td class="text-center">{{wall.cm_fc}}</td>
+                            <td class="text-center">{{wall.ct_fc}}</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{wall.cf_fc}}</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{wall.ci_fv}}</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{"%.4f"|format(wall.cp)}}</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{wall.cfrt_fc}}</td>
+                            <td class="text-center">{{"%.2f"|format(wall.fc_prime_psi)}} psi</td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">F<sub>c,perp</sub>'</td>
+                            <td class="text-center">{{wall.fcp_pl_psi}} psi</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{wall.cm_fcp}}</td>
+                            <td class="text-center">{{wall.ct_fcp}}</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{wall.ci_fv}}</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{wall.cb_fcp}}</td>
+                            <td class="text-center">{{wall.cfrt_fcp}}</td>
+                            <td class="text-center">{{"%.2f"|format(wall.fcp_pl_prime_psi)}} psi (Plate)</td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">E'</td>
+                            <td class="text-center">{{wall.E_psi}} psi</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{wall.cm_E}}</td>
+                            <td class="text-center">{{wall.ct_E}}</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{wall.ci_E}}</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{wall.cfrt_E}}</td>
+                            <td class="text-center">{{"%.2f"|format(wall.E_prime_psi)}} psi</td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">E<sub>min</sub>'</td>
+                            <td class="text-center">{{wall.Emin_psi}} psi</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{wall.cm_Emin}}</td>
+                            <td class="text-center">{{wall.ct_Emin}}</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{wall.ci_Emin}}</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{wall.cT}}</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">{{wall.cfrt_Emin}}</td>
+                            <td class="text-center">{{"%.2f"|format(wall.Emin_prime_psi)}} psi</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Common spacing Capacities -->
+                <table class="table table-striped table-hover table-sm table-dark">
+                    <thead>
+                        <tr>
+                            <th class="text-center" colspan="4"> Wall Capacity at Common Stud Spacings</th>
+                        </tr>
+                        <tr>
+                            <th class="text-center">Stud Spacing (in)</th>
+                            <th class="text-center">Wall Capacity (plf)</th>
+                            <th class="text-center">Stud Capacity (lbs)</th>
+                            <th class="text-center">Deflection Ratio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in wall.cap_at_common %}
+                        <tr>
+                            <td class="text-center">{{s}}</td>
+                            <td class="text-center">{{"%.2f"|format(wall.cap_at_common[s]["wmax"])}}</td>
+                            <td class="text-center">{{"%.2f"|format(wall.cap_at_common[s]["pmax"])}}</td>
+                            <td class="text-center">{{wall.cap_at_common[s]["delta"]}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                    <tfoot>
+                        <tr>
+                            <td colspan="4"> Capacities noted have not been reduced for wall self weight.</td>
+                        </tr>
+                    </tfoot>
+                
+                </table>
+
+                <!-- Kootenay Curve -->
+                <div id="KootenayCurve" class="w-700 plot"></div>
+                <script>
+
+                    var traces = [];
+                    
+                    {% for c in wall.kootenaycurve %}
+                    traces.push({
+                        x: {{wall.kootenaycurve[c]["p"]}},
+                        y: {{wall.kootenaycurve[c]["f"]}},
+                        mode: 'lines+markers',
+                        name: 'Cd = '+ {{c}} +'',
+                        marker: {
+                                size: 3,
+                                color: {{wall.kootenaycurve[c]["color"]|tojson}}
+                            },
+                            line: {
+                                color: {{wall.kootenaycurve[c]["color"]|tojson}},
+                                width: 2
+                            },
+                        });
+                    {% endfor %}
+
+                    traces.push({
+                        x: [ {{wall.loadbracing.get("pressure", 0)}} ],
+                        y: [ {{wall.wmax}} ],
+                        mode: 'markers',
+                        name: 'Current Wall',
+                        marker: {
+                                size: 10,
+                                color: "#ff0000"
+                            },
+                    });
+                    
+                    var section_layout = {
+                        title: "<b>Kootenay Curve</b><br><span>Stud Spacing = "+{{wall.spacing_in}}+" in.</span>",
+                        width: 900,
+                        height: 700,
+                        showlegend: true,
+                        xaxis: {
+                            title: "Pressure (psf)",
+                            showgrid: true,
+                            zeroline: true,
+                            showline: true,
+                            mirror: 'ticks',
+                            gridcolor: 'rgba(0,0,0,0.1)',
+                            gridwidth: 1,
+                            zerolinecolor: 'rgba(0,0,0,0.2)',
+                            zerolinewidth: 2,
+                            linecolor:'rgba(0,0,0,0.1)',
+                            linewidth: 1
+                        },
+                        yaxis: {
+                            title: "Axial Load (plf)",
+                            showgrid: true,
+                            zeroline: true,
+                            showline: true,
+                            mirror: 'ticks',
+                            gridcolor: 'rgba(0,0,0,0.1)',
+                            gridwidth: 1,
+                            zerolinecolor: 'rgba(0,0,0,0.2)',
+                            zerolinewidth: 2,
+                            linecolor: 'rgba(0,0,0,0.1)',
+                            linewidth: 1,
+                        },
+                        paper_bgcolor: 'rgba(0,0,0,0)',
+                        plot_bgcolor: 'rgba(0,0,0,0)'
+                    };
+
+                    Plotly.newPlot("KootenayCurve", traces, section_layout);
+
+                </script>
+
+            {% else %}
+                <div> Run Analysis for Results </div>
+            {% endif %}
         </div>
-        <div class="row">
-            <table class="table table-sm table-hover">
-                <tr>
-                    <td>NDS 2018 Supplement Table:</td>
-                    <td>
-                        <select id="nds_supp_table_select_plate" class="nds_supp_table_select_plate input-sm user_param" name="nds_supp_table_select_plate" style="width:200px">
-                            <option value="USER" {{ "selected=""selected""" if inputs["plate"]["ndstable"] == "USER"}}> USER </option>
-                            <option value="4A" {{ "selected=""selected""" if inputs["plate"]["ndstable"] == "4A"}}> NDS 2018 - Table 4A </option>
-                            <option value="4B" {{ "selected=""selected""" if inputs["plate"]["ndstable"] == "4B"}}> NDS 2018 - Table 4B </option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Wood Species:</td>
-                    <td>
-                        <select id="nds_species_select_plate" class="nds_species_select_plate input-sm user_param" name="nds_species_select_plate" style="width:300px">
-                            <option value="{{inputs["plate"]["species"]}}"> {{inputs["plate"]["species"] | replace("_", " ")}} </option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Wood Grade:</td>
-                    <td>
-                        <select id="nds_grade_select_plate" class="nds_grade_select_plate input-sm user_param" name="nds_grade_select_plate" style="width:300px">
-                            <option value="{{inputs["plate"]["grade"]}}"> {{inputs["plate"]["grade"] | replace("_"," ")}} </option>
-                        </select>
-                    </td>
-                </tr>
-            </table>
-            <table class="table table-sm table-hover">
-                <tr>
-                    <th>F<sub>b</sub> (psi)</th>
-                    <th>F<sub>t</sub> (psi)</th>
-                    <th>F<sub>v</sub> (psi)</th>
-                    <th>F<sub>cp</sub> (psi)</th>
-                    <th>F<sub>c</sub> (psi)</th>
-                    <th>E (psi)</th>
-                    <th>E<sub>min</sub> (psi)</th>
-                    <th>G</th>
-                    <th>Grading Agency</th>
-                </tr>
-                <tr>
-                    <td><input id="fb_input_plate" name="fb_input_plate" class="fb_input_plate input-sm plate_ref_values" style="width:95px" type="number" step="any" value="{{inputs["plate"]["Fb"]}}"></td>
-                    <td><input id="ft_input_plate" name="ft_input_plate" class="ft_input_plate input-sm plate_ref_values" style="width:95px" type="number" step="any" value="{{inputs["plate"]["Ft"]}}"></td>
-                    <td><input id="fv_input_plate" name="fv_input_plate" class="fv_input_plate input-sm plate_ref_values" style="width:95px" type="number" step="any" value="{{inputs["plate"]["Fv"]}}"></td>
-                    <td><input id="fcp_input_plate" name="fcp_input_plate" class="fcp_input_plate input-sm plate_ref_values" style="width:95px" type="number" step="any" value="{{inputs["plate"]["Fcp"]}}"></td>
-                    <td><input id="fc_input_plate" name="fc_input_plate" class="fc_input_plate input-sm plate_ref_values" style="width:95px" type="number" step="any" value="{{inputs["plate"]["Fc"]}}"></td>
-                    <td><input id="E_input_plate" name="E_input_plate" class="E_input_plate input-sm plate_ref_values" style="width:95px" type="number" step="any" value="{{inputs["plate"]["E"]}}"></td>
-                    <td><input id="Emin_input_plate" name="Emin_input_plate" class="Emin_input_plate input-sm plate_ref_values" style="width:95px" type="number" step="any" value="{{inputs["plate"]["Emin"]}}"></td>
-                    <td><input id="G_input_plate" name="G_input_plate" class="G_input_plate input-sm plate_ref_values" style="width:95px" type="number" step="any" value="{{inputs["plate"]["G"]}}"></td>
-                    <td><input id="agency_input_plate" name="agency_input_plate" class="agency_input_plate input-sm plate_ref_values" style="width:150px" type="text" value="{{inputs["plate"]["Grading Agency"]}}"></td>
-                </tr>
-            </table>
-        </div>
-        <div class="row">
-            <h4>Environment:</h4>
-        </div>
-        <div class="row">
-            <table class="table table-sm table-hover">
-                <tr>
-                    <td>In Service Moisture Content:</td>
-                    <td><input id="moisture_content" name="moisture_content" class="moisture_content input-sm user_param" style="width:95px" type="number" step="any" value="{{inputs["environment"]["moisture content"]}}"> %</td>
-                </tr>
-                <tr>
-                    <td>In Service Temperature (F):</td>
-                    <td><input id="service_temperature" name="service_temperature" class="service_temperature input-sm user_param" style="width:95px" type="number" step="any" value="{{inputs["environment"]["temperature"]}}"> F</td>
-                </tr>
-                <tr>
-                    <td>
-                        <input type="checkbox" id="incised_yn" name="incised_yn" value="1" {{ "checked" if inputs["environment"]["incised"] == 1}}>
-                        <label for="incised_yn">Incised Lumber</label>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <input type="checkbox" id="frt_yn" name="frt_yn" value="1" {{ "checked" if inputs["environment"]["frt"] == 1}}>
-                        <label for="frt_yn">Fire Retardant Treated Lumber</label>
-                    </td>
-                </tr>
-            </table>
-            <table id="frt_reduction_table" class="table table-sm table-hover">
-                <tr>
-                    <th>C<sub>frt,Fb</sub></th>
-                    <th>C<sub>frt,Ft</sub></th>
-                    <th>C<sub>frt,Fv</sub></th>
-                    <th>C<sub>frt,Fcp</sub></th>
-                    <th>C<sub>frt,Fc</sub></th>
-                    <th>C<sub>frt,E</sub></th>
-                    <th>C<sub>frt,Emin</sub></th>
-                    <th>C<sub>frt,G</sub></th>
-                </tr>
-                <tr>
-                    <td><input id="c_frt_fb" name="c_frt_fb" class="c_frt_fb input-sm" style="width:95px" type="number" step="any" value="{{inputs["environment"]["Cfrt"]["Cfrt_fb"]}}"></td>
-                    <td><input id="c_frt_ft" name="c_frt_ft" class="c_frt_ft input-sm" style="width:95px" type="number" step="any" value="{{inputs["environment"]["Cfrt"]["Cfrt_ft"]}}"></td>
-                    <td><input id="c_frt_fv" name="c_frt_fv" class="c_frt_fv input-sm" style="width:95px" type="number" step="any" value="{{inputs["environment"]["Cfrt"]["Cfrt_fv"]}}"></td>
-                    <td><input id="c_frt_fcp" name="c_frt_fcp" class="c_frt_fcp input-sm" style="width:95px" type="number" step="any" value="{{inputs["environment"]["Cfrt"]["Cfrt_fcp"]}}"></td>
-                    <td><input id="c_frt_fc" name="c_frt_fc" class="c_frt_fc input-sm" style="width:95px" type="number" step="any" value="{{inputs["environment"]["Cfrt"]["Cfrt_fc"]}}"></td>
-                    <td><input id="c_frt_e" name="c_frt_e" class="c_frt_e input-sm" style="width:95px" type="number" step="any" value="{{inputs["environment"]["Cfrt"]["Cfrt_E"]}}"></td>
-                    <td><input id="c_frt_emin" name="c_frt_emin" class="c_frt_emin input-sm" style="width:95px" type="number" step="any" value="{{inputs["environment"]["Cfrt"]["Cfrt_Emin"]}}"></td>
-                    <td><input id="c_frt_g" name="c_frt_g" class="c_frt_g input-sm" style="width:95px" type="number" step="any" value="{{inputs["environment"]["Cfrt"]["Cfrt_G"]}}"></td>
-                </tr>
-            </table>
-        </div>
-        <div class="row">
-            <h4>Load and Bracing:</h4>
-        </div>
-        <div class="row">
-            <table class="table table-sm table-hover">
-                <tr>
-                    <td>Lateral Pressure:</td>
-                    <td><input id="lateral_pressure" name="lateral_pressure" class="lateral_pressure input-sm user_param" style="width:95px" type="number" step="any" value="{{inputs["loadbracing"]["pressure"]}}"> psf</td>
-                </tr>
-                <tr>
-                    <td>Load Duration, C<sub>d</sub>:</td>
-                    <td>
-                        <select id="cd_select" class="cd_select input-sm user_param" name="cd_select" style="width:300px">
-                            <option value="0.9" {{ "selected=""selected""" if inputs["loadbracing"]["Cd"] == 0.9}}> Permanent (0.9) </option>
-                            <option value="1.0" {{ "selected=""selected""" if inputs["loadbracing"]["Cd"] == 1.0}}> Ten years (1.0) </option>
-                            <option value="1.15" {{ "selected=""selected""" if inputs["loadbracing"]["Cd"] == 1.15}}> Two months (1.15) </option>
-                            <option value="1.25" {{ "selected=""selected""" if inputs["loadbracing"]["Cd"] == 1.25}}> Seven days (1.25) </option>
-                            <option value="1.6" {{ "selected=""selected""" if inputs["loadbracing"]["Cd"] == 1.6}}> Ten minutes (1.6) </option>
-                            <option value="2.0" {{ "selected=""selected""" if inputs["loadbracing"]["Cd"] == 2.0}}> Impact (2.0) </option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <input type="checkbox" id="min_e_yn" name="min_e_yn" value="1" {{ "checked" if inputs["loadbracing"]["min ecc"] == 1}}>
-                        <label for="min_e_yn">Consider Minimum Eccentricity of d/6</label>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Sheathing:</td>
-                    <td>
-                        <select id="sheathing_select" class="sheathing_select input-sm user_param" name="sheathing_select" style="width:300px">
-                            <option value="1" {{ "selected=""selected""" if inputs["loadbracing"]["sheathing"] == 1}}> Sheathed on Both Faces </option>
-                            <option value="2" {{ "selected=""selected""" if inputs["loadbracing"]["sheathing"] == 2}}> Sheathed on Stud Bending Compression Face </option>
-                            <option value="3" {{ "selected=""selected""" if inputs["loadbracing"]["sheathing"] == 3}}> Sheathed on Stud Bending Tension Face </option>
-                            <option value="4" {{ "selected=""selected""" if inputs["loadbracing"]["sheathing"] == 4}}> No Sheathing </option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Maximum Distance Between Blocking:</td>
-                    <td><input id="blocking_input" name="blocking_input" class="blocking_input input-sm user_param" style="width:95px" type="number" step="any" value="{{inputs["loadbracing"]["blocking spacing"]}}"> ft</td>
-                </tr>
-            </table>
-        </div>
-        <input class="btn btn-dark btn-lg my-1" type=submit value="Calculate Stud Wall">
-    </div>
-    </form>
+
+</form>
+
 </div>
 
 
