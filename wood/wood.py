@@ -2,6 +2,7 @@ from unittest.mock import NonCallableMagicMock
 from flask import Blueprint, render_template, request, jsonify
 
 import wood.nds_database as ndsdb
+import wood.nds as nds
 
 wood_bp = Blueprint('wood_bp', __name__,
             template_folder='templates',
@@ -65,7 +66,14 @@ def wood_wall_web():
                         "sheathing": int(request.form.get("sheathing_select")),
                         "blocking spacing": float(request.form.get("blocking_input"))}
 
-        results = None
+        # Make a wood Wall
+        wall = nds.wood_stud_wall(geometry, stud, plate, environment, loadbracing)
+        wall.capacity_analysis()
+
+        #print(f" Stud Capacity: {wall.pmax} lbs or Wall Capacity: {wall.wmax} plf")
+        #print(wall.cap_at_common)
+        #print(wall.kootenaycurve)
+
     else:
         geometry = {"b": 2,
                     "d": 4,
@@ -120,7 +128,7 @@ def wood_wall_web():
                         "min ecc": 0,
                         "sheathing": 1,
                         "blocking spacing": 4}
-        results = None
+        wall = None
 
     inputs = {"geometry": geometry,
                 "stud": stud,
@@ -128,15 +136,15 @@ def wood_wall_web():
                 "environment": environment,
                 "loadbracing":loadbracing}
 
-    print("-"*100)
-    print("Inputs Echo:")
-    print(inputs)
-    print("-"*100)
+    #print("-"*100)
+    #print("Inputs Echo:")
+    #print(inputs)
+    #print("-"*100)
 
     return render_template('wood/nds_stud_wall.html', 
                             title = 'wood wall',
                             inputs = inputs, 
-                            results = results)
+                            wall = wall)
 
 @wood_bp.route('/ndsdb_api')
 def api_ndsdb():

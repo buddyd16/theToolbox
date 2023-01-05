@@ -580,11 +580,12 @@ class wood_stud_wall:
         # Stud Bracing
         self.sheathing = self.loadbracing.get("sheathing", 1)
         self.no_sheathing = True if self.sheathing == 4 else False
-        self.blocking_in = self.loadbracing.get("blocking spacing", 48)
+        self.blocking_in = 12*self.loadbracing.get("blocking spacing", 4)
         self.compression_face = True if self.sheathing <= 2 else False
 
         # Stud Design Properties
         self.fb_psi = self.stud.get("Fb", 1)
+        self.ft_psi = self.stud.get("Ft", 1)
         self.fv_psi = self.stud.get("Fv", 1)
         self.fc_psi = self.stud.get("Fc", 1)
         self.Emin_psi = self.stud.get("Emin", 1)
@@ -723,6 +724,16 @@ class wood_stud_wall:
 
 
     def compute_primes(self):
+
+        #Ft = Ft * Cm * Ct * Cf * Ci - apply Cd in Fc function
+        self.cm_ft = self.stud_factors["Cm"].get("Cm_ft", 0.01)
+        self.cf_ft = self.stud_factors["Cf"].get("Cf_ft", 0.01)
+        self.ct_ft = self.ct.get("Ct_ft", 1)
+        self.ci_ft = self.ci.get("Ci_ft", 1)
+        self.cfrt_ft = self.environment["Cfrt"].get("Cfrt_ft", 1)
+
+        self.ft_prime_psi = self.ft_psi * self.cm_ft * self.ct_ft * self.cf_ft * self.ci_ft * self.cfrt_ft
+
         #Fv' = Fv * Cm * Ct * Ci - apply Cd in Fc and Fb functions
         self.cm_fv = self.stud_factors["Cm"].get("Cm_fv", 0.01)
         self.ct_fv = self.ct.get("Ct_fv", 1)
@@ -768,9 +779,12 @@ class wood_stud_wall:
         self.defl_600_w_psf = ((self.defl_600 * 384 * self.E_prime_psi * self.I_in4) / (1728 * 5 * (self.height_in/12.0)**4))/(self.spacing_in/12.0)
 
 
-    def fc_prime_calc(self, cd):
+    def fc_prime_calc(self, cd, log=True):
+        self.assumptions_cp = []
         #apply cd to Fv'
         self.fv_prime_psi_cd = self.fv_prime_psi * cd
+        self.ft_prime_psi_cd = self.ft_prime_psi * cd
+        
         #Fc* = reference compression design value parallel to grain multiplied by all applicable adjusment factors except Cp
         self.cm_fc = self.stud_factors["Cm"].get("Cm_fc", 1)
         self.ct_fc = self.ct.get("Ct_fc", 1)
@@ -780,25 +794,25 @@ class wood_stud_wall:
         self.fc_star_psi = self.fc_psi * cd * self.cm_fc * self.ct_fc * self.cf_fc * self.ci_fc * self.cfrt_fc
         
         self.c_cp = 0.8
-        self.assumptions_c = 'c for Cp calculation based on sawn lumber - NDS 2005 3.7.1\n'
+        if log: self.assumptions_cp.append('c for Cp calculation based on sawn lumber - NDS 2005 3.7.1')
         
         #Slenderness Ratio check per NDS 2005 sections 3.7.1.2 thru 3.7.1.4
         kb = 1.0
         kd = 1.0
 
-        self.assumptions_ke = '\nKe = 1.0 for both depth and breadth of studs - Ref NDS 2005 appendix G pin top and bottom\n'
+        if log: self.assumptions_cp.append('Ke = 1.0 for both depth and breadth of studs - Ref NDS 2005 appendix G pin top and bottom')
 
         if self.no_sheathing and self.blocking_in > 0:
             leb = self.blocking_in
-            self.assumptions_leb = 'Le_b = {0:.2f} in. - no sheathing weak axis only braced by blocking\n Confirm load path exists for bracing force.\n'.format(leb)
+            if log: self.assumptions_cp.append('Le_b = {0:.2f} in. - no sheathing weak axis only braced by blocking. Confirm load path exists for bracing force.'.format(leb))
         
         elif self.no_sheathing and self.blocking_in <= 0:
             leb = self.height_in
-            self.assumptions_leb = 'Le_b = {0:.2f} in. - no sheathing and no blocking - weak axis unbraced.\n'.format(leb)
+            if log: self.assumptions_cp.append('Le_b = {0:.2f} in. - no sheathing and no blocking - weak axis unbraced.'.format(leb))
         
         else:
             leb = 12 * kb
-            self.assumptions_leb = 'Le_b = 12.0 in. - continuously braced by sheathing 12" field nailing assumed\n'
+            if log: self.assumptions_cp.append('Le_b = 12.0 in. - continuously braced by sheathing 12" field nailing assumed')
         
         led = self.height_in * kd
         self.le_b = leb
@@ -817,17 +831,17 @@ class wood_stud_wall:
             self.cp = ((1+(self.fcE_psi/self.fc_star_psi))/(2*self.c_cp))-((((1+(self.fcE_psi/self.fc_star_psi))/(2*self.c_cp))**2)-((self.fcE_psi/self.fc_star_psi)/self.c_cp))**0.5
             
             self.fc_prime_psi = self.fc_star_psi * self.cp
-            self.assumptions_cp = 'Wall studs are not tapered and not subject to NDS 2005 - 3.7.2\n'
+            if log: self.assumptions_cp.append('Wall studs are not tapered and not subject to NDS 2005 - 3.7.2')
         else:
             self.fc_prime_psi = 1
             self.fcE_psi = 1
             self.cp = 0.001
-            self.warning.append('Slenderness ratio greater than 50, suggest increase stud size or reducing wall height')
-            self.assumptions_cp = ''
+            if log: self.warning.append('Slenderness ratio greater than 50, suggest increase stud size or reducing wall height')
     
         return self.fc_prime_psi
-    
-    def fb_prime_calc(self, cd):
+
+
+    def fb_prime_calc(self, cd, log=True):
 
         #apply cd to Fv'
         self.fv_prime_psi_cd = self.fv_prime_psi * cd
@@ -836,7 +850,7 @@ class wood_stud_wall:
         #NDS 2005 section 4.3.5
         if self.compression_face:
             self.cl = 1.0 #Assumes stud walls are sheathed on the compression face
-            self.assumptions.append('Beam Stability Factor_CL - Wall studs are continuously sheathed on the compression face')
+            if log: self.assumptions.append('Beam Stability Factor_CL - Wall studs are continuously sheathed on the compression face')
         else:
             if self.blocking_in == 0 or self.blocking_in > self.height_in:
                 self.lu_bending_in = self.height_in
@@ -852,7 +866,7 @@ class wood_stud_wall:
             
             self.Rb_cl = (self.cl_le*self.ddes/self.bdes**2)**0.5
             self.Fbe_cl = (1.20 * self.Emin_prime_psi)/self.Rb_cl**2
-            self.assumptions.append('Beam Stability Factor CL - Wall studs are not braced on compression face - CL per design stud/blocking height')
+            if log: self.assumptions.append('Beam Stability Factor CL - Wall studs are not braced on compression face - CL per design stud/blocking height')
 
         self.cm_fb = self.stud_factors["Cm"].get("Cm_fb", 1)
         self.ct_fb = self.ct.get("Ct_fb", 1)
@@ -870,16 +884,70 @@ class wood_stud_wall:
             #NDS equation 3.3-6
             self.cl = ((1+self.fbe_fbstar)/1.9) - ((((1+self.fbe_fbstar)/1.9)**2) - (self.fbe_fbstar)/0.95)**0.5
             self.fb_prime_psi = self.fb_psi * cd * self.cm_fb * self.ct_fb * self.cl * self.cf_fb * self.cfu * self.ci_fb * self.cr * self.cfrt_fb
-            self.cl_calc_text = "\n\n--Calculation of CL--\nLe = {0:.3f} in - per NDS Table 3.3.3 footnote 1 \nRb = sqrt(Le*d / b^2) = {1:.3f}\nFbE = 1.20 * Emin' /Rb^2 = {2:.3f} psi\nFb* = reference bending design value multiplied by all applicable adjustment factors except Cfu, Cv, and CL\nFb* = {3:.3f} psi\nFbE/Fb* = {4:.3f}\nNDS Eq. 3.3-6\nCL = [1 + (FbE / Fb*)] / 1.9 - ( [ [1 + (FbE / Fb*)] / 1.9 ]^2 - (FbE / Fb*) / 0.95 ) ^ 1/2 = {5:.3f}".format(self.cl_le, self.Rb_cl, self.Fbe_cl, self.fb_star_psi, self.fbe_fbstar, self.cl)
+            if log: self.cl_calc_text = "\n\n--Calculation of CL--\nLe = {0:.3f} in - per NDS Table 3.3.3 footnote 1 \nRb = sqrt(Le*d / b^2) = {1:.3f}\nFbE = 1.20 * Emin' /Rb^2 = {2:.3f} psi\nFb* = reference bending design value multiplied by all applicable adjustment factors except Cfu, Cv, and CL\nFb* = {3:.3f} psi\nFbE/Fb* = {4:.3f}\nNDS Eq. 3.3-6\nCL = [1 + (FbE / Fb*)] / 1.9 - ( [ [1 + (FbE / Fb*)] / 1.9 ]^2 - (FbE / Fb*) / 0.95 ) ^ 1/2 = {5:.3f}".format(self.cl_le, self.Rb_cl, self.Fbe_cl, self.fb_star_psi, self.fbe_fbstar, self.cl)
             
         return self.fb_prime_psi
-    
-    def axial_and_bending(self, cd, p_lbs, m_inlbs):
+
+
+    def capacity_analysis(self):
+
+        pressure = self.loadbracing.get("pressure", 0)
+        cd = self.loadbracing.get("Cd")
+        crushing = self.geometry.get("plate crushing", 1)
+
+        # Moment and shear from Pressure
+        w = pressure*(self.spacing_in/12.0)
+        L = self.height_in / 12.0
+        self.lat_m_inlbs = w*L*L*(1/8) * 12
+        self.lat_v_lbs = w*L*(1/2)
+        self.lat_delta_in = ((5*w*(self.height_in/12)**4)/(384*self.E_prime_psi*self.I_in4))*1728
+
+        # Eccentricity of Load
+        self.e_in = self.ddes/6.0 if self.loadbracing.get("min ecc", 0) == 1 else 0
+        
+        # Common Capacities
+        # access with self.cap_at_common
+        self.cap_at_common_spacing(cd, pressure,self.e_in, crushing)
+
+        # P vs Pressure Curves
+        # The Kootenay Curve
+        self.kootenaycurve = {0.9:{"p":0,"f":0,"d":0, "color":'#000066'},
+                                1.0:{"p":0,"f":0,"d":0, "color":'#cc00cc'},
+                                1.15:{"p":0,"f":0,"d":0, "color":'#ff6600'},
+                                1.25:{"p":0,"f":0,"d":0, "color":'#ffff00'},
+                                1.6:{"p":0,"f":0,"d":0, "color":'#009900'},
+                                2.0:{"p":0,"f":0,"d":0, "color":'#00ffcc'},}
+        
+        for c in self.kootenaycurve:
+            p,f,d = self.wall_interaction_diagram_cd(c,self.e_in,0)
+
+            self.kootenaycurve[c]["p"] = p
+            self.kootenaycurve[c]["f"] = f
+            self.kootenaycurve[c]["d"] = d
+        
+        # Capacity
+        self.pmax = self.axial_capacity_w_moment(cd, self.lat_m_inlbs, self.e_in)
+        self.wmax = self.pmax / (self.spacing_in / 12.0)
+
+        # Additional Moment, Shear, and Deflection from Eccentric load
+        self.ecc_m_inlbs = self.pmax * self.e_in
+        self.ecc_v_lbs = self.ecc_m_inlbs / self.height_in
+        self.delta_axial = (((self.ecc_m_inlbs)*self.height_in**2)/(16.0*self.E_prime_psi*self.I_in4))
+
+        # Stresses
+        self.fa = self.pmax/self.area_in2
+        self.fv = (3*(self.lat_v_lbs+self.ecc_v_lbs))/(2*self.bdes*self.ddes)
+        self.fb_lat = self.lat_m_inlbs/self.s_in3
+        self.fb_ecc = self.ecc_m_inlbs/self.s_in3
+        self.fb = self.fb_lat+self.fb_lat
+
+
+    def axial_and_bending(self, cd, p_lbs, m_inlbs,log=True):
         fc_psi = p_lbs / self.area_in2
         fb_psi = abs(m_inlbs/self.s_in3)
         
-        fc_prime = self.fc_prime_calc(cd)
-        fb_prime = self.fb_prime_calc(cd)
+        fc_prime = self.fc_prime_calc(cd,log)
+        fb_prime = self.fb_prime_calc(cd,log)
         
         #Check that fc is less than FcE per NDS 2005 - Section 3.9.2
         if fc_psi < self.fcE_psi:
@@ -887,15 +955,16 @@ class wood_stud_wall:
             #[fc/Fc']^2 + fb / Fb' [ 1- (fc / FcE)] <= 1.0
             ratio = (fc_psi/fc_prime)**2 + (fb_psi / (fb_prime*(1-(fc_psi/self.fcE_psi))))
             if ratio > 1.0:
-                self.warning=self.warning + 'Combined Axial and Bending ratio > 1.0\n'
+                self.warning.append('Combined Axial and Bending ratio > 1.0')
                 return 'NG'
             else:
                 return 'OK'
         else:
-            self.warning=self.warning + 'fc is greater than FcE\n'
+            self.warning.append('fc is greater than FcE\n')
             return 'NG'
-        
-    def axial_capacity_w_moment(self,cd,m_inlbs,e_in):
+
+
+    def axial_capacity_w_moment(self,cd,m_inlbs,e_in,log=True):
         #solve for the allowable axial load using the bisection method
         a=0
         b=self.area_in2 * self.fc_prime_calc(cd) #upper bound limit on axial strength
@@ -911,8 +980,8 @@ class wood_stud_wall:
             fc_psi = c / self.area_in2
             fb_psi = abs((m_inlbs)/self.s_in3)
           
-            fc_prime = self.fc_prime_calc(cd)       
-            fb_prime = self.fb_prime_calc(cd)
+            fc_prime = self.fc_prime_calc(cd,log)       
+            fb_prime = self.fb_prime_calc(cd,log)
             
             if self.fc_prime_psi == 1 and self.fcE_psi == 1:
                 p_lbs = 1
@@ -921,7 +990,7 @@ class wood_stud_wall:
                 #Check that fc is less than FcE per NDS 2005 - Section 3.9.2
                 if fc_psi < self.fcE_psi:
                     if e_in ==0:
-                        #Combine ration per NDS 2005 equation (3.9-3)
+                        #Combined ratio per NDS 2005 equation (3.9-3)
                         #[fc/Fc']^2 + fb / Fb' [ 1- (fc / FcE)] <= 1.0
                         ratio = (fc_psi/fc_prime)**2 + (fb_psi / (fb_prime*(1-(fc_psi/self.fcE_psi))))
                     else:
@@ -943,7 +1012,8 @@ class wood_stud_wall:
                     loop+=1
         
         return p_lbs
-    
+
+
     def wall_interaction_diagram_cd(self, cd, e_in,s_in):
         
         if s_in == 0:
@@ -956,17 +1026,17 @@ class wood_stud_wall:
         # M = w * stud height^2 / 8
         # w = Fb' * s * 8 / stud height^2 * (12 in / 1 ft)
         
-        self.w_plf_limit = ((self.fb_prime_calc(cd) * self.s_in3 * 8.0) / (self.height_in**2)) * 12.0
+        self.w_plf_limit = ((self.fb_prime_calc(cd, log=False) * self.s_in3 * 8.0) / (self.height_in**2)) * 12.0
         self.w_psf_limit = self.w_plf_limit/(diag_spacing_in/12.0)
 
         # Determine pure axial compression capacity ie where fc = Fc' - withou consideration for plate crushing
         # fc = P/a
         # P = a * Fc'
         if e_in == 0:
-            self.p_lbs_limit = self.area_in2 * self.fc_prime_calc(cd)
+            self.p_lbs_limit = self.area_in2 * self.fc_prime_calc(cd, log=False)
             d=[0] #deflection at pressure x
         else:
-            self.p_lbs_limit = self.axial_capacity_w_moment(cd,0, e_in)
+            self.p_lbs_limit = self.axial_capacity_w_moment(cd,0, e_in, log=False)
             d=[(((self.p_lbs_limit*e_in)*self.height_in**2)/(16.0*self.E_prime_psi*self.I_in4))]
             
         points = 50
@@ -985,7 +1055,7 @@ class wood_stud_wall:
             
             deflection = (5 * (w_plf) * (self.height_in/12)**4)/(384*self.E_prime_psi*self.I_in4)*1728
             
-            p_lbs = self.axial_capacity_w_moment(cd,moment_inlbs, e_in)
+            p_lbs = self.axial_capacity_w_moment(cd,moment_inlbs, e_in, log=False)
             p_plf = p_lbs/ (diag_spacing_in /12.0)
             
             if e_in ==0:
@@ -1000,7 +1070,8 @@ class wood_stud_wall:
         y.append(0)
         d.append((5 * (self.w_plf_limit) * (self.height_in/12)**4)/(384*self.E_prime_psi*self.I_in4)*1728)
         return x,y,d
-        
+
+
     def wall_pm_diagram_cd(self, cd, e_in, s_in):
         
         if s_in == 0:
@@ -1011,15 +1082,15 @@ class wood_stud_wall:
         # Find bending limit pressure for each Cd ie where fb = Fb'
         # fb = M/s , M in in-lbs and s in in^3
         
-        self.m_inlbs_limit = (self.fb_prime_calc(cd) * self.s_in3)
+        self.m_inlbs_limit = (self.fb_prime_calc(cd, log=False) * self.s_in3)
 
         # Determine pure axial compression capacity ie where fc = Fc' - withou consideration for plate crushing
         # fc = P/a
         # P = a * Fc'
         if e_in == 0:
-            self.p_lbs_limit = self.area_in2 * self.fc_prime_calc(cd)
+            self.p_lbs_limit = self.area_in2 * self.fc_prime_calc(cd, log=False)
         else:
-            self.p_lbs_limit = self.axial_capacity_w_moment(cd,0, e_in)
+            self.p_lbs_limit = self.axial_capacity_w_moment(cd,0, e_in, log=False)
             
         points = 50
         step = self.m_inlbs_limit/points
@@ -1038,7 +1109,7 @@ class wood_stud_wall:
             x.append(m)
             w_plf = ((((m/12.0) * 8.0) / ((self.height_in/12.0)**2)))
             deflection = (5 * (w_plf) * (self.height_in/12)**4)/(384*self.E_prime_psi*self.I_in4)*1728
-            p_lbs = self.axial_capacity_w_moment(cd,moment_inlbs, e_in)
+            p_lbs = self.axial_capacity_w_moment(cd,moment_inlbs, e_in, log=False)
             p_plf = p_lbs / (diag_spacing_in /12.0)
             y.append(p_plf)
             
@@ -1055,21 +1126,22 @@ class wood_stud_wall:
         w_plf = ((((self.m_inlbs_limit/12.0) * 8.0) / ((self.height_in/12.0)**2)))
         d.append((5 * (w_plf) * (self.height_in/12)**4)/(384*self.E_prime_psi*self.I_in4)*1728)
         return x,y,d
-        
+
+
     def wall_pm_diagram_cd_stud(self, cd, e_in):
            
         # Find bending limit pressure for each Cd ie where fb = Fb'
         # fb = M/s , M in in-lbs and s in in^3
         
-        self.m_inlbs_limit = (self.fb_prime_calc(cd) * self.s_in3)
+        self.m_inlbs_limit = (self.fb_prime_calc(cd, log=False) * self.s_in3)
 
         # Determine pure axial compression capacity ie where fc = Fc' - withou consideration for plate crushing
         # fc = P/a
         # P = a * Fc'
         if e_in == 0:
-            self.p_lbs_limit = self.area_in2 * self.fc_prime_calc(cd)
+            self.p_lbs_limit = self.area_in2 * self.fc_prime_calc(cd, log=False)
         else:
-            self.p_lbs_limit = self.axial_capacity_w_moment(cd,0, e_in)
+            self.p_lbs_limit = self.axial_capacity_w_moment(cd,0, e_in, log=False)
             
         points = 50
         step = self.m_inlbs_limit/points
@@ -1088,7 +1160,7 @@ class wood_stud_wall:
             x.append(m)
             w_plf = ((((m/12.0) * 8.0) / ((self.height_in/12.0)**2)))
             deflection = (5 * (w_plf) * (self.height_in/12)**4)/(384*self.E_prime_psi*self.I_in4)*1728
-            p_lbs = self.axial_capacity_w_moment(cd,moment_inlbs, e_in)
+            p_lbs = self.axial_capacity_w_moment(cd,moment_inlbs, e_in, log=False)
             y.append(p_lbs)
             
             if e_in ==0:
@@ -1102,18 +1174,23 @@ class wood_stud_wall:
         w_plf = ((((self.m_inlbs_limit/12.0) * 8.0) / ((self.height_in/12.0)**2)))
         d.append((5 * (w_plf) * (self.height_in/12)**4)/(384*self.E_prime_psi*self.I_in4)*1728)
         return x,y,d
+
+
+    def cap_at_common_spacing(self, cd, lateral_w_psf, e_in, crush=1):
+
+        self.cap_at_common = {4:{"pmax":0,"wmax":0,"delta":0},
+                                6:{"pmax":0,"wmax":0,"delta":0},
+                                8:{"pmax":0,"wmax":0,"delta":0},
+                                12:{"pmax":0,"wmax":0,"delta":0},
+                                16:{"pmax":0,"wmax":0,"delta":0},
+                                24:{"pmax":0,"wmax":0,"delta":0}}
         
-    def cap_at_common_spacing(self, cd,lateral_w_psf, e_in, crush=1):
-        spacings = [4,6,8,12,16,24]
-        res_string = 'Axial Capacity at 4" - 6" - 8" - 12" - 16" - 24" spacings:\n'
-        self.cap_at_common = []
-        
-        for s in spacings:
+        for s in self.cap_at_common:
             w_plf = lateral_w_psf * (s/12.0)
             m_inlbs =  ((w_plf * (self.height_in/12.0)**2)/8.0)*12
             deflection = (5 * (w_plf) * (self.height_in/12)**4)/(384*self.E_prime_psi*self.I_in4)*1728
             
-            p_lbs = self.axial_capacity_w_moment(cd,m_inlbs,e_in)
+            p_lbs = self.axial_capacity_w_moment(cd,m_inlbs,e_in, log=False)
             if crush == 1:
                 p_lbs = min(p_lbs,self.crushing_limit_lbs)
             else:
@@ -1129,8 +1206,6 @@ class wood_stud_wall:
             d_ratio = self.height_in / deflection
             d_string = 'H/{0:.1f}'.format(d_ratio)
             
-            res_string = res_string + '{0:.3f} ft - {1}" O.C. - {2:.2f} Lbs ({3:.2f} plf) - {4}\n'.format(self.height_in/12.0,s,p_lbs,p_plf,d_string)
-            res_list = [s,p_lbs,p_plf,d_string]
-            self.cap_at_common.append(res_list)
-        
-        return res_string
+            self.cap_at_common[s]["pmax"] = p_lbs
+            self.cap_at_common[s]["wmax"] = p_plf
+            self.cap_at_common[s]["delta"] = d_string
