@@ -238,6 +238,16 @@ function steelShapeTemplate(){
 
                 coords = steelPipe(od,tdes);
                 writeTemplateResults(coords[0],coords[1],shapestrg);
+            } else if (shapeset == "C"){
+                let d = Number(shapedata["d"][0])*conversion;
+                let bf = Number(shapedata["bf"][0])*conversion;
+                let tf = Number(shapedata["tf"][0])*conversion;
+                let tw = Number(shapedata["tw"][0])*conversion;
+                let k = Number(shapedata["kdes"][0])*conversion;
+
+                coords = steelC(d,bf,tf,tw);
+
+                writeTemplateResults(coords[0],coords[1],shapestrg);
             };
 
         },
@@ -750,4 +760,14 @@ function nSidePolygon(){
     y.push(y[0]);
 
     writeTemplateResults(x,y,shapestrg);
+};
+
+function steelC(d,bf,tf,tw){
+    let A = (tw+(12*tf)-bf)/12
+    let B = ((-1*tw)+(12*tf)+bf)/12
+
+    let x = [0,bf,bf,tw,tw,bf,bf,0,0]
+    let y = [0,0,A,B,d-B,d-A,d,d,0]
+
+    return [x,y];
 };
