@@ -241,7 +241,7 @@
                                                         <option value="WT">WT</option>
                                                         <!-- <option value="ST">ST</option> -->
                                                         <!-- <option value="MT">MT</option> -->
-                                                        <!-- <option value="C">C</option> -->
+                                                        <option value="C">C</option>
                                                        <!--  <option value="MC">MC</option> -->
                                                         <option value="L">L</option>
                                                         <option value="HSS_RECT">HSS Rectangular</option>
@@ -483,6 +483,12 @@
                                         </button>
                                     </td>
                                     </tr>
+                                    {% elif loop.index == 2 %}
+                                    <tr class="user vertex">
+                                        <td>{{loop.index}}</td>
+                                        <td><input name="shape{{ outer_loop.index }}x" class="shape{{ outer_loop.index }}x input-sm" style="width:95px" type="number" step="any" value="{{x}}" onchange="areaAndCentroid('shape{{ outer_loop.index }}');"></td>
+                                        <td><input name="shape{{ outer_loop.index }}y" class="shape{{ outer_loop.index }}y input-sm" style="width:95px" type="number" step="any" value="{{shape["Y"][loop.index0]}}" onchange="areaAndCentroid('shape{{ outer_loop.index }}');"></td>
+                                    </tr>
                                     {% else %}
                                     <tr class="user vertex">
                                     <td>{{loop.index}}</td>
@@ -542,7 +548,7 @@
         <tr><td class="text-right text-nowrap">S<sub>xx,top</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].sxx_top)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Top Most Vertex, I<sub>xx</sub> / y<sub>max</sub></td></tr>
         <tr><td class="text-right text-nowrap">S<sub>xx,bottom</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].sxx_bottom)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Bottom Most Vertex, I<sub>xx</sub> / y<sub>min</sub></td></tr>
         <tr><td class="text-right text-nowrap">S<sub>yy,left</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].syy_left)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Left Most Vertex, I<sub>yy</sub> / x<sub>min</sub></td></tr>
-        <tr><td class="text-right text-nowrap">S<sub>yy,right</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].syy_left)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Right Most Vertex, I<sub>yy</sub> / x<sub>max</sub></td></tr>
+        <tr><td class="text-right text-nowrap">S<sub>yy,right</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].syy_right)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Right Most Vertex, I<sub>yy</sub> / x<sub>max</sub></td></tr>
         <tr><td class="text-right text-nowrap">r<sub>xx</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].rxx)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the XX-axis, &radic; I<sub>xx</sub>/A<sub>transformed</sub></td></tr>
         <tr><td class="text-right text-nowrap">r<sub>yy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].ryy)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the YY-axis, &radic; I<sub>yy</sub>/A<sub>transformed</sub></td></tr>
         <tr><td class="text-right text-nowrap">r<sub>zz</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(results["CompositeSection"].rzz)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the ZZ-axis, &radic; I<sub>zz</sub>/A<sub>transformed</sub></td></tr>
@@ -590,7 +596,7 @@
         <tr><td class="text-right text-nowrap">S<sub>xx,top</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.sxx_top)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Top Most Vertex, I<sub>xx</sub> / y<sub>max</sub></td></tr>
         <tr><td class="text-right text-nowrap">S<sub>xx,bottom</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.sxx_bottom)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Bottom Most Vertex, I<sub>xx</sub> / y<sub>min</sub></td></tr>
         <tr><td class="text-right text-nowrap">S<sub>yy,left</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.syy_left)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Left Most Vertex, I<sub>yy</sub> / x<sub>min</sub></td></tr>
-        <tr><td class="text-right text-nowrap">S<sub>yy,right</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.syy_left)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Right Most Vertex, I<sub>yy</sub> / x<sub>max</sub></td></tr>
+        <tr><td class="text-right text-nowrap">S<sub>yy,right</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.syy_right)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Right Most Vertex, I<sub>yy</sub> / x<sub>max</sub></td></tr>
         <tr><td class="text-right text-nowrap">r<sub>xx</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.rxx)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the XX-axis, &radic; I<sub>xx</sub>/A</td></tr>
         <tr><td class="text-right text-nowrap">r<sub>yy</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.ryy)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the YY-axis, &radic; I<sub>yy</sub>/A</td></td></tr>
         <tr><td class="text-right text-nowrap">r<sub>zz</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.rzz)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the ZZ-axis, &radic; I<sub>zz</sub>/A</td></td></tr>
@@ -605,7 +611,7 @@
         <tr><td class="text-right text-nowrap">S<sub>x,top</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.sx_top)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Top Most Vertex</td></tr>
         <tr><td class="text-right text-nowrap">S<sub>x,bottom</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.sx_bottom)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Bottom Most Vertex</td></tr>
         <tr><td class="text-right text-nowrap">S<sub>y,left</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.sy_left)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Left Most Vertex</td></tr>
-        <tr><td class="text-right text-nowrap">S<sub>y,right</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.sy_left)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Right Most Vertex</td></tr>
+        <tr><td class="text-right text-nowrap">S<sub>y,right</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.sy_right)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Elastic Section Modulus to the Right Most Vertex</td></tr>
         <tr><td class="text-right text-nowrap">r<sub>x</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.rx)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the X-axis</td></tr>
         <tr><td class="text-right text-nowrap">r<sub>y</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.ry)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the Y-axis</td></tr>
         <tr><td class="text-right text-nowrap">r<sub>z</sub> </td><td class="text-center text-nowrap">{{"%.3f"|format(shape.rz)}} {{ "in" if inputs["units"] == "imperial" else "mm" }}<sup>3</sup></td><td>Radius of Gyration about the Z-axis</td></tr>
