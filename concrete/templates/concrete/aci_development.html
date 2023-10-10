@@ -1,6 +1,13 @@
 {% extends "layout.html"%}
 
 {% block scripts %}
+<script>
+    MathJax = {
+        svg: {
+            displayAlign: 'left'
+        }
+    };
+</script>
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
 <script id="MathJax-script" 
       src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js">
@@ -12,8 +19,8 @@
 <a id="top"></a>
 <div class="container">
     <nav class="nav">
-        <a class="nav-link" href="#ACI_STRAIGHT_SECTION" id="Ld_LINK">ACI 318-14 Tension Development Length</a>
-        <a class="nav-link" href="#ACI_HOOKED_SECTION" id="Ldh_LINK">ACI 318-14 Hooked Development Length</a>
+        <a class="nav-link" href="#ACI_STRAIGHT_SECTION" id="Ld_LINK">ACI 318-19 Tension Development Length</a>
+        <a class="nav-link" href="#ACI_HOOKED_SECTION" id="Ldh_LINK">ACI 318-19 Hooked Development Length</a>
     </nav>
     <table class="table table-sm table-hover">
         <tr>
@@ -51,48 +58,76 @@
         </tr>
         <tr>
             <td>f'<sub>c</sub></td>
-            <td><input id="fpc_psi" name="fpc_psi" class="fpc_psi input-sm" style="width:95px" type="number" step="any" min="2500" value="3000.0"></td>
+            <td><input id="fpc_psi" name="fpc_psi" class="fpc_psi input-sm" style="width:95px" type="number" step="any" min="2500" value="3000.0" onchange="fpcChange()"></td>
             <td>psi</td>
             <td>Specified 28-day compressive strength of concrete in which the bar is to be developed.</td>
         </tr>
         <tr>
             <td>f<sub>y</sub></td>
-            <td><input id="fy_psi" name="fy_psi" class="fy_psi input-sm" style="width:95px" type="number" step="any" min="40000" value="60000.0"></td>
-            <td>psi</td>
-            <td>Yield strength of bar to be developed.</td>
+            <td>
+                <select id="fy_psi" name="fy_psi" class="fy_psi input-sm" style="width:200px" onchange="gradeChange()">
+                    <option value="40000">grade 40 (40,000 psi)</option>
+                    <option value="60000">grade 60 (60,000 psi)</option>
+                    <option value="80000">grade 80 (80,000 psi)</option>
+                    <option value="100000">grade 100 (100,000 psi)</option>
+                </select>
+            </td>
+            <td colspan=2>Yield strength of bar to be developed.</td>
         </tr>
     </table>
 
-    <h3 id="ACI_STRAIGHT_SECTION"><a href="#top">&#8593;</a> ACI 318-14 Straight Tension Development Length, L<sub>d</sub>:</h3>
+    <h3 id="ACI_STRAIGHT_SECTION"><a href="#top">&#8593;</a> ACI 318-19 Straight Tension Development Length, L<sub>d</sub>:</h3>
     <div class="row">
         <div class="col-sm">
             <table class="table table-sm table-hover">
                 <tr>
                     <td>&Psi;<sub>t</sub></td>
                     <td>
-                        <select id="aci_psi_t" class="aci_psi_t input-sm" name="aci_psi_t" style="width:200px">
-                            <option value="1.3"> More than 12 in. of fresh concrete placed below horizontal reinforcement.</option>
-                            <option value="1.0"> Other </option>
+                        <select id="aci_psi_t" class="aci_psi_t input-sm" name="aci_psi_t" style="width:200px" onchange="positionChange()">
+                            <option value="1.3"> 1.3 </option>
+                            <option value="1.0"> 1.0 </option>
                         </select>
+                    </td>
+                    <td colspan="2">
+                        <span id="psi_t_text">More than 12 in. of fresh concrete placed below horizontal reinforcement.</span>
                     </td>
                 </tr>
                 <tr>
                     <td>&Psi;<sub>e</sub></td>
                     <td>
-                        <select id="aci_psi_e" class="aci_psi_e input-sm" name="aci_psi_e" style="width:200px">
-                            <option value="1.5"> Epoxy-coated or zinc and epoxy dual-coated reinforcement with clear cover less than 3d<sub>b</sub> or clear spacing less than 6d<sub>b</sub></option>
-                            <option value="1.2"> Epoxy-coated or zinc and epoxy dual-coated reinforcement for all other conditions </option>
-                            <option value="1.0"> Uncoated or zinc-coated (galvanized) reinforcement </option>
+                        <select id="aci_psi_e" class="aci_psi_e input-sm" name="aci_psi_e" style="width:200px" onchange="epoxyChangeLd()">
+                            <option value="1.5"> 1.5 </option>
+                            <option value="1.2"> 1.2 </option>
+                            <option value="1.0"> 1.0 </option>
                         </select>
+                    </td>
+                    <td colspan="2">
+                        <span id="psi_e_text">Epoxy-coated or zinc and epoxy dual-coated reinforcement with clear cover less than 3d<sub>b</sub> or clear spacing less than 6d<sub>b</sub>.</span>
                     </td>
                 </tr>
                 <tr>
                     <td>&Psi;<sub>s</sub></td>
                     <td>
                         <select id="aci_psi_s" class="aci_psi_s input-sm" name="aci_psi_s" style="width:200px" disabled>
-                            <option value="0.8"> No. 6 and smaller bars and deformed wires </option>
-                            <option value="1.0"> No. 7 and larger bars</option>
+                            <option value="0.8"> 0.8 </option>
+                            <option value="1.0"> 1.0 </option>
                         </select>
+                    </td>
+                    <td colspan="2">
+                        <span id="psi_s_text">No. 6 and smaller bars and deformed wires</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>&Psi;<sub>g</sub></td>
+                    <td>
+                        <select id="aci_psi_g" class="aci_psi_g input-sm" name="aci_psi_g" style="width:200px" disabled>
+                            <option value="1.0"> 1.0 </option>
+                            <option value="1.15"> 1.15 </option>
+                            <option value="1.3"> 1.3 </option>
+                        </select>
+                    </td>
+                    <td colspan="2">
+                        <span id="psi_g_text">Grade 40 or Grade 60</span>
                     </td>
                 </tr>
                 <tr>
@@ -147,7 +182,7 @@
                 </tr>
                 -->
                 <tr>
-                    <td colspan=3> \[L_{d} = \text{max } \begin{bmatrix}\text{(a) }\left( \frac{3}{40} \frac{f_{y}}{\lambda\sqrt{f'_{c}}} \frac{\psi_{t}\psi_{e}\psi_{s}}{(\frac{c_{b}+K_{tr}}{d_{b}})} \right) d_{b} \text{ (25.4.2.3a)} \\ \text{(b) }12 \text{ in} \end{bmatrix} \text{[25.4.2.1]}\] </td>
+                    <td colspan=3> \[L_{d} = \text{max } \begin{bmatrix}\text{(a) }\left( \frac{3}{40} \frac{f_{y}}{\lambda\sqrt{f'_{c}}} \frac{\psi_{t}\psi_{e}\psi_{s}\psi_{g}}{(\frac{c_{b}+K_{tr}}{d_{b}})} \right) d_{b} \text{ (25.4.2.4a)} \\ \text{(b) }12 \text{ in} \end{bmatrix} \text{[25.4.2.1]}\] </td>
                 </tr>
                 <tr>
                     <td colspan=3 id="TBL_KTR_EQUATION">\[K_{tr} = 0.0 \]</td>
@@ -164,42 +199,57 @@
             </table>
         </div>
     </div>
-    <h3 id="ACI_HOOKED_SECTION"><a href="#top">&#8593;</a> ACI 318-14 Hooked Development Length, L<sub>dh</sub>:</h3>
+    <h3 id="ACI_HOOKED_SECTION"><a href="#top">&#8593;</a> ACI 318-19 Hooked Development Length, L<sub>dh</sub>:</h3>
     <div class="row">
         <div class="col-sm">
             <table class="table table-sm table-hover">
                 <tr>
                     <td>&Psi;<sub>e</sub></td>
                     <td>
-                        <select id="aci_psi_e_ldh" class="aci_psi_e_ldh input-sm" name="aci_psi_e_ldh" style="width:200px">
-                            <option value="1.2"> Epoxy-coated or zinc and epoxy dual-coated reinforcement</option>
-                            <option value="1.0"> Uncoated or zinc-coated (galvanized) reinforcement </option>
+                        <select id="aci_psi_e_ldh" class="aci_psi_e_ldh input-sm" name="aci_psi_e_ldh" style="width:200px" onchange="epoxyChangeLdh()">
+                            <option value="1.2"> 1.2 </option>
+                            <option value="1.0"> 1.0 </option>
                         </select>
                     </td>
-                </tr>
-                <tr>
-                    <td>&Psi;<sub>c</sub></td>
                     <td>
-                        <select id="aci_psi_c_ldh" class="aci_psi_c_ldh input-sm" name="aci_psi_c_ldh" style="width:200px">
-                            <option value="0.7"> For No. 11 bar and smaller hooks with side cover (normal to plane of hook)&GreaterEqual;2-1/2 in. and for 90-degree hook with cover on bar extension beyond hook &GreaterEqual;2 in.</option>
-                            <option value="1.0"> Other </option>
-                        </select>
+                        <span id="psi_e_ldh_text">Epoxy-coated or zinc and epoxy dual-coated reinforcement</span>
                     </td>
                 </tr>
                 <tr>
                     <td>&Psi;<sub>r</sub></td>
                     <td>
-                        <select id="aci_psi_r_ldh" class="aci_psi_r_ldh input-sm" name="aci_psi_r_ldh" style="width:200px">
-                            <option value="0.8"> For 90-degree hooks of No. 11 and smaller bars (1)enclosed along L<sub>dh</sub> within ties or stirrups<sup>[1]</sup> perpendicular to L<sub>dh</sub> at s &leq; 3d<sub>b</sub>, or (2)enclosed along the bar extension beyond hook including the bend withing ties or stirrups<sup>[1]</sup> perpendicular to L<sub>ext</sub> at s &leq; 3d<sub>b</sub> </option>
-                            <option value="0.8"> For 180-degree hooks of No. 11 and smaller bars enclosed along L<sub>dh</sub> within ties or stirrups<sup>[1]</sup> perpendicular to L<sub>dh</sub> at s &leq; 3d<sub>b</sub> </option>
-                            <option value="1.0"> Other </option>
+                        <select id="aci_psi_r_ldh" class="aci_psi_r_ldh input-sm" name="aci_psi_r_ldh" style="width:200px" onchange="confineChangeLdh()">
+                            <option value="1.6"> 1.6 </option>
+                            <option value="1.0"> 1.0 </option>
                         </select>
+                    </td>
+                    <td>
+                        <span id="psi_r_ldh_text"> Other </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>&Psi;<sub>o</sub></td>
+                    <td>
+                        <select id="aci_psi_o_ldh" class="aci_psi_o_ldh input-sm" name="aci_psi_o_ldh" style="width:200px" onchange="locationChangeLdh()">
+                            <option value="1.25"> 1.25 </option>
+                            <option value="1.0"> 1.0 </option>
+                        </select>
+                    </td>
+                    <td>
+                        <span id="psi_o_ldh_text">Other</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>&Psi;<sub>c</sub></td>
+                    <td>
+                        <input id="aci_psi_c_ldh" class="aci_psi_c_ldh input-sm" name="aci_psi_c_ldh" style="width:200px" disabled>
+                    </td>
+                    <td>
+                        <span id="psi_c_ldh_text"> test </span>
                     </td>
                 </tr>
             </table>
-        </div>
-
-        <div class="col-sm">
+            
             <table class="table table-sm table-hover">
                 <!-- 
                 <tr>
@@ -209,7 +259,7 @@
                 </tr>
                 -->
                 <tr>
-                    <td colspan=3>\[L_{dh} = \text{max }\begin{bmatrix}\text{(a) } \left(\frac{f_{y}\psi_{e}\psi_{c}\psi_{r}}{50\lambda\sqrt{f'_{c}}} \right)d_{b} \\ \text{(b) }8d_{b} \\ \text{(c) }6 \text{ in} \end{bmatrix} \text{ [25.4.3.1]} \]</td>
+                    <td colspan=3>\[L_{dh} = \text{max }\begin{bmatrix}\text{(a) } \left(\frac{f_{y}\psi_{e}\psi_{r}\psi_{o}\psi_{c}}{55\lambda\sqrt{f'_{c}}} \right)d_{b}^{1.5} \\ \text{(b) }8d_{b} \\ \text{(c) }6 \text{ in} \end{bmatrix} \text{ [25.4.3.1]} \]</td>
                 </tr>
                 <tr>
                     <td colspan=3 id="TBL_LDHA_EQUATION"></td>
