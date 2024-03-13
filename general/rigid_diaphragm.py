@@ -323,8 +323,6 @@ class rigid_diaphragm:
 def print_results(diaphragm, lateral_elements, case):
     output_string = []
 
-    case = "C1"
-
     output_string.append("-"*100)
     output_string.append(f"Diaphragm results for case {case} : ")
     output_string.append(f"Center of Rigiditiy: ( {diaphragm.COR[0]:^10.3f}, {diaphragm.COR[1]:^10.3f})")
